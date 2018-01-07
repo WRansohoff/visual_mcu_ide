@@ -1,8 +1,11 @@
 <link rel="stylesheet" type="text/css" href="/static/css/project_show.css">
 
 <script type="text/javascript">
+  // 'Global' variables to use.
   var selected_tool = "pan";
   var selected_menu_tool = "";
+  var gl = null;
+
   init_fsm_layout_canvas = function() {
     const canvas = document.getElementById("fsm_layout_canvas");
     const canvas_container = document.getElementById("fsm_canvas_div");
@@ -11,7 +14,7 @@
     canvas.height = canvas_container.offsetHeight;
 
     // Initialize WebGL
-    const gl = canvas.getContext("webgl");
+    gl = canvas.getContext("webgl");
     if (!gl) {
       alert("Cannot initialize WebGL context");
       return;
@@ -24,6 +27,50 @@
 
   window.onload = function() {
     init_fsm_layout_canvas();
+
+    // Input handling from HTML GUI.
+    // Main 'tool select' buttons.
+    document.getElementById("pointer_tool_select").addEventListener("click", function(e) {
+      selected_tool = "pointer";
+    });
+    document.getElementById("pan_tool_select").addEventListener("click", function(e) {
+      selected_tool = "pan";
+    });
+    document.getElementById("tool_tool_select").addEventListener("click", function(e) {
+      selected_tool = "tool";
+    });
+    // click listeners for tool buttons.
+    // Similar to the table area, TODO: Support arbitrary menu depth.
+    <% for menu_name, menu_type in pairs(tool_list) do %>
+      <% if type(menu_type) == "string" then %>
+      <% else %>
+        <% for submenu_name, submenu_type in pairs(menu_type) do %>
+          <% if type(submenu_type) == "string" then %>
+            document.getElementById("<%=submenu_name%>_tool_list_entry").addEventListener("click", function(e) {
+              if (selected_menu_tool && selected_menu_tool != "") {
+                var old_button = document.getElementById(selected_menu_tool + "_tool_list_entry");
+                old_button.style.backgroundColor = "white";
+              }
+              selected_menu_tool = "<%=submenu_name%>";
+              document.getElementById("list_currently_selected_menu_tool").innerHTML = "Currently-selected: <%=submenu_name%>";
+              document.getElementById("<%=submenu_name%>_tool_list_entry").style.backgroundColor = "lightblue";
+            });
+          <% else %>
+            <% for subsub_name, subsub_type in pairs(submenu_type) do %>
+              document.getElementById("<%=subsub_name%>_tool_list_entry").addEventListener("click", function(e) {
+                if (selected_menu_tool && selected_menu_tool != "") {
+                  var old_button = document.getElementById(selected_menu_tool + "_tool_list_entry");
+                  old_button.style.backgroundColor = "white";
+                }
+                selected_menu_tool = "<%=subsub_name%>";
+                document.getElementById("list_currently_selected_menu_tool").innerHTML = "Currently-selected: <%=subsub_name%>";
+                document.getElementById("<%=subsub_name%>_tool_list_entry").style.backgroundColor = "lightblue";
+              });
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
   };
 </script>
 
@@ -56,7 +103,7 @@
                           <% for submenu_name, submenu_type in pairs(menu_type) do %>
                             <% safe_submenu_name = submenu_name:gsub(" ", "_") %>
                             <% if type(submenu_type) == "string" then %>
-                              <li class="list-group vvc-list-margins indent-once"><%=submenu_name%></li>
+                            <li id="<%=submenu_name%>_tool_list_entry" class="list-group vvc-list-margins indent-once"><%=submenu_name%></li>
                             <% else %>
                               <li class="panel-group vvc-list-margins indent-once">
                                 <div class="panel panel-default">
@@ -68,7 +115,7 @@
                                   <div id="<%=safe_submenu_name%>_collapse" class="panel-collapse collapse">
                                     <ul class="list-group">
                                       <% for subsub_name, subsub_type in pairs(submenu_type) do %>
-                                        <li class="list-group vvc-list-margins indent-twice"><%=subsub_name%></li>
+                                        <li id="<%=subsub_name%>_tool_list_entry" class="list-group vvc-list-margins indent-twice"><%=subsub_name%></li>
                                       <% end %>
                                     </ul>
                                   </div>
@@ -85,9 +132,9 @@
             </td>
             <td class="tool_select_buttons_cell">
               <div class="btn-group-vertical tall-btn-group">
-                <button type="button" class="btn btn-primary tall-btn">Pointer</button>
-                <button type="button" class="btn btn-primary tall-btn">Pan</button>
-                <button type="button" class="btn btn-primary tall-btn">Place</button>
+                <button id="pointer_tool_select" type="button" class="btn btn-primary tall-btn">Pointer</button>
+                <button id="pan_tool_select" type="button" class="btn btn-primary tall-btn">Pan</button>
+                <button id="tool_tool_select" type="button" class="btn btn-primary tall-btn">Place</button>
               </div>
             </td>
             <td class="hobb_area_main_cell">
@@ -103,6 +150,9 @@
                 <tr class="hobb_options_row">
                   <td class="hobb_options_cell">
                     'Options' View (for currently-selected Node)
+                    <div id="list_currently_selected_menu_tool">
+                      Currently-selected: [none]
+                    </div>
                   </td>
                 </tr>
               </table>

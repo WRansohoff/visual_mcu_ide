@@ -117,21 +117,22 @@ app:match("/project/:project_id", function(self)
   vars_logic_list["Define Variable"] = "Node"
   vars_logic_list["Set Variable"] = "Node"
   logic_conditions_list = { }
-  logic_conditions_list["=="] = "Node"
-  logic_conditions_list["!="] = "Node"
-  logic_conditions_list[">="] = "Node"
-  logic_conditions_list["<="] = "Node"
-  logic_conditions_list[">"] = "Node"
-  logic_conditions_list["<"] = "Node"
+  logic_conditions_list["Equals"] = "Node"
+  logic_conditions_list["Not Equals"] = "Node"
+  logic_conditions_list["Greater than or Equals"] = "Node"
+  logic_conditions_list["Less than or Equals"] = "Node"
+  logic_conditions_list["Greater than"] = "Node"
+  logic_conditions_list["Less than"] = "Node"
   vars_logic_list["Conditional Checks"] = logic_conditions_list
   logic_mods_list = { }
-  logic_mods_list["+="] = "Node"
-  logic_mods_list["-="] = "Node"
-  logic_mods_list["*="] = "Node"
-  logic_mods_list["/="] = "Node"
-  logic_mods_list["|="] = "Node"
-  logic_mods_list["&="] = "Node"
-  logic_mods_list["~="] = "Node"
+  logic_mods_list["Add"] = "Node"
+  logic_mods_list["Subtract"] = "Node"
+  logic_mods_list["Multiply"] = "Node"
+  logic_mods_list["Divide"] = "Node"
+  logic_mods_list["Orr-Equals"] = "Node"
+  logic_mods_list["And-Equals"] = "Node"
+  logic_mods_list["Bitwise Not"] = "Node"
+  logic_mods_list["Logical Not"] = "Node"
   vars_logic_list["Variable Modification"] = logic_mods_list
   tool_list["Variables and Logic"] = vars_logic_list
 
