@@ -94,6 +94,47 @@ app:match("/project/:project_id", function(self)
   if current_project.user_id ~= current_user.id then
     return { redirect_to "/projects" }
   end
+
+  -- Load the nested list of tools to display.
+  -- TODO: Organize this and move it somewhere sensible.
+  tool_list = { }
+  core_utils_list = { }
+  core_utils_list["Boot"] = "Node"
+  core_utils_list["Delay"] = "Node"
+  tool_list["Core Utilities"] = core_utils_list
+  gpio_list = { }
+  gpio_list["Setup Input Pin"] = "Node"
+  gpio_list["Setup Output Pin"] = "Node"
+  gpio_list["Setup Alt. Func. Pin"] = "Node"
+  gpio_list["Read Input Pin"] = "Node"
+  gpio_list["Write Output Pin"] = "Node"
+  tool_list["GPIO"] = gpio_list
+  rcc_list = { }
+  rcc_list["Enable Peripheral Clock"] = "Node"
+  rcc_list["Disable Peripheral Clock"] = "Node"
+  tool_list["RCC"] = rcc_list
+  vars_logic_list = { }
+  vars_logic_list["Define Variable"] = "Node"
+  vars_logic_list["Set Variable"] = "Node"
+  logic_conditions_list = { }
+  logic_conditions_list["=="] = "Node"
+  logic_conditions_list["!="] = "Node"
+  logic_conditions_list[">="] = "Node"
+  logic_conditions_list["<="] = "Node"
+  logic_conditions_list[">"] = "Node"
+  logic_conditions_list["<"] = "Node"
+  vars_logic_list["Conditional Checks"] = logic_conditions_list
+  logic_mods_list = { }
+  logic_mods_list["+="] = "Node"
+  logic_mods_list["-="] = "Node"
+  logic_mods_list["*="] = "Node"
+  logic_mods_list["/="] = "Node"
+  logic_mods_list["|="] = "Node"
+  logic_mods_list["&="] = "Node"
+  logic_mods_list["~="] = "Node"
+  vars_logic_list["Variable Modification"] = logic_mods_list
+  tool_list["Variables and Logic"] = vars_logic_list
+
   return { render = "project_show" }
 end)
 

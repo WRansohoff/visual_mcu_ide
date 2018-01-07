@@ -10,6 +10,29 @@
     position: absolute;
   }
 
+  .tall-btn-group {
+    width: 100%;
+    height: 100%;
+  }
+
+  .tall-btn {
+    width: 100%;
+    height: 33%;
+  }
+
+  .indent-once {
+    padding-left: 10px;
+  }
+
+  .indent-twice {
+    padding-left: 20px;
+  }
+
+  .vvc-list-margins {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
   .back_link {
     padding-left: 20px;
   }
@@ -44,7 +67,7 @@
     transform: translateY(5.26%);
     position: absolute;
     overflow: scroll;
-    background-color: blue;
+    background-color: white;
   }
 
   .main_table_hobb_area_cell {
@@ -52,7 +75,7 @@
     height: 100%;
     position: absolute;
     overflow: scroll;
-    background-color: blue;
+    background-color: white;
   }
 
   .hobb_area_table {
@@ -67,7 +90,7 @@
     height: 100%;
     position: absolute;
     overflow: scroll;
-    background-color: yellow;
+    background-color: white;
   }
 
   .tool_select_buttons_cell {
@@ -76,7 +99,7 @@
     transform: translateX(200%);
     position: absolute;
     overflow: scroll;
-    background-color: green;
+    background-color: white;
   }
 
   .hobb_area_main_cell {
@@ -100,7 +123,7 @@
     height: 60%;
     position: absolute;
     overflow: scroll;
-    background-color: blue;
+    background-color: white;
   }
 
   .hobb_options_row {
@@ -109,7 +132,7 @@
     transform: translateY(150%);
     position: absolute;
     overflow: scroll;
-    background-color: magenta;
+    background-color: white;
   }
 
   .hobb_layout_cell {
@@ -117,7 +140,7 @@
     height: 100%;
     position: absolute;
     overflow: scroll;
-    background-color: blue;
+    background-color: white;
   }
 
   .hobb_options_cell {
@@ -125,9 +148,42 @@
     height: 100%;
     position: absolute;
     overflow: scroll;
-    background-color: magenta;
+    background-color: white;
+    border-left: 1px solid grey;
+  }
+
+  .fsm_canvas_div {
+    width: 100%;
+    height: 100%;
   }
 </style>
+
+<script type="text/javascript">
+  var selected_tool = "pan";
+  var selected_menu_tool = "";
+  init_fsm_layout_canvas = function() {
+    const canvas = document.getElementById("fsm_layout_canvas");
+    const canvas_container = document.getElementById("fsm_canvas_div");
+    // Resize canvas to its parent div dimensions.
+    canvas.width = canvas_container.offsetWidth;
+    canvas.height = canvas_container.offsetHeight;
+
+    // Initialize WebGL
+    const gl = canvas.getContext("webgl");
+    if (!gl) {
+      alert("Cannot initialize WebGL context");
+      return;
+    }
+
+    // Clear to sea-green.
+    gl.clearColor(0.0, 0.9, 0.7, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+  };
+
+  window.onload = function() {
+    init_fsm_layout_canvas();
+  };
+</script>
 
 <div class="main_content">
   <table class="main_table" cellpadding="0" cellspacing="0" border="0">
@@ -141,17 +197,65 @@
         <table class="hobb_area_table" cellpadding="0" cellspacing="0" border="0">
           <tr class="hobb_area_cell">
             <td class="tool_select_tool_menu_cell">
-              Tool/Node select menu
+              <!-- TODO: Make this list work with arbitrary menu depth. -->
+              <% for menu_name, menu_type in pairs(tool_list) do %>
+                <% safe_menu_name = menu_name:gsub(" ", "_") %>
+                <% if type(menu_type) == "string" then %>
+                <% else %>
+                  <div class="panel-group vvc-list-margins">
+                    <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h4 class="panel-title">
+                          <a data-toggle="collapse" href="#<%=safe_menu_name%>_collapse"><%= menu_name %></a>
+                        </h4>
+                      </div>
+                      <div id="<%=safe_menu_name%>_collapse" class="panel-collapse collapse">
+                        <ul class="list-group">
+                          <% for submenu_name, submenu_type in pairs(menu_type) do %>
+                            <% safe_submenu_name = submenu_name:gsub(" ", "_") %>
+                            <% if type(submenu_type) == "string" then %>
+                              <li class="list-group vvc-list-margins indent-once"><%=submenu_name%></li>
+                            <% else %>
+                              <li class="panel-group vvc-list-margins indent-once">
+                                <div class="panel panel-default">
+                                  <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                      <a data-toggle="collapse" href="#<%=safe_submenu_name%>_collapse"><%= submenu_name %></a>
+                                    </h4>
+                                  </div>
+                                  <div id="<%=safe_submenu_name%>_collapse" class="panel-collapse collapse">
+                                    <ul class="list-group">
+                                      <% for subsub_name, subsub_type in pairs(submenu_type) do %>
+                                        <li class="list-group vvc-list-margins indent-twice"><%=subsub_name%></li>
+                                      <% end %>
+                                    </ul>
+                                  </div>
+                                </div>
+                              </li>
+                            <% end %>
+                          <% end %>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
             </td>
             <td class="tool_select_buttons_cell">
-              Tool
-              Buttons
+              <div class="btn-group-vertical tall-btn-group">
+                <button type="button" class="btn btn-primary tall-btn">Pointer</button>
+                <button type="button" class="btn btn-primary tall-btn">Pan</button>
+                <button type="button" class="btn btn-primary tall-btn">Place</button>
+              </div>
             </td>
             <td class="hobb_area_main_cell">
               <table class="hobb_layout_options_table" cellpadding="0" cellspacing="0" border="0">
                 <tr class="hobb_layout_row">
                   <td class="hobb_layout_cell">
-                    Main 'FSM Layout' / 'Programming' View
+                    <div id="fsm_canvas_div" class="fsm_canvas_div">
+                      <canvas id="fsm_layout_canvas">
+                      </canvas>
+                    </div>
                   </td>
                 </tr>
                 <tr class="hobb_options_row">
