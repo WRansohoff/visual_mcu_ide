@@ -1,8 +1,4 @@
-<style>
-  .main_content {
-    padding: 20px;
-  }
-</style>
+<link rel="stylesheet" type="text/css" href="/static/css/projects.css">
 
 <script type="text/javascript">
   window.onload = function() {
