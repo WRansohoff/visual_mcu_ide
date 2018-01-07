@@ -4,6 +4,21 @@
   }
 </style>
 
+<script type="text/javascript">
+  window.onload = function() {
+    var delete_buttons = document.getElementsByClassName("delete_project_button");
+    var confirmDeletion = function(e) {
+      if (confirm("Are you sure you want to delete this project?")) {
+        return;
+      }
+      e.preventDefault();
+    };
+    for (var i = 0; i < delete_buttons.length; ++i) {
+          delete_buttons[i].addEventListener('click', confirmDeletion);
+    }
+  }
+</script>
+
 <div class="main_content">
   <div class="header_panel">
     <h1>Hi, <%= current_user.username %>. Your Projects:</h1>
