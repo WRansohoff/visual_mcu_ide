@@ -1,3 +1,9 @@
+<style>
+  .main_content {
+    padding: 20px;
+  }
+</style>
+
 <div class="main_content">
   <div class="header_panel">
     <h1>Hi, <%= current_user.username %>. Your Projects:</h1>

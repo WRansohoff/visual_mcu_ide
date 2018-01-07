@@ -1,8 +1,174 @@
+<style>
+  .main_content {
+    padding: 5px;
+    font-size: 20px;
+  }
+
+  .header_panel {
+    height: 5%;
+    transform: translateY(1850%);
+    position: absolute;
+  }
+
+  .back_link {
+    padding-left: 20px;
+  }
+
+  .main_table {
+    width: 97.5%;
+    height: 90%;
+    position: absolute;
+    overflow: scroll;
+    background-color: black;
+  }
+
+  .main_table_menu_bar {
+    width: 100%;
+    height: 5%;
+    position: absolute;
+    overflow: scroll;
+    background-color: red;
+  }
+
+  .main_table_menu_bar_cell {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    overflow: scroll;
+    background-color: red;
+  }
+
+  .main_table_hobb_area {
+    width: 100%;
+    height: 95%;
+    transform: translateY(5.26%);
+    position: absolute;
+    overflow: scroll;
+    background-color: blue;
+  }
+
+  .main_table_hobb_area_cell {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    overflow: scroll;
+    background-color: blue;
+  }
+
+  .hobb_area_table {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    overflow: scroll;
+  }
+
+  .tool_select_tool_menu_cell {
+    width: 20%;
+    height: 100%;
+    position: absolute;
+    overflow: scroll;
+    background-color: yellow;
+  }
+
+  .tool_select_buttons_cell {
+    width: 10%;
+    height: 100%;
+    transform: translateX(200%);
+    position: absolute;
+    overflow: scroll;
+    background-color: green;
+  }
+
+  .hobb_area_main_cell {
+    width: 70%;
+    height: 100%;
+    transform: translateX(42.85%);
+    position: absolute;
+    overflow: scroll;
+    background-color: orange;
+  }
+
+  .hobb_layout_options_table {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    overflow: scroll;
+  }
+
+  .hobb_layout_row {
+    width: 100%;
+    height: 60%;
+    position: absolute;
+    overflow: scroll;
+    background-color: blue;
+  }
+
+  .hobb_options_row {
+    width: 100%;
+    height: 40%;
+    transform: translateY(150%);
+    position: absolute;
+    overflow: scroll;
+    background-color: magenta;
+  }
+
+  .hobb_layout_cell {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    overflow: scroll;
+    background-color: blue;
+  }
+
+  .hobb_options_cell {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    overflow: scroll;
+    background-color: magenta;
+  }
+</style>
+
 <div class="main_content">
+  <table class="main_table" cellpadding="0" cellspacing="0" border="0">
+    <tr class="main_table_menu_bar">
+      <td class="main_table_menu_bar_cell">
+        Menu Bar
+      </td>
+    </tr>
+    <tr class="main_table_hobb_area">
+      <td class="main_table_hobb_area_cell">
+        <table class="hobb_area_table" cellpadding="0" cellspacing="0" border="0">
+          <tr class="hobb_area_cell">
+            <td class="tool_select_tool_menu_cell">
+              Tool/Node select menu
+            </td>
+            <td class="tool_select_buttons_cell">
+              Tool
+              Buttons
+            </td>
+            <td class="hobb_area_main_cell">
+              <table class="hobb_layout_options_table" cellpadding="0" cellspacing="0" border="0">
+                <tr class="hobb_layout_row">
+                  <td class="hobb_layout_cell">
+                    Main 'FSM Layout' / 'Programming' View
+                  </td>
+                </tr>
+                <tr class="hobb_options_row">
+                  <td class="hobb_options_cell">
+                    'Options' View (for currently-selected Node)
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
   <div class="header_panel">
-    <h1>Project Title: <%= current_project.title %></h1>
-  </div>
-  <div class="back_link_div">
+    Project Title: <%= current_project.title %>
     <a href="/projects" class="back_link">Back</a>
   </div>
 </div>
