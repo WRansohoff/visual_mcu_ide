@@ -4,8 +4,8 @@ local lapis = require("lapis")
 local config = require("lapis.config").get()
 
 -- Database models
-local Model = require("lapis.db.model").Model
-local User = Model:extend("users")
+local User = require("models/user")
+local Project = require("models/project")
 
 -- Initial Application setup.
 local app = lapis.Application()
@@ -17,16 +17,113 @@ app:get("/", function(self)
   err_msg = self.session.err_msg
   self.session.err_msg = nil
 
-  -- Load the 'index' page if a user is signed in, otherwise redirect
-  -- to sign-in/up page.
-  return_opts = {}
+  -- Load the User's 'projects' page if a user is signed in,
+  -- otherwise redirect to sign-in/up page.
   current_user = self.session.current_user
   if not self.session.current_user then
-    return_opts["render"] = "sign_in"
+    return { render = "sign_in" }
   else
-    return_opts["render"] = "index"
+    return { redirect_to = "/projects" }
   end
-  return return_opts
+  -- (Shouldn't ever be reached)
+  return { render = "index" }
+end)
+
+app:get("/projects", function(self)
+  -- If there isn't a signed-in user, redirect to the landing page.
+  if not self.session.current_user then
+    self.session.err_msg = "You must be signed in to view this page."
+    return { redirect_to = "/" }
+  end
+  current_user = self.session.current_user
+
+  -- Load the user's projects. TODO: Paging, folders, just...some sort
+  -- of organization.
+  current_projects = Project:select("where user_id = ?", current_user.id)
+  return { render = "projects" }
+end)
+
+app:post("/new_project", function(self)
+  -- If there isn't a signed-in user, redirect to the landing page.
+  if not self.session.current_user then
+    self.session.err_msg = "You must be signed in to use this page."
+    return { redirect_to = "/" }
+  end
+  -- If the required parameters are not provided, return to the /projects
+  -- page without creating a new entry.
+  if not self.params.title or self.params.title == "" then
+    return { redirect_to = "/projects" }
+  end
+  -- Ditto if the current user already has a project with the given title.
+  local existing_proj = Project:select("where user_id = ? and title = ?",
+    self.session.current_user.id,
+    self.params.title)
+  if next(existing_proj) then
+    return { redirect_to = "/projects" }
+  end
+
+  -- Create a new project for the user with the given title, and pass
+  -- it on to the /projects page. TODO: Render a message or something?
+  new_project = Project:create({
+    user_id = self.session.current_user.id,
+    title   = self.params.title
+  })
+  -- Return to the base 'projects' page.
+  return { redirect_to = "/projects" }
+end)
+
+app:match("/project/:project_id", function(self)
+  -- If there isn't a signed-in user, redirect to the landing page.
+  if not self.session.current_user then
+    self.session.err_msg = "You must be signed in to use this page."
+    return { redirect_to = "/" }
+  end
+  -- If no ID is provided, return without action.
+  if not self.params.project_id or self.params.project_id == "" then
+    return { redirect_to "/projects" }
+  end
+  local proj_id = tonumber(self.params.project_id)
+  -- If no project exists with the given ID, return without action.
+  current_project = Project:find(proj_id)
+  if not current_project then
+    return { redirect_to "/projects" }
+  end
+  -- If the current user does not own the given project,
+  -- return without action.
+  current_user = self.session.current_user
+  if current_project.user_id ~= current_user.id then
+    return { redirect_to "/projects" }
+  end
+  return { render = "project_show" }
+end)
+
+app:match("/project/delete/:project_id", function(self)
+  -- If there isn't a signed-in user, redirect to the landing page.
+  if not self.session.current_user then
+    self.session.err_msg = "You must be signed in to use this page."
+    return { redirect_to = "/" }
+  end
+  -- If no ID is provided, return without action.
+  if not self.params.project_id or self.params.project_id == "" then
+    return { redirect_to "/projects" }
+  end
+  local proj_id = tonumber(self.params.project_id)
+  -- If no project exists with the given ID, return without action.
+  local proj = Project:find(proj_id)
+  if not proj then
+    return { redirect_to "/projects" }
+  end
+  -- If the current user does not own the given project,
+  -- return without action.
+  if proj.user_id ~= self.session.current_user.id then
+    return { redirect_to "/projects" }
+  end
+
+  -- Delete the project. TODO: Alert the user if deletion fails.
+  local deleted = proj:delete()
+
+  -- Return to the base 'projects' page.
+  return { redirect_to = "/projects" }
 end)
 
 app:post("/sign_up", function(self)

@@ -1,0 +1,66 @@
+<div class="main_content">
+  <div class="header_panel">
+    <h1>Hi, <%= current_user.username %>. Your Projects:</h1>
+  </div>
+  <div id="sign_out_panel" class="sign_out_panel">
+    <a href="/sign_out" class="sign_out_link">Sign Out</a>
+  </div>
+
+  <% if not next(current_projects) then %>
+    <div class="no_projects_message">
+      Looks like you don't have any projects.
+    </div>
+  <% else %>
+    <div class="main_projects_table_div">
+      <table class="main_projects_table">
+        <tr class="main_projects_table_header_row">
+          <th class="main_projects_table_header">
+            Project Title
+          </th>
+          <th class="main_projects_table_header">
+            Open?
+          </th>
+          <th class="main_projects_table_header">
+            Copy?
+          </th>
+          <th class="main_projects_table_header">
+            Delete?
+          </th>
+        </tr>
+        <% for ind, proj in ipairs(current_projects) do %>
+          <tr class="main_projects_table_row">
+            <td class="main_projects_table_cell">
+              <%= proj.title %>
+            </td>
+            <td class="main_projects_table_cell">
+              <a href="/project/<%= proj.id %>" class="open_project_button">Open</a>
+            </td>
+            <td class="main_projects_table_cell">
+              Copy (to-do)
+            </td>
+            <td class="main_projects_table_cell">
+              <a href="/project/delete/<%= proj.id %>" class="delete_project_button">Delete</a>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </div>
+  <% end %>
+
+  <div class="new_project_panel">
+    <div class="new_project_header">
+      New Project:
+    </div>
+    <div class="new_project_form">
+      <form action="/new_project" method="post">
+        <div class="input_field">
+          Project title:
+          <input type="text" name="title">
+        </div>
+        <div class="start_new_project_button">
+          <input type="submit" value="Start">
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

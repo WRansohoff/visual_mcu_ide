@@ -57,6 +57,10 @@
   #sign_up_div {
     display: none;
   }
+
+  .input_field {
+      padding: 5px;
+  }
 </style>
 
 <script type="text/javascript">
@@ -85,45 +89,50 @@
 
 <div class="main_content">
   <div class="title_panel">
-    <h1>Hey there! Please sign up or sign in!</h1>
+    <h1>Sign up or sign in:</h1>
   </div>
   <div class="buttons">
     <span id="sign_in_button" class="sign_in_button">
-      Sign in!
+      Sign in
     </span>
     <span id="sign_up_button" class="sign_up_button">
-      Sign up!
+      Sign up
     </span>
   </div>
 
   <div id="sign_in_div" class="sign_in_content">
-    Hi, sign in.
+    Sign in:
     <div class="sign_in_form">
       <form action="/sign_in" method="post">
-        Username or Email:
-        <input type="text" name="identifier">
-        <br>
-        Password:
-        <input type="password" name="password">
-        <br>
+        <div class="input_field">
+          Username or Email:
+          <input type="text" name="identifier">
+        </div>
+        <div class="input_field">
+          Password:
+          <input type="password" name="password">
+        </div>
         <input type="submit" value="Submit">
       </form>
     </div>
   </div>
 
   <div id="sign_up_div" class="sign_up_content">
-    Hi, sign up.
+    Sign up:
     <div class="sign_up_form">
       <form action="/sign_up" method="post">
-        Email (optional):
-        <input type="text" name="email">
-        <br>
-        Username:
-        <input type="text" name="username">
-        <br>
-        Password:
-        <input type="password" name="password">
-        <br>
+        <div class="input_field">
+          Email (optional):
+          <input type="text" name="email">
+        </div>
+        <div class="input_field">
+          Username:
+          <input type="text" name="username">
+        </div>
+        <div class="input_field">
+          Password:
+          <input type="password" name="password">
+        </div>
         <input type="submit" value="Submit">
       </form>
     </div>

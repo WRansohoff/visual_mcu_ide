@@ -1,0 +1,8 @@
+<div class="main_content">
+  <div class="header_panel">
+    <h1>Project Title: <%= current_project.title %></h1>
+  </div>
+  <div class="back_link_div">
+    <a href="/projects" class="back_link">Back</a>
+  </div>
+</div>

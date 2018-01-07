@@ -19,4 +19,18 @@ return {
 		schema.create_index("users", "username")
 		schema.create_index("users", "email")
 	end,
+
+    -- Add a Projects table.
+    [2] = function()
+        schema.create_table("projects", {
+            { "id", types.serial },
+            { "user_id", types.foreign_key },
+            { "title", types.varchar },
+
+            "PRIMARY KEY (id)"
+        })
+
+        -- Add index on user_id for lookups.
+        schema.create_index("projects", "user_id")
+    end,
 }
