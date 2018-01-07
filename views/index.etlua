@@ -1,0 +1,10 @@
+<!-- 'etlua' is a Lua templating language -->
+<div class="main_content">
+  <div class="salutations">
+    <h1>Hey there, <%= current_user.username %>.</h1>
+  </div>
+  <div class="logout_link">
+    <a href="/sign_out">Logout</a>
+  </div>
+  <div class="clear"></div>
+</div>

@@ -1,0 +1,11 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title><%= page_title or "(No Title)" %></title>
+</head>
+
+<body>
+    <% content_for("inner") %>
+</body>
+</html>
