@@ -1,10 +1,70 @@
 <link rel="stylesheet" type="text/css" href="/static/css/project_show.css">
 
 <script type="text/javascript">
+  // Shaders. We're only doing simple 2D drawing, so
+  // why even make separate files for them
+  const vert_sh = `
+    precision mediump float;
+    attribute vec2 vp;
+    uniform   vec2 cur_view_coords;
+    void main() {
+      gl_Position = vec4(vp.x, vp.y, 0.0, 1.0);
+    }
+  `;
+  const frag_sh = `
+    precision mediump float;
+    uniform float canvas_w;
+    uniform float canvas_h;
+    uniform   vec2 cur_view_coords;
+    void main() {
+      // Draw a 'pegboard' view. For now, no DPI settings or anything.
+      // Just 32px per grid square.
+      int x_mod = int(cur_view_coords.x / 32.0);
+      int y_mod = int(cur_view_coords.y / 32.0);
+      int cur_px_x = int(gl_FragCoord.x);
+      int cur_px_x_mod = cur_px_x / 32;
+      cur_px_x_mod = cur_px_x_mod * 32;
+      cur_px_x_mod = cur_px_x_mod - cur_px_x;
+      int cur_px_y = int(gl_FragCoord.y);
+      int cur_px_y_mod = cur_px_y / 32;
+      cur_px_y_mod = cur_px_y_mod * 32;
+      cur_px_y_mod = cur_px_y_mod - cur_px_y;
+      const int grid_px_size = 3;
+      int is_grid_px = 0;
+      for (int grid_px_x_progress = 0; grid_px_x_progress < grid_px_size; ++grid_px_x_progress) {
+        for (int grid_px_y_progress = 0; grid_px_y_progress < grid_px_size; ++grid_px_y_progress) {
+          if ((cur_px_x_mod+grid_px_x_progress == x_mod) && cur_px_y_mod+grid_px_y_progress == y_mod) {
+            is_grid_px = 1;
+          }
+        }
+      }
+      if (is_grid_px == 1) {
+        gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0);
+      }
+      else {
+        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+      }
+      //gl_FragColor = vec4(gl_FragCoord.x / canvas_w, gl_FragCoord.y / canvas_h, 0.0, 1.0);
+    }
+  `;
+
   // 'Global' variables to use.
   var selected_tool = "pan";
   var selected_menu_tool = "";
   var gl = null;
+  var shader_prog = null;
+
+  load_shader = function(gl, sh_type, sh_source) {
+    const sh = gl.createShader(sh_type);
+    gl.shaderSource(sh, sh_source);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+      alert("Error compiling shaders: " + gl.getShaderInfoLog(sh));
+      gl.deleteShader(sh);
+      return null;
+    }
+    return sh;
+  };
 
   init_fsm_layout_canvas = function() {
     const canvas = document.getElementById("fsm_layout_canvas");
@@ -23,6 +83,58 @@
     // Clear to sea-green.
     gl.clearColor(0.0, 0.9, 0.7, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // Load shaders.
+    const vs = load_shader(gl, gl.VERTEX_SHADER, vert_sh);
+    const fs = load_shader(gl, gl.FRAGMENT_SHADER, frag_sh);
+    shader_prog = gl.createProgram();
+    gl.attachShader(shader_prog, vs);
+    gl.attachShader(shader_prog, fs);
+    gl.linkProgram(shader_prog);
+    if (!gl.getProgramParameter(shader_prog, gl.LINK_STATUS)) {
+      alert("Couldn't initialize shader program - log:\n" + gl.getProgramInfoLog(shader_prog));
+      return;
+    }
+
+    // Initialize buffer objects.
+    const pos_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, pos_buffer);
+    const pos_pts = [
+      1.0, 1.0,
+      -1.0, 1.0,
+      1.0, -1.0,
+      -1.0, -1.0,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER,
+                  new Float32Array(pos_pts),
+                  gl.STATIC_DRAW);
+
+    // Setup the scene.
+    gl.clearDepth(1.0);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // Define positions buffer.
+    gl.bindBuffer(gl.ARRAY_BUFFER, pos_buffer);
+    gl.vertexAttribPointer(gl.getAttribLocation(shader_prog, 'vp'),
+                           2, // number of components
+                           gl.FLOAT,
+                           false, // normalize?
+                           0, 0);
+    gl.enableVertexAttribArray(gl.getAttribLocation(shader_prog, 'vp'));
+
+    // Use the current shader program.
+    gl.useProgram(shader_prog);
+
+    // Send uniform values.
+    gl.uniform1f(gl.getUniformLocation(shader_prog, 'canvas_w'), canvas.width);
+    gl.uniform1f(gl.getUniformLocation(shader_prog, 'canvas_h'), canvas.height);
+    gl.uniform2fv(gl.getUniformLocation(shader_prog, 'cur_view_coords'), [0.0, 0.0]);
+
+    // Draw.
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   };
 
   window.onload = function() {
@@ -74,7 +186,7 @@
   };
 </script>
 
-<div class="main_content">
+<div id="main_container" class="main_content">
   <table class="main_table" cellpadding="0" cellspacing="0" border="0">
     <tr class="main_table_menu_bar">
       <td class="main_table_menu_bar_cell">
