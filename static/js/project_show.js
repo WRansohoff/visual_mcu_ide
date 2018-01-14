@@ -316,6 +316,7 @@ project_show_onload = function() {
     $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool_down");
     $("#fsm_canvas_div").removeClass("hobb_layout_tool_tool");
+    redraw_canvas();
   });
   document.getElementById("pan_tool_select").addEventListener("click", function(e) {
     selected_tool = 'pan';
@@ -330,6 +331,7 @@ project_show_onload = function() {
     $("#fsm_canvas_div").addClass("hobb_layout_pan_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool_down");
     $("#fsm_canvas_div").removeClass("hobb_layout_tool_tool");
+    redraw_canvas();
   });
   document.getElementById("tool_tool_select").addEventListener("click", function(e) {
     selected_tool = 'tool';
@@ -344,6 +346,7 @@ project_show_onload = function() {
     $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool_down");
     $("#fsm_canvas_div").addClass("hobb_layout_tool_tool");
+    redraw_canvas();
   });
 
   // Add a global 'resize' event for the whole window.
