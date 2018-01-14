@@ -33,20 +33,31 @@ const frag_sh = `#version 300 es
     // Draw a 'pegboard' view. For now, no DPI settings or anything.
     // Just 64px per grid square.
     const int grid_spacing = 64;
-    int x_mod = int(cur_view_coords.x) & 0x0000003F;
-    int y_mod = int(cur_view_coords.y) & 0x0000003F;
+    int cur_x = int(cur_view_coords.x);
+    int cur_y = int(cur_view_coords.y);
+    int x_mod = cur_x & 0x0000003F;
+    int y_mod = cur_y & 0x0000003F;
     int cur_px_x = int(gl_FragCoord.x);
     int cur_px_x_mod = cur_px_x & 0x0000003F;
+    cur_px_x_mod = 64-cur_px_x_mod;
     int cur_px_y = int(gl_FragCoord.y);
     int cur_px_y_mod = cur_px_y & 0x0000003F;
+    cur_px_y_mod = 64-cur_px_y_mod;
     int is_grid_px = 0;
     const int grid_dot_size = 2;
+    // Draw a larger dot at (0, 0) to get the coordinate system straight.
+    // So, if x and y are within say, [-5, 5] including the offset.
+    const int origin_dot = 5;
+    if ((cur_x+cur_px_x >= -origin_dot && cur_x+cur_px_x <= origin_dot) &&
+        (cur_y+cur_px_y >= -origin_dot && cur_y+cur_px_y <= origin_dot)) {
+      is_grid_px = 1;
+    }
     // For x,y in [0:dot_size], draw dot color if (cur_x % grid_size)
     // is within (dot_offset)+[0:dot_size].
     for (int x_prog = 0; x_prog < grid_dot_size; ++x_prog) {
       for (int y_prog = 0; y_prog < grid_dot_size; ++y_prog) {
-        if ((x_mod+x_prog == cur_px_x_mod || x_mod+x_prog == 64+cur_px_x_mod)
-            && (y_mod+y_prog == cur_px_y_mod || y_mod+y_prog == 64+cur_px_y_mod)) {
+        if ((x_mod+x_prog == cur_px_x_mod || x_mod+x_prog+64 == cur_px_x_mod)
+            && (y_mod+y_prog == cur_px_y_mod || y_mod+y_prog+64 == cur_px_y_mod)) {
           is_grid_px = 1;
         }
       }
@@ -67,6 +78,8 @@ var selected_menu_tool = "";
 var is_currently_panning = false;
 var last_pan_mouse_x = -1;
 var last_pan_mouse_y = -1;
+var cur_fsm_x = 0;
+var cur_fsm_y = 0;
 var cur_fsm_grid_x = 0;
 var cur_fsm_grid_y = 0;
 var gl = null;
@@ -79,6 +92,12 @@ var fsm_node_struct_fields = [
   "grid_coord_x",
   "grid_coord_y",
 ];
+// 'currently-selected preview' node info.
+var cur_tool_node_tex = -1;
+var cur_tool_node_grid_x = 0;
+var cur_tool_node_grid_y = 0;
+// Preloaded textures
+var loaded_textures = [];
 
 load_shader = function(gl, sh_type, sh_source) {
   const sh = gl.createShader(sh_type);
@@ -90,6 +109,23 @@ load_shader = function(gl, sh_type, sh_source) {
     return null;
   }
   return sh;
+};
+
+preload_textures = function() {
+  var tex = gl.createTexture();
+  var img = new Image();
+  const mip_level = 0;
+  const format = gl.RGBA;
+  const src_type = gl.UNSIGNED_BYTE;
+  img.onload = function() {
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, mip_level, format, format, src_type, img);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  };
+  img.src = "/static/fsm_assets/boot_node.png";
+  loaded_textures["Boot"] = tex;
 };
 
 init_fsm_layout_canvas = function() {
@@ -109,6 +145,9 @@ init_fsm_layout_canvas = function() {
   // Clear to sea-green.
   gl.clearColor(0.0, 0.9, 0.7, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // Preload textures.
+  preload_textures();
 
   // Load shaders.
   const vs = load_shader(gl, gl.VERTEX_SHADER, vert_sh);
@@ -171,7 +210,7 @@ redraw_canvas = function() {
   // Send uniform values.
   gl.uniform1f(gl.getUniformLocation(shader_prog, 'canvas_w'), canvas.width);
   gl.uniform1f(gl.getUniformLocation(shader_prog, 'canvas_h'), canvas.height);
-  gl.uniform2fv(gl.getUniformLocation(shader_prog, 'cur_view_coords'), [cur_fsm_grid_x, cur_fsm_grid_y]);
+  gl.uniform2fv(gl.getUniformLocation(shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
   // Send 'node' uniform values. If a node doesn't exist,
   // set sampler to -1 and coords to (0, 0).
   for (var node_ind = 0; node_ind < 256; ++node_ind) {
@@ -273,6 +312,14 @@ project_show_onload = function() {
       $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool_down");
       last_pan_mouse_x = -1;
       last_pan_mouse_y = -1;
+      // Un-select any text that may have been selected if panning
+      // dragged outside of the WebGL window.
+      if (document.selected) {
+        document.selected.empty();
+      }
+      else if (window.getSelection()) {
+        window.getSelection().removeAllRanges();
+      }
     }
   };
 
@@ -293,12 +340,16 @@ project_show_onload = function() {
       if (last_pan_mouse_x != -1 && last_pan_mouse_y != -1) {
         var diff_x = e.clientX - last_pan_mouse_x;
         var diff_y = e.clientY - last_pan_mouse_y;
-        cur_fsm_grid_x += diff_x;
-        cur_fsm_grid_y -= diff_y;
+        cur_fsm_x += diff_x;
+        cur_fsm_y -= diff_y;
+        cur_fsm_grid_x = parseInt(cur_fsm_x / 64);
+        cur_fsm_grid_y = parseInt(cur_fsm_y / 64);
 
         // Submit the 'moved' coordinates to the shaders and re-draw.
         redraw_canvas();
-        document.getElementById("list_current_fsm_coords").innerHTML = ("FSM Co-ords: (" + cur_fsm_grid_x + ", " + cur_fsm_grid_y + ")");
+        // Debug:
+        document.getElementById("list_current_fsm_coords").innerHTML = ("FSM Co-ords (bottom-left): (" + cur_fsm_x + ", " + cur_fsm_y + ")");
+        document.getElementById("list_current_fsm_grid_coords").innerHTML = ("= Grid Coordinates: (" + cur_fsm_grid_x + ", " + cur_fsm_grid_y + ")");
       }
       last_pan_mouse_x = e.clientX;
       last_pan_mouse_y = e.clientY;
@@ -310,6 +361,16 @@ project_show_onload = function() {
   // placement.
   document.getElementById("fsm_canvas_div").onmousemove = function(e) {
     if (selected_tool == 'tool') {
+      var menu_tool_selected = false;
+      // 'Boot' node, for testing.
+      if (selected_menu_tool == 'Boot') {
+        cur_tool_node_tex = loaded_textures['Boot'];
+        menu_tool_selected = true;
+      }
+      // If there is a texture for the selection, find its grid coord.
+      // (So, x/y coordinates / 64. (or whatever dot distance if it changes)
+      if (menu_tool_selected) {
+      }
     }
   };
 };

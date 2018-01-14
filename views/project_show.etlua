@@ -122,7 +122,10 @@
                       Currently-selected: [none]
                     </div>
                     <div id="list_current_fsm_coords">
-                      FSM Co-ords: (0, 0)
+                      FSM Co-ords (bottom-left): (0, 0)
+                    </div>
+                    <div id="list_current_fsm_grid_coords">
+                      = Grid Coordinates: (0, 0)
                     </div>
                   </td>
                 </tr>
