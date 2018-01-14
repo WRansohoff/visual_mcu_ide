@@ -12,7 +12,7 @@
     <title><%= page_title or "(No Title)" %></title>
 </head>
 
-<body>
+<body id="varm_body_tag">
     <% content_for("inner") %>
 </body>
 

@@ -114,14 +114,14 @@
   width: 100%;
   height: 100%;
   position: absolute;
-  overflow: hidden;
+  overflow: scroll;
 }
 
 .hobb_layout_row {
   width: 100%;
   height: 60%;
   position: absolute;
-  overflow: hidden;
+  overflow: scroll;
   background-color: white;
 }
 
@@ -142,6 +142,24 @@
   background-color: white;
 }
 
+.hobb_layout_pointer_tool {
+  cursor: default;
+}
+
+.hobb_layout_pan_tool {
+  cursor: grab;
+  cursor: -webkit-grab;
+}
+
+.hobb_layout_pan_tool_down {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
+}
+
+.hobb_layout_tool_tool {
+  cursor: default;
+}
+
 .hobb_options_cell {
   width: 100%;
   height: 100%;
@@ -154,4 +172,5 @@
 .fsm_canvas_div {
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
