@@ -12,6 +12,7 @@ const frag_sh = `#version 300 es
   // Struct definitions.
   struct FSM_Node {
     sampler2D tex_sampler;
+    int node_status;
     int grid_coord_x;
     int grid_coord_y;
   };
@@ -68,7 +69,35 @@ const frag_sh = `#version 300 es
     else {
       out_color = vec4(1.0, 1.0, 1.0, 1.0);
     }
-    //out_color = vec4(gl_FragCoord.x / canvas_w, gl_FragCoord.y / canvas_h, 0.0, 1.0);
+
+    // Next, draw the 'currently-selected' tool if necessary.
+    if (cur_tool_node.node_status != -1) {
+      // Find the right grid coordinate's location relative to the window.
+      // The center will be at global (x*64, y*64), so:
+      // (global_x-cur_view_x) = local center.
+      int cur_tool_node_local_x = cur_tool_node.grid_coord_x * 64;
+      cur_tool_node_local_x -= int(cur_view_coords.x);
+      int cur_tool_node_local_y = cur_tool_node.grid_coord_y * 64;
+      cur_tool_node_local_y -= int(cur_view_coords.y);
+      int cur_tool_node_min_x = cur_tool_node_local_x - 32;
+      int cur_tool_node_max_x = cur_tool_node_local_x + 32;
+      int cur_tool_node_min_y = cur_tool_node_local_y - 32;
+      int cur_tool_node_max_y = cur_tool_node_local_y + 32;
+      if (cur_px_x >= cur_tool_node_min_x &&
+          cur_px_x <= cur_tool_node_max_x &&
+          cur_px_y >= cur_tool_node_min_y &&
+          cur_px_y <= cur_tool_node_max_y) {
+        // Texture coordinates are [0:1]; treat (grid_coord-32) as the 
+        // '0' and (grid_coord+32) as the '1', for a 64-px grid.
+        float cur_tool_s = float(cur_px_x - cur_tool_node_min_x);
+        float cur_tool_t = float(cur_px_y - cur_tool_node_min_y);
+        cur_tool_s /= 64.0;
+        cur_tool_t /= 64.0;
+        cur_tool_t = 1.0 - cur_tool_t;
+        vec2 cur_tool_st = vec2(cur_tool_s, cur_tool_t);
+        out_color = texture(cur_tool_node.tex_sampler, cur_tool_st);
+      }
+    }
   }
 `;
 
@@ -78,10 +107,13 @@ var selected_menu_tool = "";
 var is_currently_panning = false;
 var last_pan_mouse_x = -1;
 var last_pan_mouse_y = -1;
+var pan_scale_factor = 1.5;
 var cur_fsm_x = 0;
 var cur_fsm_y = 0;
 var cur_fsm_grid_x = 0;
 var cur_fsm_grid_y = 0;
+var cur_fsm_mouse_x = 0;
+var cur_fsm_mouse_y = 0;
 var gl = null;
 var shader_prog = null;
 // Array for keeping track of FSM node structs to send to the shader.
@@ -89,6 +121,7 @@ var fsm_nodes = [];
 var fsm_node_locs = [];
 var fsm_node_struct_fields = [
   "tex_sampler",
+  "node_status",
   "grid_coord_x",
   "grid_coord_y",
 ];
@@ -113,19 +146,23 @@ load_shader = function(gl, sh_type, sh_source) {
 
 preload_textures = function() {
   var tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
   var img = new Image();
   const mip_level = 0;
   const format = gl.RGBA;
   const src_type = gl.UNSIGNED_BYTE;
+  // Dummy 1-pixel texture.
+  gl.texImage2D(gl.TEXTURE_2D, mip_level, format, 1, 1, 0, format, src_type, new Uint8Array([0, 0, 255, 255]));
   img.onload = function() {
-    gl.bindTexture(gl.TEXTURE_2D, tex);
+    while (!img.complete) {}
     gl.texImage2D(gl.TEXTURE_2D, mip_level, format, format, src_type, img);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    loaded_textures["Boot"] = tex;
   };
   img.src = "/static/fsm_assets/boot_node.png";
-  loaded_textures["Boot"] = tex;
 };
 
 init_fsm_layout_canvas = function() {
@@ -197,6 +234,7 @@ init_fsm_layout_canvas = function() {
     fsm_nodes[node_ind] = null;
     fsm_node_locs[node_ind] = [];
     fsm_node_locs[node_ind]["tex_sampler"] = gl.getUniformLocation(shader_prog, "nodes[" + node_ind + "].tex_sampler");
+    fsm_node_locs[node_ind]["node_status"] = gl.getUniformLocation(shader_prog, "nodes[" + node_ind + "].node_status");
     fsm_node_locs[node_ind]["grid_coord_x"] = gl.getUniformLocation(shader_prog, "nodes[" + node_ind + "].grid_coord_x");
     fsm_node_locs[node_ind]["grid_coord_y"] = gl.getUniformLocation(shader_prog, "nodes[" + node_ind + "].grid_coord_y");
   }
@@ -216,25 +254,40 @@ redraw_canvas = function() {
   for (var node_ind = 0; node_ind < 256; ++node_ind) {
     if (fsm_nodes[node_ind] == null) {
       // Find/send empty uniform values.
-      gl.uniform1i(fsm_node_locs[node_ind]["tex_sampler"], -1);
+      //gl.uniform1i(fsm_node_locs[node_ind]["tex_sampler"], 0);
+      gl.uniform1i(fsm_node_locs[node_ind]["node_status"], -1);
       gl.uniform1i(fsm_node_locs[node_ind]["grid_coord_x"], 0);
       gl.uniform1i(fsm_node_locs[node_ind]["grid_coord_y"], 0);
     }
     else {
-      gl.uniform1i(fsm_node_locs[node_ind]["tex_sampler"], fsm_nodes[node_ind]["tex_sampler"]);
+      if (fsm_nodes[node_ind]["node_status"] == -1) {
+        //gl.uniform1i(fsm_node_locs[node_ind]["tex_sampler"], fsm_nodes[node_ind]["tex_sampler"]);
+        gl.uniform1i(fsm_node_locs[node_ind]["node_status"], fsm_nodes[node_ind]["node_status"]);
+      }
+      else {
+        gl.uniform1i(fsm_node_locs[node_ind]["tex_sampler"], fsm_nodes[node_ind]["tex_sampler"]);
+        gl.uniform1i(fsm_node_locs[node_ind]["node_status"], fsm_nodes[node_ind]["node_status"]);
+      }
       gl.uniform1i(fsm_node_locs[node_ind]["grid_coord_x"], fsm_nodes[node_ind]["grid_coord_x"]);
       gl.uniform1i(fsm_node_locs[node_ind]["grid_coord_y"], fsm_nodes[node_ind]["grid_coord_y"]);
     }
   }
   // Send 'current tool' node if necessary.
   if (selected_tool == 'tool') {
-    // TODO - render 'current tool' node.
-    gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.tex_sampler'), -1);
-    gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.grid_coord_x'), 0);
-    gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.grid_coord_y'), 0);
+    if (cur_tool_node_tex == -1) {
+      //gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.tex_sampler'), 0);
+      gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.node_status'), -1);
+    }
+    else {
+      gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.tex_sampler'), cur_tool_node_tex);
+      gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.node_status'), 0);
+    }
+    gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.grid_coord_x'), cur_tool_node_grid_x);
+    gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.grid_coord_y'), cur_tool_node_grid_y);
   }
   else {
-    gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.tex_sampler'), -1);
+    //gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.tex_sampler'), 0);
+    gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.node_status'), -1);
     gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.grid_coord_x'), 0);
     gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.grid_coord_y'), 0);
   }
@@ -250,8 +303,8 @@ project_show_onload = function() {
   // Input handling from HTML GUI.
   // Main 'tool select' buttons.
   var pointer_tool_btn = document.getElementById("pointer_tool_select");
-  pointer_tool_btn.addEventListener("click", function(e) {
-    selected_tool = "pointer";
+  pointer_tool_btn.addEventListener('click', function(e) {
+    selected_tool = 'pointer';
     // Update stylings.
     $("#pointer_tool_select").removeClass("btn-primary");
     $("#pointer_tool_select").addClass("btn-success");
@@ -265,7 +318,7 @@ project_show_onload = function() {
     $("#fsm_canvas_div").removeClass("hobb_layout_tool_tool");
   });
   document.getElementById("pan_tool_select").addEventListener("click", function(e) {
-    selected_tool = "pan";
+    selected_tool = 'pan';
     // Update stylings.
     $("#pan_tool_select").removeClass("btn-primary");
     $("#pan_tool_select").addClass("btn-success");
@@ -279,7 +332,7 @@ project_show_onload = function() {
     $("#fsm_canvas_div").removeClass("hobb_layout_tool_tool");
   });
   document.getElementById("tool_tool_select").addEventListener("click", function(e) {
-    selected_tool = "tool";
+    selected_tool = 'tool';
     // Update stylings.
     $("#tool_tool_select").removeClass("btn-primary");
     $("#tool_tool_select").addClass("btn-success");
@@ -340,8 +393,8 @@ project_show_onload = function() {
       if (last_pan_mouse_x != -1 && last_pan_mouse_y != -1) {
         var diff_x = e.clientX - last_pan_mouse_x;
         var diff_y = e.clientY - last_pan_mouse_y;
-        cur_fsm_x += diff_x;
-        cur_fsm_y -= diff_y;
+        cur_fsm_x += (diff_x * pan_scale_factor);
+        cur_fsm_y -= (diff_y * pan_scale_factor);
         cur_fsm_grid_x = parseInt(cur_fsm_x / 64);
         cur_fsm_grid_y = parseInt(cur_fsm_y / 64);
 
@@ -360,17 +413,40 @@ project_show_onload = function() {
   // be used for the tool tool, to render the prospective node before
   // placement.
   document.getElementById("fsm_canvas_div").onmousemove = function(e) {
+    // Record current mouse dimensions. Use bottom-left as origin,
+    // to match the WebGL conventions.
+    cur_fsm_mouse_x = e.clientX;
+    cur_fsm_mouse_y = e.clientY;
+    var canvas_bounding_box = document.getElementById("fsm_canvas_div").getBoundingClientRect();
+    cur_fsm_mouse_x -= canvas_bounding_box.left;
+    cur_fsm_mouse_y -= canvas_bounding_box.bottom;
+    cur_fsm_mouse_x = parseInt(cur_fsm_mouse_x);
+    cur_fsm_mouse_y = parseInt(-cur_fsm_mouse_y);
+
     if (selected_tool == 'tool') {
       var menu_tool_selected = false;
       // 'Boot' node, for testing.
-      if (selected_menu_tool == 'Boot') {
+      if (selected_menu_tool == 'Boot' && loaded_textures["Boot"]) {
         cur_tool_node_tex = loaded_textures['Boot'];
         menu_tool_selected = true;
+      }
+      else {
+        cur_tool_node_tex = -1;
       }
       // If there is a texture for the selection, find its grid coord.
       // (So, x/y coordinates / 64. (or whatever dot distance if it changes)
       if (menu_tool_selected) {
+        var half_grid = 32;
+        if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
+        cur_tool_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
+        if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
+        else { half_grid = 32; }
+        cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+        document.getElementById("list_last_fsm_tool_coords").innerHTML = ("Last FSM tool grid coordinates: (" + cur_tool_node_grid_x + ", " + cur_tool_node_grid_y + ")");
       }
     }
+    document.getElementById("list_last_fsm_mouse_coords").innerHTML = ("Last FSM grid mouse coordinates: (" + cur_fsm_mouse_x + ", " + cur_fsm_mouse_y + ")");
+    // Redraw the canvas.
+    redraw_canvas();
   };
 };

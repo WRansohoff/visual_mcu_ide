@@ -127,6 +127,12 @@
                     <div id="list_current_fsm_grid_coords">
                       = Grid Coordinates: (0, 0)
                     </div>
+                    <div id="list_last_fsm_mouse_coords">
+                      Last FSM grid mouse coordinates: (0, 0)
+                    </div>
+                    <div id="list_last_fsm_tool_coords">
+                      Last FSM tool grid coordinates: (0, 0)
+                    </div>
                   </td>
                 </tr>
               </table>
