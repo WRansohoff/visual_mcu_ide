@@ -437,6 +437,10 @@ project_show_onload = function() {
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
     $("#fsm_canvas_div").removeClass("hobb_layout_delete_tool");
+    last_pan_mouse_x = -1;
+    last_pan_mouse_y = -1;
+    cur_fsm_mouse_x = 0;
+    cur_fsm_mouse_y = 0;
     move_grabbed_node_id = -1;
     redraw_canvas();
   });
@@ -460,6 +464,10 @@ project_show_onload = function() {
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
     $("#fsm_canvas_div").removeClass("hobb_layout_delete_tool");
+    last_pan_mouse_x = -1;
+    last_pan_mouse_y = -1;
+    cur_fsm_mouse_x = 0;
+    cur_fsm_mouse_y = 0;
     move_grabbed_node_id = -1;
     redraw_canvas();
   });
@@ -483,6 +491,10 @@ project_show_onload = function() {
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
     $("#fsm_canvas_div").removeClass("hobb_layout_delete_tool");
+    last_pan_mouse_x = -1;
+    last_pan_mouse_y = -1;
+    cur_fsm_mouse_x = 0;
+    cur_fsm_mouse_y = 0;
     move_grabbed_node_id = -1;
     redraw_canvas();
   });
@@ -506,6 +518,10 @@ project_show_onload = function() {
     $("#fsm_canvas_div").addClass("hobb_layout_move_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
     $("#fsm_canvas_div").removeClass("hobb_layout_delete_tool");
+    last_pan_mouse_x = -1;
+    last_pan_mouse_y = -1;
+    cur_fsm_mouse_x = 0;
+    cur_fsm_mouse_y = 0;
     move_grabbed_node_id = -1;
     redraw_canvas();
   });
@@ -529,6 +545,10 @@ project_show_onload = function() {
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
     $("#fsm_canvas_div").addClass("hobb_layout_delete_tool");
+    last_pan_mouse_x = -1;
+    last_pan_mouse_y = -1;
+    cur_fsm_mouse_x = 0;
+    cur_fsm_mouse_y = 0;
     move_grabbed_node_id = -1;
     redraw_canvas();
   });
@@ -588,8 +608,8 @@ project_show_onload = function() {
         // Submit the 'moved' coordinates to the shaders and re-draw.
         redraw_canvas();
         // Debug:
-        document.getElementById("list_current_fsm_coords").innerHTML = ("FSM Co-ords (bottom-left): (" + cur_fsm_x + ", " + cur_fsm_y + ")");
-        document.getElementById("list_current_fsm_grid_coords").innerHTML = ("= Grid Coordinates: (" + cur_fsm_grid_x + ", " + cur_fsm_grid_y + ")");
+        //document.getElementById("list_current_fsm_coords").innerHTML = ("FSM Co-ords (bottom-left): (" + cur_fsm_x + ", " + cur_fsm_y + ")");
+        //document.getElementById("list_current_fsm_grid_coords").innerHTML = ("= Grid Coordinates: (" + cur_fsm_grid_x + ", " + cur_fsm_grid_y + ")");
       }
       last_pan_mouse_x = e.clientX;
       last_pan_mouse_y = e.clientY;
@@ -621,10 +641,10 @@ project_show_onload = function() {
         if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
         else { half_grid = 32; }
         cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
-        document.getElementById("list_last_fsm_tool_coords").innerHTML = ("Last FSM tool grid coordinates: (" + cur_tool_node_grid_x + ", " + cur_tool_node_grid_y + ")");
+        //document.getElementById("list_last_fsm_tool_coords").innerHTML = ("Last FSM tool grid coordinates: (" + cur_tool_node_grid_x + ", " + cur_tool_node_grid_y + ")");
       }
     }
-    document.getElementById("list_last_fsm_mouse_coords").innerHTML = ("Last FSM grid mouse coordinates: (" + cur_fsm_mouse_x + ", " + cur_fsm_mouse_y + ")");
+    //document.getElementById("list_last_fsm_mouse_coords").innerHTML = ("Last FSM grid mouse coordinates: (" + cur_fsm_mouse_x + ", " + cur_fsm_mouse_y + ")");
     // Redraw the canvas.
     redraw_canvas();
   };
@@ -642,7 +662,7 @@ project_show_onload = function() {
         if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
         else { half_grid = 32; }
         cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
-        document.getElementById("list_last_fsm_tool_coords").innerHTML = ("Last FSM tool grid coordinates: (" + cur_tool_node_grid_x + ", " + cur_tool_node_grid_y + ")");
+        //document.getElementById("list_last_fsm_tool_coords").innerHTML = ("Last FSM tool grid coordinates: (" + cur_tool_node_grid_x + ", " + cur_tool_node_grid_y + ")");
       }
       // Add the current tool node to the list, unless there is a
       // node in the proposed coordinates already.

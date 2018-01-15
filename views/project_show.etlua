@@ -20,7 +20,7 @@
                 old_button.style.backgroundColor = "white";
               }
               selected_menu_tool = "<%=submenu_name%>";
-              document.getElementById("list_currently_selected_menu_tool").innerHTML = "Currently-selected: <%=submenu_name%>";
+              //document.getElementById("list_currently_selected_menu_tool").innerHTML = "Currently-selected: <%=submenu_name%>";
               document.getElementById("<%=submenu_name%>_tool_list_entry").style.backgroundColor = "lightblue";
             });
           <% else %>
@@ -31,7 +31,7 @@
                   old_button.style.backgroundColor = "white";
                 }
                 selected_menu_tool = "<%=subsub_name%>";
-                document.getElementById("list_currently_selected_menu_tool").innerHTML = "Currently-selected: <%=subsub_name%>";
+                //document.getElementById("list_currently_selected_menu_tool").innerHTML = "Currently-selected: <%=subsub_name%>";
                 document.getElementById("<%=subsub_name%>_tool_list_entry").style.backgroundColor = "lightblue";
               });
             <% end %>
@@ -120,6 +120,7 @@
                 <tr class="hobb_options_row">
                   <td class="hobb_options_cell">
                     'Options' View (for currently-selected Node)
+                    <!--
                     <div id="list_currently_selected_menu_tool">
                       Currently-selected: [none]
                     </div>
@@ -135,6 +136,7 @@
                     <div id="list_last_fsm_tool_coords">
                       Last FSM tool grid coordinates: (0, 0)
                     </div>
+                    -->
                   </td>
                 </tr>
               </table>
