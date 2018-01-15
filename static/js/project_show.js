@@ -135,6 +135,7 @@ var cur_fsm_mouse_y = 0;
 var gl = null;
 var grid_shader_prog = null;
 var node_shader_prog = null;
+var img_lock = false;
 // Array for keeping track of FSM node structs to send to the shader.
 var fsm_nodes = [];
 var fsm_node_struct_fields = [
@@ -162,7 +163,7 @@ load_shader = function(gl, sh_type, sh_source) {
   return sh;
 };
 
-preload_textures = function() {
+load_one_texture = function(tex_key, tex_path) {
   var tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, tex);
   var img = new Image();
@@ -173,21 +174,33 @@ preload_textures = function() {
   gl.texImage2D(gl.TEXTURE_2D, mip_level, format, 1, 1, 0, format, src_type, new Uint8Array([0, 0, 255, 255]));
   img.onload = function() {
     while (!img.complete) {}
+    while (img_lock) {}
+    img_lock = true;
+    gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texImage2D(gl.TEXTURE_2D, mip_level, format, format, src_type, img);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.bindTexture(gl.TEXTURE_2D, tex);
-    loaded_textures["Boot"] = tex;
+    loaded_textures[tex_key] = tex;
+    img_lock = false;
   };
-  img.src = "/static/fsm_assets/boot_node.png";
+  img.src = tex_path;
+};
+
+preload_textures = function() {
+  load_one_texture('Boot', '/static/fsm_assets/boot_node.png');
+  load_one_texture('Delay', '/static/fsm_assets/delay_node.png');
 };
 
 check_selected_menu_tool = function() {
   var menu_tool_selected = false;
   // 'Boot' node, for testing.
-  if (selected_menu_tool == 'Boot' && loaded_textures["Boot"]) {
+  if (selected_menu_tool == 'Boot' && loaded_textures['Boot']) {
     cur_tool_node_tex = loaded_textures['Boot'];
+    menu_tool_selected = true;
+  }
+  else if (selected_menu_tool == 'Delay' && loaded_textures['Delay']) {
+    cur_tool_node_tex = loaded_textures['Delay'];
     menu_tool_selected = true;
   }
   else {
@@ -313,6 +326,8 @@ redraw_canvas = function() {
          fsm_nodes[node_ind].grid_coord_y >= grid_min_y &&
          fsm_nodes[node_ind].grid_coord_y <= grid_max_y)) {
       gl.useProgram(node_shader_prog);
+      // Bind texture.
+      gl.bindTexture(gl.TEXTURE_2D, fsm_nodes[node_ind].tex_sampler);
       // Send uniform values.
       gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_w'), canvas.width);
       gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_h'), canvas.height);
@@ -330,6 +345,8 @@ redraw_canvas = function() {
   // Finally, draw the currently-selected tool node if applicable.
   if (selected_tool == 'tool' && cur_tool_node_tex != -1) {
     gl.useProgram(node_shader_prog);
+    // Bind texture.
+    gl.bindTexture(gl.TEXTURE_2D, cur_tool_node_tex);
     // Send uniform values.
     gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_w'), canvas.width);
     gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_h'), canvas.height);
