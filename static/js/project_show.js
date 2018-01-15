@@ -801,6 +801,8 @@ project_show_onload = function() {
         selected_tool = 'move_grabbed';
         $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
         $("#fsm_canvas_div").addClass("hobb_layout_move_tool_grabbed");
+        // Re-draw the canvas.
+        redraw_canvas();
       }
     }
     else if (selected_tool == 'move_grabbed') {
@@ -813,11 +815,13 @@ project_show_onload = function() {
       var node_dropped = true;
       if (move_grabbed_node_id >= 0) {
         // If there is a 'grabbed' node, and if the currently-selected
-        // grid node is empty, drop the grabbed node.
+        // grid node is empty, drop the grabbed node. Allow re-dropping
+        // a node on the square that it previously occupied.
         for (var node_ind = 0; node_ind < 256; ++node_ind) {
           if (fsm_nodes[node_ind]) {
             if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
-                fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y) {
+                fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y &&
+                node_ind != move_grabbed_node_id) {
               node_dropped = false;
             }
           }
