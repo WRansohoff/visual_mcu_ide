@@ -87,7 +87,7 @@ const node_frag_sh = `#version 300 es
     int cur_px_x = int(gl_FragCoord.x);
     int cur_px_y = int(gl_FragCoord.y);
     // Draw the supplied node.
-    if (cur_tool_node.node_status != -1) {
+    if (cur_tool_node.node_status >= 0) {
       // Find the right grid coordinate's location relative to the window.
       // The center will be at global (x*64, y*64), so:
       // (global_x-cur_view_x) = local center.
@@ -107,11 +107,25 @@ const node_frag_sh = `#version 300 es
         // '0' and (grid_coord+32) as the '1', for a 64-px grid.
         float cur_tool_s = float(cur_px_x - cur_tool_node_min_x);
         float cur_tool_t = float(cur_px_y - cur_tool_node_min_y);
+        int stripes_check = int(cur_tool_s+cur_tool_t);
+        const int stripes_w = 16;
+        const int stripes_s = 4;
         cur_tool_s /= 64.0;
         cur_tool_t /= 64.0;
         cur_tool_t = 1.0 - cur_tool_t;
         vec2 cur_tool_st = vec2(cur_tool_s, cur_tool_t);
-        out_color = texture(cur_tool_node.tex_sampler, cur_tool_st);
+        if (cur_tool_node.node_status == 1) {
+          // Apply a 'striping' transparency effect to indicate that this
+          // node is in a temporary or transient state.
+          if (stripes_check % stripes_w <= (stripes_w-stripes_s)/2 ||
+              stripes_check % stripes_w >= stripes_w-(stripes_w-stripes_s)/2) {
+            out_color = texture(cur_tool_node.tex_sampler, cur_tool_st);
+          }
+          else { discard; }
+        }
+        else {
+          out_color = texture(cur_tool_node.tex_sampler, cur_tool_st);
+        }
       }
       else { discard; }
     }
@@ -322,8 +336,8 @@ redraw_canvas = function() {
   // Next, draw any nodes that are within the current view.
   var grid_min_x = cur_fsm_grid_x - 1;
   var grid_min_y = cur_fsm_grid_y - 1;
-  var grid_max_x = cur_fsm_grid_x + parseInt(canvas.width/64);
-  var grid_max_y = cur_fsm_grid_y + parseInt(canvas.height/64);
+  var grid_max_x = cur_fsm_grid_x + parseInt(canvas.width/64) + 1;
+  var grid_max_y = cur_fsm_grid_y + parseInt(canvas.height/64) + 1;
   for (var node_ind = 0; node_ind < 256; ++node_ind) {
     if (fsm_nodes[node_ind] && fsm_nodes[node_ind].node_status != -1 &&
         (fsm_nodes[node_ind].grid_coord_x >= grid_min_x &&
@@ -338,7 +352,13 @@ redraw_canvas = function() {
       gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_h'), canvas.height);
       gl.uniform2fv(gl.getUniformLocation(node_shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.tex_sampler'), fsm_nodes[node_ind].tex_sampler);
-      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_status'), fsm_nodes[node_ind].node_status);
+      // TODO: Handle 'node_status' properly...
+      if (move_grabbed_node_id == node_ind) {
+        gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_status'), 1);
+      }
+      else {
+        gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_status'), fsm_nodes[node_ind].node_status);
+      }
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_x'), fsm_nodes[node_ind].grid_coord_x);
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_y'), fsm_nodes[node_ind].grid_coord_y);
       // Draw.
