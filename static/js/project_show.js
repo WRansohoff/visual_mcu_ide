@@ -725,6 +725,12 @@ project_show_onload = function() {
               fsm_nodes[node_ind].grid_coord_y == cur_tool_node_grid_y) {
             already_populated = true;
           }
+          // Only allow one 'Boot' node. TODO: How to handle this?
+          // For now, just don't place any more than one 'Boot' node.
+          if (fsm_nodes[node_ind].node_type == 'Boot' &&
+              cur_tool_node_type == 'Boot') {
+            already_populated = true;
+          }
         }
         else {
           if (index_to_use == -1) {
