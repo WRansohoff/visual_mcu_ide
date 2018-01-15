@@ -187,6 +187,10 @@ load_one_texture = function(tex_key, tex_path) {
   img.src = tex_path;
 };
 
+array_filter_nulls = function(x) {
+  return (x != null);
+}
+
 preload_textures = function() {
   load_one_texture('Boot', '/static/fsm_assets/boot_node.png');
   load_one_texture('Delay', '/static/fsm_assets/delay_node.png');
@@ -376,10 +380,17 @@ project_show_onload = function() {
     $("#pan_tool_select").removeClass("btn-success");
     $("#tool_tool_select").addClass("btn-primary");
     $("#tool_tool_select").removeClass("btn-success");
+    $("#move_tool_select").addClass("btn-primary");
+    $("#move_tool_select").removeClass("btn-success");
+    $("#delete_tool_select").addClass("btn-primary");
+    $("#delete_tool_select").removeClass("btn-success");
     $("#fsm_canvas_div").addClass("hobb_layout_pointer_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool_down");
     $("#fsm_canvas_div").removeClass("hobb_layout_tool_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
+    $("#fsm_canvas_div").removeClass("hobb_layout_delete_tool");
     redraw_canvas();
   });
   document.getElementById("pan_tool_select").addEventListener("click", function(e) {
@@ -391,10 +402,17 @@ project_show_onload = function() {
     $("#pointer_tool_select").removeClass("btn-success");
     $("#tool_tool_select").addClass("btn-primary");
     $("#tool_tool_select").removeClass("btn-success");
+    $("#move_tool_select").addClass("btn-primary");
+    $("#move_tool_select").removeClass("btn-success");
+    $("#delete_tool_select").addClass("btn-primary");
+    $("#delete_tool_select").removeClass("btn-success");
     $("#fsm_canvas_div").removeClass("hobb_layout_pointer_tool");
     $("#fsm_canvas_div").addClass("hobb_layout_pan_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool_down");
     $("#fsm_canvas_div").removeClass("hobb_layout_tool_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
+    $("#fsm_canvas_div").removeClass("hobb_layout_delete_tool");
     redraw_canvas();
   });
   document.getElementById("tool_tool_select").addEventListener("click", function(e) {
@@ -406,10 +424,61 @@ project_show_onload = function() {
     $("#pan_tool_select").removeClass("btn-success");
     $("#pointer_tool_select").addClass("btn-primary");
     $("#pointer_tool_select").removeClass("btn-success");
+    $("#move_tool_select").addClass("btn-primary");
+    $("#move_tool_select").removeClass("btn-success");
+    $("#delete_tool_select").addClass("btn-primary");
+    $("#delete_tool_select").removeClass("btn-success");
     $("#fsm_canvas_div").removeClass("hobb_layout_pointer_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool_down");
     $("#fsm_canvas_div").addClass("hobb_layout_tool_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
+    $("#fsm_canvas_div").removeClass("hobb_layout_delete_tool");
+    redraw_canvas();
+  });
+  document.getElementById("move_tool_select").addEventListener("click", function(e) {
+    selected_tool = 'move';
+    // Update stylings.
+    $("#tool_tool_select").addClass("btn-primary");
+    $("#tool_tool_select").removeClass("btn-success");
+    $("#pan_tool_select").addClass("btn-primary");
+    $("#pan_tool_select").removeClass("btn-success");
+    $("#pointer_tool_select").addClass("btn-primary");
+    $("#pointer_tool_select").removeClass("btn-success");
+    $("#move_tool_select").removeClass("btn-primary");
+    $("#move_tool_select").addClass("btn-success");
+    $("#delete_tool_select").addClass("btn-primary");
+    $("#delete_tool_select").removeClass("btn-success");
+    $("#fsm_canvas_div").removeClass("hobb_layout_pointer_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool_down");
+    $("#fsm_canvas_div").removeClass("hobb_layout_tool_tool");
+    $("#fsm_canvas_div").addClass("hobb_layout_move_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
+    $("#fsm_canvas_div").removeClass("hobb_layout_delete_tool");
+    redraw_canvas();
+  });
+  document.getElementById("delete_tool_select").addEventListener("click", function(e) {
+    selected_tool = 'delete';
+    // Update stylings.
+    $("#tool_tool_select").addClass("btn-primary");
+    $("#tool_tool_select").removeClass("btn-success");
+    $("#pan_tool_select").addClass("btn-primary");
+    $("#pan_tool_select").removeClass("btn-success");
+    $("#pointer_tool_select").addClass("btn-primary");
+    $("#pointer_tool_select").removeClass("btn-success");
+    $("#move_tool_select").addClass("btn-primary");
+    $("#move_tool_select").removeClass("btn-success");
+    $("#delete_tool_select").removeClass("btn-primary");
+    $("#delete_tool_select").addClass("btn-success");
+    $("#fsm_canvas_div").removeClass("hobb_layout_pointer_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_pan_tool_down");
+    $("#fsm_canvas_div").removeClass("hobb_layout_tool_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
+    $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
+    $("#fsm_canvas_div").addClass("hobb_layout_delete_tool");
     redraw_canvas();
   });
 
@@ -551,6 +620,27 @@ project_show_onload = function() {
       }
 
       // Re-draw the canvas to show the placed node.
+      redraw_canvas();
+    }
+    else if (selected_tool == 'delete') {
+      var half_grid = 32;
+      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
+      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
+      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
+      else { half_grid = 32; }
+      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+      // If there is a node on the current grid coordinate, delete it.
+      for (var node_ind = 0; node_ind < 256; ++node_ind) {
+        if (fsm_nodes[node_ind]) {
+          if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
+              fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y) {
+            fsm_nodes[node_ind] = null;
+            fsm_nodes = fsm_nodes.filter(array_filter_nulls);
+          }
+        }
+      }
+
+      // Re-draw the canvas.
       redraw_canvas();
     }
   };

@@ -16,7 +16,7 @@
 
 .tall-btn {
   width: 100%;
-  height: 33%;
+  height: 20%;
 }
 
 .indent-once {
@@ -158,6 +158,20 @@
 
 .hobb_layout_tool_tool {
   cursor: default;
+}
+
+.hobb_layout_move_tool {
+  cursor: grab;
+  cursor: -webkit-grab;
+}
+
+.hobb_layout_move_tool_grabbed {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
+}
+
+.hobb_layout_delete_tool {
+  cursor: cell;
 }
 
 .hobb_options_cell {

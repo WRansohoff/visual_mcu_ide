@@ -103,6 +103,8 @@
                 <button id="pointer_tool_select" type="button" class="btn btn-primary tall-btn">Pointer</button>
                 <button id="pan_tool_select" type="button" class="btn btn-success tall-btn">Pan</button>
                 <button id="tool_tool_select" type="button" class="btn btn-primary tall-btn">Place</button>
+                <button id="move_tool_select" type="button" class="btn btn-primary tall-btn">Move</button>
+                <button id="delete_tool_select" type="button" class="btn btn-primary tall-btn">Delete</button>
               </div>
             </td>
             <td class="hobb_area_main_cell">
