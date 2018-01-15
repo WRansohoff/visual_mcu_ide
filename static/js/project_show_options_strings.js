@@ -102,3 +102,36 @@ var boot_node_options_html = `
   </tr>
 </table>
 `;
+
+// 'Delay' node options.
+var delay_node_options_html = `
+
+`;
+
+// 'Setup GPIO Pin' node options.
+var init_gpio_node_options_html = `
+`;
+
+// 'Disable GPIO Pin' node options.
+var deinit_gpio_node_options_html = `
+`;
+
+// 'Set GPIO Output' node options.
+var set_gpio_out_node_options_html = `
+`;
+
+// 'Enable peripheral clock' node options.
+var rcc_enable_node_options_html = `
+`;
+
+// 'Disable peripheral clock' node options.
+var rcc_disable_node_options_html = `
+`;
+
+// 'Define variable' node options.
+var define_var_node_options_html = `
+`;
+
+// 'Set variable' node options.
+var set_var_node_options_html = `
+`;

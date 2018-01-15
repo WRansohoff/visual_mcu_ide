@@ -745,6 +745,30 @@ project_show_onload = function() {
             if (sel_type == 'Boot') {
               selected_node_options_html += boot_node_options_html;
             }
+            else if (sel_type == 'Delay') {
+              selected_node_options_html += delay_node_options_html;
+            }
+            else if (sel_type == 'GPIO_Init') {
+              selected_node_options_html += init_gpio_node_options_html;
+            }
+            else if (sel_type == 'GPIO_Deinit') {
+              selected_node_options_html += deinit_gpio_node_options_html;
+            }
+            else if (sel_type == 'GPIO_Output') {
+              selected_node_options_html += set_gpio_out_node_options_html;
+            }
+            else if (sel_type == 'RCC_Enable') {
+              selected_node_options_html += rcc_enable_node_options_html;
+            }
+            else if (sel_type == 'RCC_Disable') {
+              selected_node_options_html += rcc_disable_node_options_html;
+            }
+            else if (sel_type == 'New_Variable') {
+              selected_node_options_html += define_var_node_options_html;
+            }
+            else if (sel_type == 'Set_Variable') {
+              selected_node_options_html += set_var_node_options_html;
+            }
             document.getElementById("hobb_options_content").innerHTML = selected_node_options_html;
             break;
           }
