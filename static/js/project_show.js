@@ -212,6 +212,13 @@ array_filter_nulls = function(x) {
 preload_textures = function() {
   load_one_texture('Boot', '/static/fsm_assets/boot_node.png');
   load_one_texture('Delay', '/static/fsm_assets/delay_node.png');
+  load_one_texture('GPIO_Init', '/static/fsm_assets/init_gpio_node.png');
+  load_one_texture('GPIO_Deinit', '/static/fsm_assets/disable_pin_node.png');
+  load_one_texture('GPIO_Output', '/static/fsm_assets/set_output_pin_node.png');
+  load_one_texture('RCC_Enable', '/static/fsm_assets/enable_clock_node.png');
+  load_one_texture('RCC_Disable', '/static/fsm_assets/disable_clock_node.png');
+  load_one_texture('New_Variable', '/static/fsm_assets/new_var_node.png');
+  load_one_texture('Set_Variable', '/static/fsm_assets/set_variable_node.png');
   // Sooo I mixed up 'LtoR' and 'RtoL' in the png filenames. But long-term,
   // these should be svg files anyways so just...ugh, TODO
   load_one_texture('left_arrow_blue', '/static/fsm_assets/conn_LtoR_blue.png');
@@ -226,17 +233,65 @@ preload_textures = function() {
 
 check_selected_menu_tool = function() {
   var menu_tool_selected = false;
-  // 'Boot' node, for testing.
+  // 'Boot' node.
   if (selected_menu_tool == 'Boot' && loaded_textures['Boot']) {
     cur_tool_node_tex = loaded_textures['Boot'];
     cur_tool_node_type = 'Boot';
     menu_tool_selected = true;
   }
+  // 'Delay' node.
   else if (selected_menu_tool == 'Delay' && loaded_textures['Delay']) {
     cur_tool_node_tex = loaded_textures['Delay'];
     cur_tool_node_type = 'Delay';
     menu_tool_selected = true;
   }
+  // 'GPIO Init' node; setup a GPIO pin.
+  else if (selected_menu_tool == 'Setup GPIO Pin' && loaded_textures['GPIO_Init']) {
+    cur_tool_node_tex = loaded_textures['GPIO_Init'];
+    cur_tool_node_type = 'GPIO_Init';
+    menu_tool_selected = true;
+  }
+  // 'GPIO Deinit' node; disable a previously-initialized GPIO pin.
+  else if (selected_menu_tool == 'Disable GPIO Pin' && loaded_textures['GPIO_Deinit']) {
+    cur_tool_node_tex = loaded_textures['GPIO_Deinit'];
+    cur_tool_node_type = 'GPIO_Deinit';
+    menu_tool_selected = true;
+  }
+  // 'GPIO Output' node; set a previously-setup GPIO output pin to 0 or 1.
+  else if (selected_menu_tool == 'Write Output Pin' && loaded_textures['GPIO_Output']) {
+    cur_tool_node_tex = loaded_textures['GPIO_Output'];
+    cur_tool_node_type = 'GPIO_Output';
+    menu_tool_selected = true;
+  }
+  // 'RCC Enable' node; enable a peripheral clock.
+  else if (selected_menu_tool == 'Enable Peripheral Clock' && loaded_textures['RCC_Enable']) {
+    cur_tool_node_tex = loaded_textures['RCC_Enable'];
+    cur_tool_node_type = 'RCC_Enable';
+    menu_tool_selected = true;
+  }
+  // 'RCC Disable' node; turn off a peripheral clock.
+  else if (selected_menu_tool == 'Disable Peripheral Clock' && loaded_textures['RCC_Disable']) {
+    cur_tool_node_tex = loaded_textures['RCC_Disable'];
+    cur_tool_node_type = 'RCC_Disable';
+    menu_tool_selected = true;
+  }
+  // 'New variable' node; define a variable. It's not 'new' as in
+  // 'malloc', the C equivalent is just defining a variable in a
+  // scope higher than the 'main' function. A 'global'
+  else if (selected_menu_tool == 'Define Variable' && loaded_textures['New_Variable']) {
+    cur_tool_node_tex = loaded_textures['New_Variable'];
+    cur_tool_node_type = 'New_Variable';
+    menu_tool_selected = true;
+  }
+  // 'Set variable' node; set a variable which was previously defined
+  // with a 'Define Variable' node. TODO: support multiple variable scopes.
+  // But that's a pretty long-term goal.
+  else if (selected_menu_tool == 'Set Variable' && loaded_textures['Set_Variable']) {
+    cur_tool_node_tex = loaded_textures['Set_Variable'];
+    cur_tool_node_type = 'Set_Variable';
+    menu_tool_selected = true;
+  }
+  // No match.
   else {
     cur_tool_node_tex = -1;
   }
