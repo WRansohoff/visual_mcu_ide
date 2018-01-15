@@ -1,5 +1,6 @@
 <link rel="stylesheet" type="text/css" href="/static/css/project_show.css">
 
+<script type="text/javascript" src="/static/js/project_show_options_strings.js"></script>
 <script type="text/javascript" src="/static/js/project_show.js"></script>
 
 <script type="text/javascript">
@@ -119,8 +120,18 @@
                 </tr>
                 <tr class="hobb_options_row">
                   <td class="hobb_options_cell">
-                    'Options' View (for currently-selected Node)
-                    <!--
+                    <div id="hobb_options_header">
+                      Options: (No selection)
+                    </div>
+                    <div id="hobb_options_content">
+                    </div>
+                    <!-- (Debug)
+                    <div id="list_currently_selected_node_id">
+                      Current selection ID: None.
+                    </div>
+                    <div id="list_currently_selected_node_type">
+                      Current selection type: None.
+                    </div>
                     <div id="list_currently_selected_menu_tool">
                       Currently-selected: [none]
                     </div>

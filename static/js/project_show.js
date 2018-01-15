@@ -138,6 +138,7 @@ var selected_tool = "pan";
 var selected_menu_tool = "";
 var is_currently_panning = false;
 var move_grabbed_node_id = -1;
+var selected_node_id = -1;
 var last_pan_mouse_x = -1;
 var last_pan_mouse_y = -1;
 var pan_scale_factor = 1.5;
@@ -153,6 +154,7 @@ var node_shader_prog = null;
 var img_lock = false;
 // Array for keeping track of FSM node structs to send to the shader.
 var fsm_nodes = [];
+// (Fields sent to the shaders)
 var fsm_node_struct_fields = [
   "tex_sampler",
   "node_status",
@@ -161,6 +163,7 @@ var fsm_node_struct_fields = [
 ];
 // 'currently-selected preview' node info.
 var cur_tool_node_tex = -1;
+var cur_tool_node_type = '';
 var cur_tool_node_grid_x = 0;
 var cur_tool_node_grid_y = 0;
 // Preloaded textures
@@ -209,6 +212,16 @@ array_filter_nulls = function(x) {
 preload_textures = function() {
   load_one_texture('Boot', '/static/fsm_assets/boot_node.png');
   load_one_texture('Delay', '/static/fsm_assets/delay_node.png');
+  // Sooo I mixed up 'LtoR' and 'RtoL' in the png filenames. But long-term,
+  // these should be svg files anyways so just...ugh, TODO
+  load_one_texture('left_arrow_blue', '/static/fsm_assets/conn_LtoR_blue.png');
+  load_one_texture('right_arrow_blue', '/static/fsm_assets/conn_RtoL_blue.png');
+  load_one_texture('down_arrow_blue', '/static/fsm_assets/conn_TtoB_blue.png');
+  load_one_texture('up_arrow_blue', '/static/fsm_assets/conn_BtoT_blue.png');
+  load_one_texture('left_arrow_green', '/static/fsm_assets/conn_LtoR_green.png');
+  load_one_texture('right_arrow_green', '/static/fsm_assets/conn_RtoL_green.png');
+  load_one_texture('down_arrow_green', '/static/fsm_assets/conn_TtoB_green.png');
+  load_one_texture('up_arrow_green', '/static/fsm_assets/conn_BtoT_green.png');
 };
 
 check_selected_menu_tool = function() {
@@ -216,10 +229,12 @@ check_selected_menu_tool = function() {
   // 'Boot' node, for testing.
   if (selected_menu_tool == 'Boot' && loaded_textures['Boot']) {
     cur_tool_node_tex = loaded_textures['Boot'];
+    cur_tool_node_type = 'Boot';
     menu_tool_selected = true;
   }
   else if (selected_menu_tool == 'Delay' && loaded_textures['Delay']) {
     cur_tool_node_tex = loaded_textures['Delay'];
+    cur_tool_node_type = 'Delay';
     menu_tool_selected = true;
   }
   else {
@@ -651,7 +666,43 @@ project_show_onload = function() {
 
   // Add a master 'on click' function for the FSM canvas.
   document.getElementById("fsm_canvas_div").onclick = function(e) {
-    if (selected_tool == 'tool') {
+    if (selected_tool == 'pointer') {
+      // Get the grid coordinate closest to the current cursor.
+      var half_grid = 32;
+      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
+      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
+      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
+      else { half_grid = 32; }
+      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+      // If there is a node underneath the cursor, select it.
+      var node_selected = false;
+      for (var node_ind = 0; node_ind < 256; ++node_ind) {
+        if (fsm_nodes[node_ind]) {
+          if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
+              fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y) {
+            node_selected = true;
+            selected_node_id = node_ind;
+            var sel_type = fsm_nodes[selected_node_id].node_type;
+            document.getElementById("hobb_options_header").innerHTML = ("Options: (" + sel_type + ")");
+            // In/Out connections table.
+            var selected_node_options_html = node_io_options_html;
+            // Type-specific options:
+            if (sel_type == 'Boot') {
+              selected_node_options_html += boot_node_options_html;
+            }
+            document.getElementById("hobb_options_content").innerHTML = selected_node_options_html;
+            break;
+          }
+        }
+      }
+      // If not, Deselect.
+      if (!node_selected) {
+        selected_node_id = -1;
+        document.getElementById("hobb_options_header").innerHTML = ("Options: (None)");
+        document.getElementById("hobb_options_content").innerHTML = "";
+      }
+    }
+    else if (selected_tool == 'tool') {
       var menu_tool_selected = check_selected_menu_tool();
       // If there is a texture for the selection, find its grid coord.
       // (So, x/y coordinates / 64. (or whatever dot distance if it changes)
@@ -685,6 +736,7 @@ project_show_onload = function() {
         // Place a new node.
         fsm_nodes[index_to_use] = [];
         fsm_nodes[index_to_use].tex_sampler = cur_tool_node_tex;
+        fsm_nodes[index_to_use].node_type = cur_tool_node_type;
         fsm_nodes[index_to_use].node_status = 0;
         fsm_nodes[index_to_use].grid_coord_x = cur_tool_node_grid_x;
         fsm_nodes[index_to_use].grid_coord_y = cur_tool_node_grid_y;
@@ -705,6 +757,12 @@ project_show_onload = function() {
         if (fsm_nodes[node_ind]) {
           if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
               fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y) {
+            // (Un-select the node if deleting the current selection.)
+            if (selected_node_id == node_ind) {
+              selected_node_id = -1;
+              document.getElementById("hobb_options_header").innerHTML = ("Options: (None)");
+              document.getElementById("hobb_options_content").innerHTML = "";
+            }
             fsm_nodes[node_ind] = null;
             fsm_nodes = fsm_nodes.filter(array_filter_nulls);
           }
