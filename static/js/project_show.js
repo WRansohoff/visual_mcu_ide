@@ -123,6 +123,7 @@ const node_frag_sh = `#version 300 es
 var selected_tool = "pan";
 var selected_menu_tool = "";
 var is_currently_panning = false;
+var move_grabbed_node_id = -1;
 var last_pan_mouse_x = -1;
 var last_pan_mouse_y = -1;
 var pan_scale_factor = 1.5;
@@ -363,6 +364,31 @@ redraw_canvas = function() {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
+  else if (selected_tool == 'move_grabbed') {
+    if (move_grabbed_node_id >= 0 &&
+        fsm_nodes[move_grabbed_node_id]) {
+      var half_grid = 32;
+      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
+      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
+      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
+      else { half_grid = 32; }
+      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+      gl.useProgram(node_shader_prog);
+      // Bind texture.
+      gl.bindTexture(gl.TEXTURE_2D, fsm_nodes[move_grabbed_node_id].tex_sampler);
+      // Send uniform values.
+      gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_w'), canvas.width);
+      gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_h'), canvas.height);
+      gl.uniform2fv(gl.getUniformLocation(node_shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.tex_sampler'), fsm_nodes[move_grabbed_node_id].tex_sampler);
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_status'), fsm_nodes[move_grabbed_node_id].node_status);
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_x'), cur_node_grid_x);
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_y'), cur_node_grid_y);
+      // Draw.
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+  }
 };
 
 project_show_onload = function() {
@@ -391,6 +417,7 @@ project_show_onload = function() {
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
     $("#fsm_canvas_div").removeClass("hobb_layout_delete_tool");
+    move_grabbed_node_id = -1;
     redraw_canvas();
   });
   document.getElementById("pan_tool_select").addEventListener("click", function(e) {
@@ -413,6 +440,7 @@ project_show_onload = function() {
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
     $("#fsm_canvas_div").removeClass("hobb_layout_delete_tool");
+    move_grabbed_node_id = -1;
     redraw_canvas();
   });
   document.getElementById("tool_tool_select").addEventListener("click", function(e) {
@@ -435,6 +463,7 @@ project_show_onload = function() {
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
     $("#fsm_canvas_div").removeClass("hobb_layout_delete_tool");
+    move_grabbed_node_id = -1;
     redraw_canvas();
   });
   document.getElementById("move_tool_select").addEventListener("click", function(e) {
@@ -457,6 +486,7 @@ project_show_onload = function() {
     $("#fsm_canvas_div").addClass("hobb_layout_move_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
     $("#fsm_canvas_div").removeClass("hobb_layout_delete_tool");
+    move_grabbed_node_id = -1;
     redraw_canvas();
   });
   document.getElementById("delete_tool_select").addEventListener("click", function(e) {
@@ -479,6 +509,7 @@ project_show_onload = function() {
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
     $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
     $("#fsm_canvas_div").addClass("hobb_layout_delete_tool");
+    move_grabbed_node_id = -1;
     redraw_canvas();
   });
 
@@ -642,6 +673,64 @@ project_show_onload = function() {
 
       // Re-draw the canvas.
       redraw_canvas();
+    }
+    else if (selected_tool == 'move') {
+      var half_grid = 32;
+      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
+      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
+      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
+      else { half_grid = 32; }
+      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+      // If there is a node on the currently-selected grid node, pick it up.
+      var node_to_grab = -1;
+      for (var node_ind = 0; node_ind < 256; ++node_ind) {
+        if (fsm_nodes[node_ind]) {
+          if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
+              fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y) {
+            node_to_grab = node_ind;
+            break;
+          }
+        }
+      }
+      if (node_to_grab != -1) {
+        move_grabbed_node_id = node_to_grab;
+        selected_tool = 'move_grabbed';
+        $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
+        $("#fsm_canvas_div").addClass("hobb_layout_move_tool_grabbed");
+      }
+    }
+    else if (selected_tool == 'move_grabbed') {
+      var half_grid = 32;
+      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
+      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
+      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
+      else { half_grid = 32; }
+      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+      var node_dropped = true;
+      if (move_grabbed_node_id >= 0) {
+        // If there is a 'grabbed' node, and if the currently-selected
+        // grid node is empty, drop the grabbed node.
+        for (var node_ind = 0; node_ind < 256; ++node_ind) {
+          if (fsm_nodes[node_ind]) {
+            if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
+                fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y) {
+              node_dropped = false;
+            }
+          }
+        }
+      }
+      if (node_dropped) {
+        if (move_grabbed_node_id >= 0 && fsm_nodes[move_grabbed_node_id]) {
+          fsm_nodes[move_grabbed_node_id].grid_coord_x = cur_node_grid_x;
+          fsm_nodes[move_grabbed_node_id].grid_coord_y = cur_node_grid_y;
+        }
+        selected_tool = 'move'
+        move_grabbed_node_id = -1;
+        $("#fsm_canvas_div").addClass("hobb_layout_move_tool");
+        $("#fsm_canvas_div").removeClass("hobb_layout_move_tool_grabbed");
+        // Re-draw the canvas.
+        redraw_canvas();
+      }
     }
   };
 };
