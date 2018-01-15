@@ -8,27 +8,13 @@ const vert_sh = `#version 300 es
     gl_Position = vec4(vp.x, vp.y, 0.0, 1.0);
   }
 `;
-const frag_sh = `#version 300 es
-  // Struct definitions.
-  struct FSM_Node {
-    sampler2D tex_sampler;
-    int node_status;
-    int grid_coord_x;
-    int grid_coord_y;
-  };
-  struct FSM_Conn {
-    int start_coord_x;
-    int start_coord_y;
-    int end_coord_x;
-    int end_coord_y;
-  };
-  // Inputs.
+const grid_frag_sh = `#version 300 es
   precision mediump float;
+  // Inputs.
   uniform   float canvas_w;
   uniform   float canvas_h;
   uniform   vec2 cur_view_coords;
-  uniform   FSM_Node nodes[256];
-  uniform   FSM_Node cur_tool_node;
+  // Output color.
   out       vec4 out_color;
   void main() {
     // Draw a 'pegboard' view. For now, no DPI settings or anything.
@@ -69,8 +55,38 @@ const frag_sh = `#version 300 es
     else {
       out_color = vec4(1.0, 1.0, 1.0, 1.0);
     }
+  }
+`;
 
-    // Next, draw the 'currently-selected' tool if necessary.
+const node_frag_sh = `#version 300 es
+  precision mediump float;
+  // Struct definitions.
+  struct FSM_Node {
+    sampler2D tex_sampler;
+    int node_status;
+    int grid_coord_x;
+    int grid_coord_y;
+  };
+  struct FSM_Conn {
+    int start_coord_x;
+    int start_coord_y;
+    int end_coord_x;
+    int end_coord_y;
+  };
+  // Inputs.
+  uniform   float canvas_w;
+  uniform   float canvas_h;
+  uniform   vec2 cur_view_coords;
+  uniform   FSM_Node cur_tool_node;
+  // Output color.
+  out       vec4 out_color;
+  void main() {
+    // Gather grid/view information.
+    int cur_x = int(cur_view_coords.x);
+    int cur_y = int(cur_view_coords.y);
+    int cur_px_x = int(gl_FragCoord.x);
+    int cur_px_y = int(gl_FragCoord.y);
+    // Draw the supplied node.
     if (cur_tool_node.node_status != -1) {
       // Find the right grid coordinate's location relative to the window.
       // The center will be at global (x*64, y*64), so:
@@ -97,7 +113,9 @@ const frag_sh = `#version 300 es
         vec2 cur_tool_st = vec2(cur_tool_s, cur_tool_t);
         out_color = texture(cur_tool_node.tex_sampler, cur_tool_st);
       }
+      else { discard; }
     }
+    else { discard; }
   }
 `;
 
@@ -115,10 +133,10 @@ var cur_fsm_grid_y = 0;
 var cur_fsm_mouse_x = 0;
 var cur_fsm_mouse_y = 0;
 var gl = null;
-var shader_prog = null;
+var grid_shader_prog = null;
+var node_shader_prog = null;
 // Array for keeping track of FSM node structs to send to the shader.
 var fsm_nodes = [];
-var fsm_node_locs = [];
 var fsm_node_struct_fields = [
   "tex_sampler",
   "node_status",
@@ -165,6 +183,19 @@ preload_textures = function() {
   img.src = "/static/fsm_assets/boot_node.png";
 };
 
+check_selected_menu_tool = function() {
+  var menu_tool_selected = false;
+  // 'Boot' node, for testing.
+  if (selected_menu_tool == 'Boot' && loaded_textures["Boot"]) {
+    cur_tool_node_tex = loaded_textures['Boot'];
+    menu_tool_selected = true;
+  }
+  else {
+    cur_tool_node_tex = -1;
+  }
+  return menu_tool_selected;
+};
+
 init_fsm_layout_canvas = function() {
   const canvas = document.getElementById("fsm_layout_canvas");
   const canvas_container = document.getElementById("fsm_canvas_div");
@@ -188,13 +219,22 @@ init_fsm_layout_canvas = function() {
 
   // Load shaders.
   const vs = load_shader(gl, gl.VERTEX_SHADER, vert_sh);
-  const fs = load_shader(gl, gl.FRAGMENT_SHADER, frag_sh);
-  shader_prog = gl.createProgram();
-  gl.attachShader(shader_prog, vs);
-  gl.attachShader(shader_prog, fs);
-  gl.linkProgram(shader_prog);
-  if (!gl.getProgramParameter(shader_prog, gl.LINK_STATUS)) {
-    alert("Couldn't initialize shader program - log:\n" + gl.getProgramInfoLog(shader_prog));
+  const grid_fs = load_shader(gl, gl.FRAGMENT_SHADER, grid_frag_sh);
+  const node_fs = load_shader(gl, gl.FRAGMENT_SHADER, node_frag_sh);
+  grid_shader_prog = gl.createProgram();
+  node_shader_prog = gl.createProgram();
+  gl.attachShader(grid_shader_prog, vs);
+  gl.attachShader(grid_shader_prog, grid_fs);
+  gl.linkProgram(grid_shader_prog);
+  gl.attachShader(node_shader_prog, vs);
+  gl.attachShader(node_shader_prog, node_fs);
+  gl.linkProgram(node_shader_prog);
+  if (!gl.getProgramParameter(grid_shader_prog, gl.LINK_STATUS)) {
+    alert("Couldn't initialize grid shader program - log:\n" + gl.getProgramInfoLog(grid_shader_prog));
+    return;
+  }
+  if (!gl.getProgramParameter(node_shader_prog, gl.LINK_STATUS)) {
+    alert("Couldn't initialize node shader program - log:\n" + gl.getProgramInfoLog(node_shader_prog));
     return;
   }
 
@@ -219,24 +259,25 @@ init_fsm_layout_canvas = function() {
 
   // Define positions buffer.
   gl.bindBuffer(gl.ARRAY_BUFFER, pos_buffer);
-  gl.vertexAttribPointer(gl.getAttribLocation(shader_prog, 'vp'),
+  gl.vertexAttribPointer(gl.getAttribLocation(grid_shader_prog, 'vp'),
                          2, // number of components
                          gl.FLOAT,
                          false, // normalize?
                          0, 0);
-  gl.enableVertexAttribArray(gl.getAttribLocation(shader_prog, 'vp'));
+  gl.enableVertexAttribArray(gl.getAttribLocation(grid_shader_prog, 'vp'));
+  gl.vertexAttribPointer(gl.getAttribLocation(node_shader_prog, 'vp'),
+                         2, // number of components
+                         gl.FLOAT,
+                         false,
+                         0, 0);
+  gl.enableVertexAttribArray(gl.getAttribLocation(node_shader_prog, 'vp'));
 
   // Use the current shader program.
-  gl.useProgram(shader_prog);
+  gl.useProgram(grid_shader_prog);
 
-  // Pre-fill FSM node arrays with null/default values.
+  // Pre-fill FSM node arrays with null values.
   for (var node_ind = 0; node_ind < 256; ++node_ind) {
     fsm_nodes[node_ind] = null;
-    fsm_node_locs[node_ind] = [];
-    fsm_node_locs[node_ind]["tex_sampler"] = gl.getUniformLocation(shader_prog, "nodes[" + node_ind + "].tex_sampler");
-    fsm_node_locs[node_ind]["node_status"] = gl.getUniformLocation(shader_prog, "nodes[" + node_ind + "].node_status");
-    fsm_node_locs[node_ind]["grid_coord_x"] = gl.getUniformLocation(shader_prog, "nodes[" + node_ind + "].grid_coord_x");
-    fsm_node_locs[node_ind]["grid_coord_y"] = gl.getUniformLocation(shader_prog, "nodes[" + node_ind + "].grid_coord_y");
   }
 
   // Draw.
@@ -244,57 +285,63 @@ init_fsm_layout_canvas = function() {
 };
 
 redraw_canvas = function() {
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
   const canvas = document.getElementById("fsm_layout_canvas");
+
+  // First, draw the 'grid' view.
+  gl.useProgram(grid_shader_prog);
+
   // Send uniform values.
-  gl.uniform1f(gl.getUniformLocation(shader_prog, 'canvas_w'), canvas.width);
-  gl.uniform1f(gl.getUniformLocation(shader_prog, 'canvas_h'), canvas.height);
-  gl.uniform2fv(gl.getUniformLocation(shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
-  // Send 'node' uniform values. If a node doesn't exist,
-  // set sampler to -1 and coords to (0, 0).
-  for (var node_ind = 0; node_ind < 256; ++node_ind) {
-    if (fsm_nodes[node_ind] == null) {
-      // Find/send empty uniform values.
-      //gl.uniform1i(fsm_node_locs[node_ind]["tex_sampler"], 0);
-      gl.uniform1i(fsm_node_locs[node_ind]["node_status"], -1);
-      gl.uniform1i(fsm_node_locs[node_ind]["grid_coord_x"], 0);
-      gl.uniform1i(fsm_node_locs[node_ind]["grid_coord_y"], 0);
-    }
-    else {
-      if (fsm_nodes[node_ind]["node_status"] == -1) {
-        //gl.uniform1i(fsm_node_locs[node_ind]["tex_sampler"], fsm_nodes[node_ind]["tex_sampler"]);
-        gl.uniform1i(fsm_node_locs[node_ind]["node_status"], fsm_nodes[node_ind]["node_status"]);
-      }
-      else {
-        gl.uniform1i(fsm_node_locs[node_ind]["tex_sampler"], fsm_nodes[node_ind]["tex_sampler"]);
-        gl.uniform1i(fsm_node_locs[node_ind]["node_status"], fsm_nodes[node_ind]["node_status"]);
-      }
-      gl.uniform1i(fsm_node_locs[node_ind]["grid_coord_x"], fsm_nodes[node_ind]["grid_coord_x"]);
-      gl.uniform1i(fsm_node_locs[node_ind]["grid_coord_y"], fsm_nodes[node_ind]["grid_coord_y"]);
-    }
-  }
-  // Send 'current tool' node if necessary.
-  if (selected_tool == 'tool') {
-    if (cur_tool_node_tex == -1) {
-      //gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.tex_sampler'), 0);
-      gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.node_status'), -1);
-    }
-    else {
-      gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.tex_sampler'), cur_tool_node_tex);
-      gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.node_status'), 0);
-    }
-    gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.grid_coord_x'), cur_tool_node_grid_x);
-    gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.grid_coord_y'), cur_tool_node_grid_y);
-  }
-  else {
-    //gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.tex_sampler'), 0);
-    gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.node_status'), -1);
-    gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.grid_coord_x'), 0);
-    gl.uniform1i(gl.getUniformLocation(shader_prog, 'cur_tool_node.grid_coord_y'), 0);
-  }
+  gl.uniform1f(gl.getUniformLocation(grid_shader_prog, 'canvas_w'), canvas.width);
+  gl.uniform1f(gl.getUniformLocation(grid_shader_prog, 'canvas_h'), canvas.height);
+  gl.uniform2fv(gl.getUniformLocation(grid_shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
 
   // Draw.
   gl.viewport(0, 0, canvas.width, canvas.height);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+  // Next, draw any nodes that are within the current view.
+  var grid_min_x = cur_fsm_grid_x - 1;
+  var grid_min_y = cur_fsm_grid_y - 1;
+  var grid_max_x = cur_fsm_grid_x + parseInt(canvas.width/64);
+  var grid_max_y = cur_fsm_grid_y + parseInt(canvas.height/64);
+  for (var node_ind = 0; node_ind < 256; ++node_ind) {
+    if (fsm_nodes[node_ind] && fsm_nodes[node_ind].node_status != -1 &&
+        (fsm_nodes[node_ind].grid_coord_x >= grid_min_x &&
+         fsm_nodes[node_ind].grid_coord_x <= grid_max_x &&
+         fsm_nodes[node_ind].grid_coord_y >= grid_min_y &&
+         fsm_nodes[node_ind].grid_coord_y <= grid_max_y)) {
+      gl.useProgram(node_shader_prog);
+      // Send uniform values.
+      gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_w'), canvas.width);
+      gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_h'), canvas.height);
+      gl.uniform2fv(gl.getUniformLocation(node_shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.tex_sampler'), fsm_nodes[node_ind].tex_sampler);
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_status'), fsm_nodes[node_ind].node_status);
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_x'), fsm_nodes[node_ind].grid_coord_x);
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_y'), fsm_nodes[node_ind].grid_coord_y);
+      // Draw.
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+  }
+
+  // Finally, draw the currently-selected tool node if applicable.
+  if (selected_tool == 'tool' && cur_tool_node_tex != -1) {
+    gl.useProgram(node_shader_prog);
+    // Send uniform values.
+    gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_w'), canvas.width);
+    gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_h'), canvas.height);
+    gl.uniform2fv(gl.getUniformLocation(node_shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
+    gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.tex_sampler'), cur_tool_node_tex);
+    gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_status'), 0);
+    gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_x'), cur_tool_node_grid_x);
+    gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_y'), cur_tool_node_grid_y);
+    // Draw.
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
 };
 
 project_show_onload = function() {
@@ -427,15 +474,7 @@ project_show_onload = function() {
     cur_fsm_mouse_y = parseInt(-cur_fsm_mouse_y);
 
     if (selected_tool == 'tool') {
-      var menu_tool_selected = false;
-      // 'Boot' node, for testing.
-      if (selected_menu_tool == 'Boot' && loaded_textures["Boot"]) {
-        cur_tool_node_tex = loaded_textures['Boot'];
-        menu_tool_selected = true;
-      }
-      else {
-        cur_tool_node_tex = -1;
-      }
+      var menu_tool_selected = check_selected_menu_tool();
       // If there is a texture for the selection, find its grid coord.
       // (So, x/y coordinates / 64. (or whatever dot distance if it changes)
       if (menu_tool_selected) {
@@ -451,5 +490,51 @@ project_show_onload = function() {
     document.getElementById("list_last_fsm_mouse_coords").innerHTML = ("Last FSM grid mouse coordinates: (" + cur_fsm_mouse_x + ", " + cur_fsm_mouse_y + ")");
     // Redraw the canvas.
     redraw_canvas();
+  };
+
+  // Add a master 'on click' function for the FSM canvas.
+  document.getElementById("fsm_canvas_div").onclick = function(e) {
+    if (selected_tool == 'tool') {
+      var menu_tool_selected = check_selected_menu_tool();
+      // If there is a texture for the selection, find its grid coord.
+      // (So, x/y coordinates / 64. (or whatever dot distance if it changes)
+      if (menu_tool_selected) {
+        var half_grid = 32;
+        if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
+        cur_tool_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
+        if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
+        else { half_grid = 32; }
+        cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+        document.getElementById("list_last_fsm_tool_coords").innerHTML = ("Last FSM tool grid coordinates: (" + cur_tool_node_grid_x + ", " + cur_tool_node_grid_y + ")");
+      }
+      // Add the current tool node to the list, unless there is a
+      // node in the proposed coordinates already.
+      var already_populated = false;
+      var index_to_use = -1;
+      for (var node_ind = 0; node_ind < 256; ++node_ind) {
+        if (fsm_nodes[node_ind]) {
+          if (fsm_nodes[node_ind].grid_coord_x == cur_tool_node_grid_x &&
+              fsm_nodes[node_ind].grid_coord_y == cur_tool_node_grid_y) {
+            already_populated = true;
+          }
+        }
+        else {
+          if (index_to_use == -1) {
+            index_to_use = node_ind;
+          }
+        }
+      }
+      if (!already_populated) {
+        // Place a new node.
+        fsm_nodes[index_to_use] = [];
+        fsm_nodes[index_to_use].tex_sampler = cur_tool_node_tex;
+        fsm_nodes[index_to_use].node_status = 0;
+        fsm_nodes[index_to_use].grid_coord_x = cur_tool_node_grid_x;
+        fsm_nodes[index_to_use].grid_coord_y = cur_tool_node_grid_y;
+      }
+
+      // Re-draw the canvas to show the placed node.
+      redraw_canvas();
+    }
   };
 };
