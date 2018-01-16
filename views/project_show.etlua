@@ -1,4 +1,5 @@
 <link rel="stylesheet" type="text/css" href="/static/css/project_show.css">
+<link rel="stylesheet" type="text/css" href="/static/css/project_show_options_strings.css">
 
 <script type="text/javascript" src="/static/js/project_show_options_strings.js"></script>
 <script type="text/javascript" src="/static/js/project_show.js"></script>

@@ -1,0 +1,357 @@
+/* CSS styling for the various nodes' options panels. */
+/*
+ * 'Boot' node.
+ */
+.boot_options_table {
+}
+
+.boot_options_mcu_chip_row {
+}
+
+.boot_options_mcu_chip_text {
+}
+
+.boot_options_mcu_chip_opt {
+}
+
+.boot_options_mcu_chip_select {
+}
+
+.boot_options_mcu_chip_option {
+}
+
+/*
+ * 'Delay' node.
+ */
+.delay_options_table {
+}
+
+.delay_options_unit_row {
+}
+
+.delay_options_unit_text {
+}
+
+.delay_options_unit_opt {
+}
+
+.delay_options_unit_select {
+}
+
+.delay_options_unit_option {
+}
+
+.delay_options_value_row {
+}
+
+.delay_options_value_text {
+}
+
+.delay_options_value_opt {
+}
+
+.delay_options_value_input {
+}
+
+/*
+ * 'Init GPIO Pin' node.
+ */
+.init_gpio_options_table {
+}
+
+.init_gpio_options_pin_bank_row {
+}
+
+.init_gpio_options_pin_bank_text {
+}
+
+.init_gpio_options_pin_bank_opt {
+}
+
+.init_gpio_options_pin_bank_select {
+}
+
+.init_gpio_options_pin_bank_option {
+}
+
+.init_gpio_options_pin_number_row {
+}
+
+.init_gpio_options_pin_number_text {
+}
+
+.init_gpio_options_pin_number_opt {
+}
+
+.init_gpio_options_pin_number_select {
+}
+
+.init_gpio_options_pin_number_option {
+}
+
+.init_gpio_options_pin_func_row {
+}
+
+.init_gpio_options_pin_func_text {
+}
+
+.init_gpio_options_pin_func_opt {
+}
+
+.init_gpio_options_pin_func_select {
+}
+
+.init_gpio_options_pin_func_option {
+}
+
+.init_gpio_options_otype_row {
+}
+
+.init_gpio_options_otype_text {
+}
+
+.init_gpio_options_otype_opt {
+}
+
+.init_gpio_options_otype_select {
+}
+
+.init_gpio_options_otype_option {
+}
+
+.init_gpio_options_ospeed_row {
+}
+
+.init_gpio_options_ospeed_text {
+}
+
+.init_gpio_options_ospeed_opt {
+}
+
+.init_gpio_options_ospeed_select {
+}
+
+.init_gpio_options_ospeed_option {
+}
+
+.init_gpio_options_pupdr_row {
+}
+
+.init_gpio_options_pupdr_text {
+}
+
+.init_gpio_options_pupdr_opt {
+}
+
+.init_gpio_options_pupdr_select {
+}
+
+.init_gpio_options_pupdr_option {
+}
+
+/*
+ * 'Disable GPIO Pin' node.
+ */
+.deinit_gpio_options_table {
+}
+
+.deinit_gpio_options_pin_bank_row {
+}
+
+.deinit_gpio_options_pin_bank_text {
+}
+
+.deinit_gpio_options_pin_bank_opt {
+}
+
+.deinit_gpio_options_pin_bank_select {
+}
+
+.deinit_gpio_options_pin_bank_option {
+}
+
+.deinit_gpio_options_pin_number_row {
+}
+
+.deinit_gpio_options_pin_number_text {
+}
+
+.deinit_gpio_options_pin_number_opt {
+}
+
+.deinit_gpio_options_pin_number_select {
+}
+
+.deinit_gpio_options_pin_number_option {
+}
+
+/*
+ * 'Set GPIO Output' node.
+ */
+.set_gpio_out_options_table {
+}
+
+.set_gpio_out_options_pin_bank_row {
+}
+
+.set_gpio_out_options_pin_bank_text {
+}
+
+.set_gpio_out_options_pin_bank_opt {
+}
+
+.set_gpio_out_options_pin_bank_select {
+}
+
+.set_gpio_out_options_pin_bank_option {
+}
+
+.set_gpio_out_options_pin_number_row {
+}
+
+.set_gpio_out_options_pin_number_text {
+}
+
+.set_gpio_out_options_pin_number_opt {
+}
+
+.set_gpio_out_options_pin_number_select {
+}
+
+.set_gpio_out_options_pin_number_option {
+}
+
+.set_gpio_out_options_value_row {
+}
+
+.set_gpio_out_options_value_text {
+}
+
+.set_gpio_out_options_value_opt {
+}
+
+.set_gpio_out_options_value_select {
+}
+
+.set_gpio_out_options_value_option {
+}
+
+/*
+ * 'Enable Peripheral Clock' node.
+ */
+.rcc_enable_options_table {
+}
+
+.rcc_enable_options_periph_clocks_row {
+}
+
+.rcc_enable_options_periph_clocks_text {
+}
+
+.rcc_enable_options_periph_clocks_opt {
+}
+
+.rcc_enable_options_periph_clocks_select {
+}
+
+.rcc_enable_options_periph_clocks_option {
+}
+
+/*
+ * 'Disable Peripheral Clock' node.
+ */
+.rcc_disable_options_table {
+}
+
+.rcc_disable_options_periph_clocks_row {
+}
+
+.rcc_disable_options_periph_clocks_text {
+}
+
+.rcc_disable_options_periph_clocks_opt {
+}
+
+.rcc_disable_options_periph_clocks_select {
+}
+
+.rcc_disable_options_periph_clocks_option {
+}
+
+/*
+ * 'Define Variable' node.
+ */
+.define_var_options_table {
+}
+
+.define_var_options_var_name_row {
+}
+
+.define_var_options_var_name_text {
+}
+
+.define_var_options_var_name_opt {
+}
+
+.define_var_options_var_name_input {
+}
+
+.define_var_options_var_type_row {
+}
+
+.define_var_options_var_type_text {
+}
+
+.define_var_options_var_type_opt {
+}
+
+.define_var_options_var_type_select {
+}
+
+.define_var_options_var_type_option {
+}
+
+.define_var_options_var_val_row {
+}
+
+.define_var_options_var_val_text {
+}
+
+.define_var_options_var_val_opt {
+}
+
+/*
+ * 'Set Variable' node.
+ */
+.set_var_options_table {
+}
+
+.set_var_options_var_list_row {
+}
+
+.set_var_options_var_list_text {
+}
+
+.set_var_options_var_list_opt {
+}
+
+.set_var_options_var_list_select {
+}
+
+.set_var_options_var_list_option {
+}
+
+.set_var_options_var_list_new_value_row {
+}
+
+.set_var_options_var_list_new_value_opt {
+}
+
+.set_var_options_var_list_new_value_input {
+}
+
+.set_var_options_var_list_new_value_select {
+}
+
+.set_var_options_var_list_new_value_option {
+}
