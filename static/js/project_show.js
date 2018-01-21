@@ -240,12 +240,39 @@ var loaded_textures = [];
 var mcu_chip = 'STM32F030F4';
 var rcc_opts = {
   STM32F03xFx: {
-    GPIOA: 'GPIO Bank A',
-    GPIOB: 'GPIO Bank B',
-    GPIOC: 'GPIO Bank C',
-    GPIOD: 'GPIO Bank D',
-    GPIOE: 'GPIO Bank E',
-    GPIOF: 'GPIO Bank F',
+    GPIOA:   'GPIO Bank A',
+    GPIOB:   'GPIO Bank B',
+    GPIOC:   'GPIO Bank C',
+    GPIOD:   'GPIO Bank D',
+    // (GPIO Bank E only available on F072 devices.)
+    GPIOF:   'GPIO Bank F',
+    TS:      'Touch-Sensing Controller',
+    CRC:     'Cyclic Redundancy Check',
+    FLITF:   'Sleep-Mode Flash Programming',
+    SRAM:    'Static RAM Controller',
+    DMA1:    'Direct Memory Access, Channel 1',
+    DMA2:    'Direct Memory Access, Channel 2',
+    SYSCFG:  'System Configuration',
+    USART6:  'USART Bus 6',
+    // TODO: USART 7-8 are on F031, but not F030.
+    ADC1:    'Analog-Digital Converter, Channel 1',
+    TIM1:    'Timer 1',
+    SPI1:    'Serial Peripheral Interface 1',
+    USART1:  'USART Bus 1',
+    TIM15:   'Timer 15',
+    TIM16:   'Timer 16',
+    TIM17:   'Timer 17',
+    DBGMCU:  'Debug Controller',
+    TIM3:    'Timer 3',
+    TIM6:    'Timer 6',
+    TIM14:   'Timer 14',
+    WWDG:    'Window-Watchdog Timer',
+    SPI2:    'Serial Peripheral Interface 2',
+    USART2:  'USART Bus 2',
+    I2C1:    'Inter-IC Communication 1',
+    I2C2:    'Inter-IC Communication 2',
+    PWR:     'Power Controller',
+    // TODO: CRS, CEC, DAC are on F031, but not F030.
   },
 };
 
