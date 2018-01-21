@@ -236,6 +236,18 @@ var cur_tool_node_grid_x = 0;
 var cur_tool_node_grid_y = 0;
 // Preloaded textures
 var loaded_textures = [];
+// Global program values.
+var mcu_chip = 'STM32F030F4';
+var rcc_opts = {
+  STM32F03xFx: {
+    GPIOA: 'GPIO Bank A',
+    GPIOB: 'GPIO Bank B',
+    GPIOC: 'GPIO Bank C',
+    GPIOD: 'GPIO Bank D',
+    GPIOE: 'GPIO Bank E',
+    GPIOF: 'GPIO Bank F',
+  },
+};
 
 load_shader = function(gl, sh_type, sh_source) {
   const sh = gl.createShader(sh_type);
@@ -287,6 +299,7 @@ preload_textures = function() {
   load_one_texture('RCC_Disable', '/static/fsm_assets/disable_clock_node.png');
   load_one_texture('New_Variable', '/static/fsm_assets/new_var_node.png');
   load_one_texture('Set_Variable', '/static/fsm_assets/set_variable_node.png');
+  load_one_texture('Set_Var_Logic_Not', '/static/fsm_assets/set_not_node.png');
   // Sooo I mixed up 'LtoR' and 'RtoL' in the png filenames. But long-term,
   // these should be svg files anyways so just...ugh, TODO
   load_one_texture('left_arrow_blue', '/static/fsm_assets/conn_LtoR_blue.png');
@@ -361,6 +374,14 @@ check_selected_menu_tool = function() {
   else if (selected_menu_tool == 'Set Variable' && loaded_textures['Set_Variable']) {
     cur_tool_node_tex = loaded_textures['Set_Variable'];
     cur_tool_node_type = 'Set_Variable';
+    menu_tool_selected = true;
+  }
+  // 'Variable modification' nodes; for now, just add a 'logic not'
+  // node for testing the concept with a simple 'blink' example.
+  // TODO: others.
+  else if (selected_menu_tool == 'Logical Not' && loaded_textures['Set_Var_Logic_Not']) {
+    cur_tool_node_tex = loaded_textures['Set_Var_Logic_Not'];
+    cur_tool_node_type = 'Set_Var_Logic_Not';
     menu_tool_selected = true;
   }
   // No match.
@@ -904,8 +925,14 @@ project_show_onload = function() {
             selected_node_id = node_ind;
             var sel_type = fsm_nodes[selected_node_id].node_type;
             document.getElementById("hobb_options_header").innerHTML = ("Options: (" + sel_type + ")");
-            // In/Out connections table.
-            var selected_node_options_html = node_io_options_html;
+            // In/Out connections table. The only case where this
+            // won't be added is a 'global' node that affects
+            // the entire program. Currently, that is only the
+            // 'Define new variable' node.
+            var selected_node_options_html = ""
+            if (sel_type != 'New_Variable') {
+              selected_node_options_html += node_io_options_html;
+            }
             // Type-specific options:
             if (sel_type == 'Boot') {
               selected_node_options_html += boot_node_options_html;
@@ -933,6 +960,9 @@ project_show_onload = function() {
             }
             else if (sel_type == 'Set_Variable') {
               selected_node_options_html += set_var_node_options_html;
+            }
+            else if (sel_type == 'Set_Var_Logic_Not') {
+              selected_node_options_html += set_var_logic_not_node_options_html;
             }
             document.getElementById("hobb_options_content").innerHTML = selected_node_options_html;
             // Apply click listeners.
@@ -996,6 +1026,7 @@ project_show_onload = function() {
           up: 'none',
           down: 'none',
         };
+        fsm_nodes[index_to_use].options = {};
         fsm_nodes[index_to_use].grid_coord_x = cur_tool_node_grid_x;
         fsm_nodes[index_to_use].grid_coord_y = cur_tool_node_grid_y;
       }
@@ -1278,7 +1309,144 @@ var apply_node_io_table_listeners = function(node_type) {
   };
 };
 
+var apply_boot_node_options_listeners = function() {
+  var chip_sel_tag = document.getElementById("boot_options_mcu_chip_tag");
+  if (mcu_chip == 'STM32F030F4') {
+    chip_sel_tag.value = 'STM32F030F4';
+  }
+  else if (mcu_chip == 'STM32F031F6') {
+    chip_sel_tag.value = 'STM32F031F6';
+  }
+  // 'MCU Chip Type' selection listener.
+  chip_sel_tag.onchange = function() {
+    mcu_chip = chip_sel_tag.value;
+  };
+};
+
+var apply_delay_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var delay_units_tag = document.getElementById('delay_options_unit_tag');
+  var delay_value_tag = document.getElementById('delay_options_value_tag');
+  if (cur_node.options) {
+    // Set values according to previously-selected options.
+    if (cur_node.options.delay_units && cur_node.options.delay_units != '') {
+      if (cur_node.options.delay_units == 'cycles') {
+        delay_units_tag.value = 'Cycles';
+      }
+      else if (cur_node.options.delay_units == 'us') {
+        delay_units_tag.value = 'Microseconds';
+      }
+      else if (cur_node.options.delay_units == 'ms') {
+        delay_units_tag.value = 'Milliseconds';
+      }
+      else if (cur_node.options.delay_units == 's') {
+        delay_units_tag.value = 'Seconds';
+      }
+    }
+    if (cur_node.options.delay_value) {
+      delay_value_tag.value = parseInt(cur_node.options.delay_value);
+    }
+  }
+  // Listeners to set option values.
+  delay_units_tag.onchange = function() {
+    var new_delay_type = delay_units_tag.value;
+    if (new_delay_type == 'Cycles') {
+      cur_node.options.delay_units = 'cycles';
+    }
+    else if (new_delay_type == 'Microseconds') {
+      cur_node.options.delay_units = 'us';
+    }
+    else if (new_delay_type == 'Milliseconds') {
+      cur_node.options.delay_units = 'ms';
+    }
+    else if (new_delay_type == 'Seconds') {
+      cur_node.options.delay_units = 's';
+    }
+  };
+  delay_value_tag.onchange = function() {
+    var new_delay_value = parseInt(delay_value_tag.value);
+    if (new_delay_value >= 0) {
+      cur_node.options.delay_value = new_delay_value;
+    }
+  };
+};
+
+// 'Enable RCC Peripheral Clock' node options.
+var apply_rcc_enable_node_options_listeners = function () {
+  var cur_node = fsm_nodes[selected_node_id];
+  // Here, we need to set the options based on what is available in the
+  // target MCU chip. From an RCC perspective, the 'F03xFx' chips look identical.
+  var rcc_en_dropdown_tag = document.getElementById('rcc_enable_options_periph_clocks_tag');
+  var periph_clocks = {};
+  if (mcu_chip == 'STM32F030F4' || mcu_chip == 'STM32F031F6') {
+    periph_clocks = rcc_opts.STM32F03xFx;
+    var select_tag_html = '';
+    for (var periph_val in periph_clocks) {
+      select_tag_html += `
+        <option value="` + periph_val + `" class="rcc_enable_options_periph_clocks_option">` + periph_clocks[periph_val] + `</option>
+      `;
+    }
+    rcc_en_dropdown_tag.innerHTML = select_tag_html;
+  }
+
+  // Set selected value based on options, if applicable.
+  if (cur_node.options.periph_clock && cur_node.options.periph_clock != '') {
+    rcc_en_dropdown_tag.value = cur_node.options.periph_clock;
+  }
+
+  // Set click listener functions for each available clock.
+  rcc_en_dropdown_tag.onchange = function() {
+    cur_node.options.periph_clock = rcc_en_dropdown_tag.value;
+  };
+};
+
+// 'Disable RCC Peripheral Clock' node options. Similar to 'Enable'
+var apply_rcc_disable_node_options_listeners = function () {
+  var cur_node = fsm_nodes[selected_node_id];
+  // Here, we need to set the options based on what is available in the
+  // target MCU chip. From an RCC perspective, the 'F03xFx' chips look identical.
+  var rcc_dis_dropdown_tag = document.getElementById('rcc_disable_options_periph_clocks_tag');
+  var periph_clocks = {};
+  if (mcu_chip == 'STM32F030F4' || mcu_chip == 'STM32F031F6') {
+    periph_clocks = rcc_opts.STM32F03xFx;
+    var select_tag_html = '';
+    for (var periph_val in periph_clocks) {
+      select_tag_html += `
+        <option value="` + periph_val + `" class="rcc_disable_options_periph_clocks_option">` + periph_clocks[periph_val] + `</option>
+      `;
+    }
+    rcc_dis_dropdown_tag.innerHTML = select_tag_html;
+  }
+
+  // Set selected value based on options, if applicable.
+  if (cur_node.options.periph_clock && cur_node.options.periph_clock != '') {
+    rcc_dis_dropdown_tag.value = cur_node.options.periph_clock;
+  }
+
+  // Set click listener functions for each available clock.
+  rcc_dis_dropdown_tag.onchange = function() {
+    cur_node.options.periph_clock = rcc_dis_dropdown_tag.value;
+  };
+};
+
 // Common 'new node selected' call.
 var apply_selected_node_option_listeners = function(node_type) {
-  apply_node_io_table_listeners(node_type);
+  // 'Global' nodes have no I/O connections table.
+  if (node_type != 'New_Variable') {
+    apply_node_io_table_listeners(node_type);
+  }
+
+  // 'Boot' node.
+  if (node_type == 'Boot') {
+    apply_boot_node_options_listeners();
+  }
+  else if (node_type == 'Delay') {
+    apply_delay_node_options_listeners();
+  }
+  else if (node_type == 'RCC_Enable') {
+    apply_rcc_enable_node_options_listeners();
+  }
+  else if (node_type == 'RCC_Disable') {
+    apply_rcc_disable_node_options_listeners();
+  }
 };

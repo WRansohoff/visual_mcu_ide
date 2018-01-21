@@ -159,8 +159,7 @@ var rcc_clock_list_table_row = function(tag_prefix) {
     </td>
     <td class="` + tag_prefix + `_periph_clocks_opt">
       <select id="` + tag_prefix + `_periph_clocks_tag" class="` + tag_prefix + `_periph_clocks_select">
-        <option selected="true" value="TODO" class="` + tag_prefix + `_periph_clocks_option">TODO</option>
-        <option value="TODO" class="` + tag_prefix + `_periph_clocks_option">TODO</option>
+        <option selected="true" value="TODO" class="` + tag_prefix + `_periph_clocks_option">(None Available)</option>
       </select>
     </td>
   </tr>
@@ -421,5 +420,13 @@ var set_var_node_options_html = `
     <td class="set_var_options_var_new_value_opt">
     </td>
   </tr>
+</table>
+`;
+
+// 'Modify Variable: Logic Not' node options.
+var set_var_logic_not_node_options_html = `
+<table class="set_var_logic_not_options_table" cellpadding="0" cellspacing="0" border="0">
+  ` + defined_variables_list_table_row('set_var_logic_not_options_A') + `
+  ` + defined_variables_list_table_row('set_var_options_B') + `
 </table>
 `;
