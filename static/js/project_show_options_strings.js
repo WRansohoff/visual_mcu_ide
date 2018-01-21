@@ -66,10 +66,10 @@ var node_io_options_html = `
         <option value="None" selected="true" id="node_io_options_bot_mid_none" class="node_io_options_opt">
           None
         </option>
-        <option value="None" id="node_io_options_bot_mid_input" class="node_io_options_opt">
+        <option value="Input" id="node_io_options_bot_mid_input" class="node_io_options_opt">
           Input
         </option>
-        <option value="None" id="node_io_options_bot_mid_output" class="node_io_options_opt">
+        <option value="Output" id="node_io_options_bot_mid_output" class="node_io_options_opt">
           Output
         </option>
       </select>
@@ -148,6 +148,9 @@ var select_gpio_pin_table_row = function(tag_prefix) {
   `;
 };
 
+/*
+ * List RCC 'peripheral clocks'.
+ */
 var rcc_clock_list_table_row = function(tag_prefix) {
   return `
   <tr class="` + tag_prefix + `_periph_clocks_row">

@@ -67,12 +67,6 @@ const node_frag_sh = `#version 300 es
     int grid_coord_x;
     int grid_coord_y;
   };
-  struct FSM_Conn {
-    int start_coord_x;
-    int start_coord_y;
-    int end_coord_x;
-    int end_coord_y;
-  };
   // Inputs.
   uniform   float canvas_w;
   uniform   float canvas_h;
@@ -128,6 +122,80 @@ const node_frag_sh = `#version 300 es
         }
       }
       else { discard; }
+    }
+    else { discard; }
+  }
+`;
+
+const conn_frag_sh = `#version 300 es
+  precision mediump float;
+  // Inputs.
+  uniform sampler2D tex_sampler;
+  uniform int  conn_tex_w;
+  uniform int  conn_tex_h;
+  uniform vec2 cur_view_coords;
+  uniform int  node_grid_x;
+  uniform int  node_grid_y;
+  // [0:3] = [top, left, bottom, right].
+  uniform int  conn_position;
+  // Output color.
+  out     vec4 out_color;
+  void main() {
+    // Gather grid/view information.
+    int cur_x = int(cur_view_coords.x);
+    int cur_y = int(cur_view_coords.y);
+    int cur_px_x = int(gl_FragCoord.x);
+    int cur_px_y = int(gl_FragCoord.y);
+    // Find the right grid coordinate's location relative to the window.
+    int cur_node_conn_local_x = node_grid_x * 64;
+    cur_node_conn_local_x -= int(cur_view_coords.x);
+    int cur_node_conn_local_y = node_grid_y * 64;
+    cur_node_conn_local_y -= int(cur_view_coords.y);
+    int cur_node_conn_min_x = cur_node_conn_local_x - (conn_tex_w/2);
+    int cur_node_conn_max_x = cur_node_conn_local_x + (conn_tex_w/2);
+    int cur_node_conn_min_y = cur_node_conn_local_y - (conn_tex_h/2);
+    int cur_node_conn_max_y = cur_node_conn_local_y + (conn_tex_h/2);
+    // TODO: Constants.
+    if (conn_position == 0) {
+      // 'up'
+      cur_node_conn_min_y += 48;
+      cur_node_conn_max_y += 48;
+    }
+    else if (conn_position == 1) {
+      // 'left'
+      cur_node_conn_min_x -= 48;
+      cur_node_conn_max_x -= 48;
+    }
+    else if (conn_position == 2) {
+      // 'down'
+      cur_node_conn_min_y -= 48;
+      cur_node_conn_max_y -= 48;
+    }
+    else if (conn_position == 3) {
+      // 'right'
+      cur_node_conn_min_x += 48;
+      cur_node_conn_max_x += 48;
+    }
+    if (cur_px_x >= cur_node_conn_min_x &&
+        cur_px_x <= cur_node_conn_max_x &&
+        cur_px_y >= cur_node_conn_min_y &&
+        cur_px_y <= cur_node_conn_max_y) {
+      float cur_conn_s = float(cur_px_x - cur_node_conn_min_x);
+      float cur_conn_t = float(cur_px_y - cur_node_conn_min_y);
+      cur_conn_s /= float(conn_tex_w);
+      cur_conn_t /= float(conn_tex_h);
+      cur_conn_t = 1.0 - cur_conn_t;
+      vec2 cur_conn_st = vec2(cur_conn_s, cur_conn_t);
+      // Pofolk transparency: discard ~(1,1,1) or ~alpha==0 colors.
+      vec4 tex_color = texture(tex_sampler, cur_conn_st);
+      if (tex_color.a <= 0.01 ||
+          (tex_color.r > 0.99 && tex_color.g > 0.99 && tex_color.b > 0.99)) {
+        discard;
+      }
+      else {
+        out_color = texture(tex_sampler, cur_conn_st);
+      }
+      //out_color = vec4(0.5, 0.8, 0.2, 1.0);
     }
     else { discard; }
   }
@@ -229,6 +297,10 @@ preload_textures = function() {
   load_one_texture('right_arrow_green', '/static/fsm_assets/conn_RtoL_green.png');
   load_one_texture('down_arrow_green', '/static/fsm_assets/conn_TtoB_green.png');
   load_one_texture('up_arrow_green', '/static/fsm_assets/conn_BtoT_green.png');
+  load_one_texture('left_arrow_canary', '/static/fsm_assets/conn_LtoR_canary.png');
+  load_one_texture('right_arrow_canary', '/static/fsm_assets/conn_RtoL_canary.png');
+  load_one_texture('down_arrow_canary', '/static/fsm_assets/conn_TtoB_canary.png');
+  load_one_texture('up_arrow_canary', '/static/fsm_assets/conn_BtoT_canary.png');
 };
 
 check_selected_menu_tool = function() {
@@ -323,16 +395,25 @@ init_fsm_layout_canvas = function() {
   const vs = load_shader(gl, gl.VERTEX_SHADER, vert_sh);
   const grid_fs = load_shader(gl, gl.FRAGMENT_SHADER, grid_frag_sh);
   const node_fs = load_shader(gl, gl.FRAGMENT_SHADER, node_frag_sh);
+  const conn_fs = load_shader(gl, gl.FRAGMENT_SHADER, conn_frag_sh);
   grid_shader_prog = gl.createProgram();
   node_shader_prog = gl.createProgram();
+  conn_shader_prog = gl.createProgram();
   gl.attachShader(grid_shader_prog, vs);
   gl.attachShader(grid_shader_prog, grid_fs);
   gl.linkProgram(grid_shader_prog);
   gl.attachShader(node_shader_prog, vs);
   gl.attachShader(node_shader_prog, node_fs);
   gl.linkProgram(node_shader_prog);
+  gl.attachShader(conn_shader_prog, vs);
+  gl.attachShader(conn_shader_prog, conn_fs);
+  gl.linkProgram(conn_shader_prog);
   if (!gl.getProgramParameter(grid_shader_prog, gl.LINK_STATUS)) {
     alert("Couldn't initialize grid shader program - log:\n" + gl.getProgramInfoLog(grid_shader_prog));
+    return;
+  }
+  if (!gl.getProgramParameter(node_shader_prog, gl.LINK_STATUS)) {
+    alert("Couldn't initialize node shader program - log:\n" + gl.getProgramInfoLog(node_shader_prog));
     return;
   }
   if (!gl.getProgramParameter(node_shader_prog, gl.LINK_STATUS)) {
@@ -373,6 +454,12 @@ init_fsm_layout_canvas = function() {
                          false,
                          0, 0);
   gl.enableVertexAttribArray(gl.getAttribLocation(node_shader_prog, 'vp'));
+  gl.vertexAttribPointer(gl.getAttribLocation(conn_shader_prog, 'vp'),
+                         2, // number of components
+                         gl.FLOAT,
+                         false,
+                         0, 0);
+  gl.enableVertexAttribArray(gl.getAttribLocation(conn_shader_prog, 'vp'));
 
   // Use the current shader program.
   gl.useProgram(grid_shader_prog);
@@ -434,6 +521,84 @@ redraw_canvas = function() {
       // Draw.
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+      // Draw connections, if any. (TODO: loop?)
+      if (fsm_nodes[node_ind].connections) {
+        gl.useProgram(conn_shader_prog);
+        // Send common uniform values.
+        gl.uniform2fv(gl.getUniformLocation(conn_shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
+        gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'node_grid_x'), fsm_nodes[node_ind].grid_coord_x);
+        gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'node_grid_y'), fsm_nodes[node_ind].grid_coord_y);
+        // TODO: Arrow colors matching node colors.
+        // Top
+        gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_position'), 0);
+        gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_tex_w'), 8);
+        gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_tex_h'), 32);
+        if (fsm_nodes[node_ind].connections.up == 'input') {
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['down_arrow_green']);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['down_arrow_green']);
+          // Draw.
+          gl.viewport(0, 0, canvas.width, canvas.height);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+        else if (fsm_nodes[node_ind].connections.up == 'output') {
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['up_arrow_green']);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['up_arrow_green']);
+          // Draw.
+          gl.viewport(0, 0, canvas.width, canvas.height);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+        // Bottom
+        gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_position'), 2);
+        if (fsm_nodes[node_ind].connections.down == 'input') {
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['up_arrow_green']);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['up_arrow_green']);
+          // Draw.
+          gl.viewport(0, 0, canvas.width, canvas.height);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+        else if (fsm_nodes[node_ind].connections.down == 'output') {
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['down_arrow_green']);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['down_arrow_green']);
+          // Draw.
+          gl.viewport(0, 0, canvas.width, canvas.height);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+        // Left
+        gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_position'), 1);
+        gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_tex_w'), 32);
+        gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_tex_h'), 8);
+        if (fsm_nodes[node_ind].connections.left == 'input') {
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['right_arrow_green']);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['right_arrow_green']);
+          // Draw.
+          gl.viewport(0, 0, canvas.width, canvas.height);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+        else if (fsm_nodes[node_ind].connections.left == 'output') {
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['left_arrow_green']);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['left_arrow_green']);
+          // Draw.
+          gl.viewport(0, 0, canvas.width, canvas.height);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+        // Right
+        gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_position'), 3);
+        if (fsm_nodes[node_ind].connections.right == 'input') {
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['left_arrow_green']);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['left_arrow_green']);
+          // Draw.
+          gl.viewport(0, 0, canvas.width, canvas.height);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+        else if (fsm_nodes[node_ind].connections.right == 'output') {
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['right_arrow_green']);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['right_arrow_green']);
+          // Draw.
+          gl.viewport(0, 0, canvas.width, canvas.height);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+      }
     }
   }
 
@@ -770,6 +935,8 @@ project_show_onload = function() {
               selected_node_options_html += set_var_node_options_html;
             }
             document.getElementById("hobb_options_content").innerHTML = selected_node_options_html;
+            // Apply click listeners.
+            apply_selected_node_option_listeners(sel_type);
             break;
           }
         }
@@ -823,6 +990,12 @@ project_show_onload = function() {
         fsm_nodes[index_to_use].tex_sampler = cur_tool_node_tex;
         fsm_nodes[index_to_use].node_type = cur_tool_node_type;
         fsm_nodes[index_to_use].node_status = 0;
+        fsm_nodes[index_to_use].connections = {
+          left: 'none',
+          right: 'none',
+          up: 'none',
+          down: 'none',
+        };
         fsm_nodes[index_to_use].grid_coord_x = cur_tool_node_grid_x;
         fsm_nodes[index_to_use].grid_coord_y = cur_tool_node_grid_y;
       }
@@ -849,6 +1022,7 @@ project_show_onload = function() {
               document.getElementById("hobb_options_content").innerHTML = "";
             }
             fsm_nodes[node_ind] = null;
+            // Squash the array of nodes.
             fsm_nodes = fsm_nodes.filter(array_filter_nulls);
           }
         }
@@ -920,4 +1094,191 @@ project_show_onload = function() {
       }
     }
   };
+};
+
+/*
+ * Additional listeners for options panels.
+ * These should be applied after filling the 'options' cell with...well, options.
+ */
+// Common 'connectors' table options.
+var apply_node_io_table_listeners = function(node_type) {
+  // The 'boot' node is a special type which has no inputs.
+  if (node_type == 'Boot') {
+    document.getElementById('node_io_options_top_mid_input').hidden = true;
+    document.getElementById('node_io_options_mid_left_input').hidden = true;
+    document.getElementById('node_io_options_mid_right_input').hidden = true;
+    document.getElementById('node_io_options_bot_mid_input').hidden = true;
+  }
+  var cur_node = fsm_nodes[selected_node_id];
+  var top_select_tag = document.getElementById('node_io_options_top_sel');
+  var left_select_tag = document.getElementById('node_io_options_left_sel');
+  var right_select_tag = document.getElementById('node_io_options_right_sel');
+  var bot_select_tag = document.getElementById('node_io_options_bot_sel');
+  if (cur_node && cur_node.connections) {
+    if (cur_node.connections.up == 'input') {
+      top_select_tag.value = 'Input';
+    }
+    else if (cur_node.connections.up == 'output') {
+      top_select_tag.value = 'Output';
+    }
+    if (cur_node.connections.left == 'input') {
+      left_select_tag.value = 'Input';
+    }
+    else if (cur_node.connections.left == 'output') {
+      left_select_tag.value = 'Output';
+    }
+    if (cur_node.connections.right == 'input') {
+      right_select_tag.value = 'Input';
+    }
+    else if (cur_node.connections.right == 'output') {
+      right_select_tag.value = 'Output';
+    }
+    if (cur_node.connections.down == 'input') {
+      bot_select_tag.value = 'Input';
+    }
+    else if (cur_node.connections.down == 'output') {
+      bot_select_tag.value = 'Output';
+    }
+  }
+  top_select_tag.onchange = function() {
+    if (top_select_tag.value == 'None') {
+      var cur_node = fsm_nodes[selected_node_id];
+      if (cur_node && cur_node.connections) {
+        cur_node.connections.up = 'none';
+      }
+    }
+    else if (top_select_tag.value == 'Input') {
+      var cur_node = fsm_nodes[selected_node_id];
+      if (cur_node && cur_node.connections) {
+        cur_node.connections.up = 'input';
+      }
+    }
+    else if (top_select_tag.value == 'Output') {
+      var cur_node = fsm_nodes[selected_node_id];
+      if (cur_node && cur_node.connections) {
+        cur_node.connections.up = 'output';
+        // Only allow one 'output' for non-branch nodes. (TODO: branches)
+        if (cur_node.connections.down == 'output') {
+          cur_node.connections.down = 'none';
+          bot_select_tag.value = 'None';
+        }
+        if (cur_node.connections.left == 'output') {
+          cur_node.connections.left = 'none';
+          left_select_tag.value = 'None';
+        }
+        if (cur_node.connections.right == 'output') {
+          cur_node.connections.right = 'none';
+          right_select_tag.value = 'None';
+        }
+      }
+    }
+    redraw_canvas();
+  };
+  left_select_tag.onchange = function() {
+    if (left_select_tag.value == 'None') {
+      var cur_node = fsm_nodes[selected_node_id];
+      if (cur_node && cur_node.connections) {
+        cur_node.connections.left = 'none';
+      }
+    }
+    else if (left_select_tag.value == 'Input') {
+      var cur_node = fsm_nodes[selected_node_id];
+      if (cur_node && cur_node.connections) {
+        cur_node.connections.left = 'input';
+      }
+    }
+    else if (left_select_tag.value == 'Output') {
+      var cur_node = fsm_nodes[selected_node_id];
+      if (cur_node && cur_node.connections) {
+        cur_node.connections.left = 'output';
+        // Only allow one 'output' for non-branch nodes. (TODO: branches)
+        if (cur_node.connections.down == 'output') {
+          cur_node.connections.down = 'none';
+          bot_select_tag.value = 'None';
+        }
+        if (cur_node.connections.up == 'output') {
+          cur_node.connections.up = 'none';
+          top_select_tag.value = 'None';
+        }
+        if (cur_node.connections.right == 'output') {
+          cur_node.connections.right = 'none';
+          right_select_tag.value = 'None';
+        }
+      }
+    }
+    redraw_canvas();
+  };
+  right_select_tag.onchange = function() {
+    if (right_select_tag.value == 'None') {
+      var cur_node = fsm_nodes[selected_node_id];
+      if (cur_node && cur_node.connections) {
+        cur_node.connections.right = 'none';
+      }
+    }
+    else if (right_select_tag.value == 'Input') {
+      var cur_node = fsm_nodes[selected_node_id];
+      if (cur_node && cur_node.connections) {
+        cur_node.connections.right = 'input';
+      }
+    }
+    else if (right_select_tag.value == 'Output') {
+      var cur_node = fsm_nodes[selected_node_id];
+      if (cur_node && cur_node.connections) {
+        cur_node.connections.right = 'output';
+        // Only allow one 'output' for non-branch nodes. (TODO: branches)
+        if (cur_node.connections.down == 'output') {
+          cur_node.connections.down = 'none';
+          bot_select_tag.value = 'None';
+        }
+        if (cur_node.connections.up == 'output') {
+          cur_node.connections.up = 'none';
+          top_select_tag.value = 'None';
+        }
+        if (cur_node.connections.left == 'output') {
+          cur_node.connections.left = 'none';
+          left_select_tag.value = 'None';
+        }
+      }
+    }
+    redraw_canvas();
+  };
+  bot_select_tag.onchange = function() {
+    if (bot_select_tag.value == 'None') {
+      var cur_node = fsm_nodes[selected_node_id];
+      if (cur_node && cur_node.connections) {
+        cur_node.connections.down = 'none';
+      }
+    }
+    else if (bot_select_tag.value == 'Input') {
+      var cur_node = fsm_nodes[selected_node_id];
+      if (cur_node && cur_node.connections) {
+        cur_node.connections.down = 'input';
+      }
+    }
+    else if (bot_select_tag.value == 'Output') {
+      var cur_node = fsm_nodes[selected_node_id];
+      if (cur_node && cur_node.connections) {
+        cur_node.connections.down = 'output';
+        // Only allow one 'output' for non-branch nodes. (TODO: branches)
+        if (cur_node.connections.right == 'output') {
+          cur_node.connections.right = 'none';
+          right_select_tag.value = 'None';
+        }
+        if (cur_node.connections.up == 'output') {
+          cur_node.connections.up = 'none';
+          top_select_tag.value = 'None';
+        }
+        if (cur_node.connections.left == 'output') {
+          cur_node.connections.left = 'none';
+          left_select_tag.value = 'None';
+        }
+      }
+    }
+    redraw_canvas();
+  };
+};
+
+// Common 'new node selected' call.
+var apply_selected_node_option_listeners = function(node_type) {
+  apply_node_io_table_listeners(node_type);
 };
