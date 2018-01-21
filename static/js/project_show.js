@@ -1528,6 +1528,43 @@ var apply_gpio_deinit_options_listeners = function() {
   };
 };
 
+var apply_gpio_output_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var gpio_bank_tag = document.getElementById('set_gpio_out_options_pin_bank_tag');
+  var gpio_pin_tag = document.getElementById('set_gpio_out_options_pin_number_tag');
+  var gpio_value_tag = document.getElementById('set_gpio_out_options_value_tag');
+
+  // Set values according to node options.
+  if (cur_node.options.gpio_bank) {
+    gpio_bank_tag.value = cur_node.options.gpio_bank;
+  }
+  if (cur_node.options.gpio_pin) {
+    gpio_pin_tag.value = cur_node.options.gpio_pin;
+  }
+  if (cur_node.options.gpio_val) {
+    gpio_value_tag.value = 'On';
+  }
+  else {
+    gpio_value_tag.value = 'Off';
+  }
+
+  // Set click listener functions.
+  gpio_bank_tag.onchange = function() {
+    cur_node.options.gpio_bank = gpio_bank_tag.value;
+  };
+  gpio_pin_tag.onchange = function() {
+    cur_node.options.gpio_pin = gpio_pin_tag.value;
+  };
+  gpio_value_tag.onchange = function() {
+    if (gpio_value_tag.value == 'On') {
+      cur_node.options.gpio_val = 1;
+    }
+    else {
+      cur_node.options.gpio_val = 0;
+    }
+  }
+};
+
 // Common 'new node selected' call.
 var apply_selected_node_option_listeners = function(node_type) {
   // 'Global' nodes have no I/O connections table.
@@ -1547,6 +1584,9 @@ var apply_selected_node_option_listeners = function(node_type) {
   }
   else if (node_type == 'GPIO_Deinit') {
     apply_gpio_deinit_options_listeners();
+  }
+  else if (node_type == 'GPIO_Output') {
+    apply_gpio_output_options_listeners();
   }
   else if (node_type == 'RCC_Enable') {
     apply_rcc_enable_node_options_listeners();
