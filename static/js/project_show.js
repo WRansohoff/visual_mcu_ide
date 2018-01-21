@@ -231,6 +231,7 @@ var fsm_node_struct_fields = [
 ];
 // 'currently-selected preview' node info.
 var cur_tool_node_tex = -1;
+var cur_tool_node_color = 'green';
 var cur_tool_node_type = '';
 var cur_tool_node_grid_x = 0;
 var cur_tool_node_grid_y = 0;
@@ -341,6 +342,10 @@ preload_textures = function() {
   load_one_texture('right_arrow_canary', '/static/fsm_assets/conn_RtoL_canary.png');
   load_one_texture('down_arrow_canary', '/static/fsm_assets/conn_TtoB_canary.png');
   load_one_texture('up_arrow_canary', '/static/fsm_assets/conn_BtoT_canary.png');
+  load_one_texture('left_arrow_pink', '/static/fsm_assets/conn_LtoR_pink.png');
+  load_one_texture('right_arrow_pink', '/static/fsm_assets/conn_RtoL_pink.png');
+  load_one_texture('down_arrow_pink', '/static/fsm_assets/conn_TtoB_pink.png');
+  load_one_texture('up_arrow_pink', '/static/fsm_assets/conn_BtoT_pink.png');
 };
 
 check_selected_menu_tool = function() {
@@ -349,42 +354,49 @@ check_selected_menu_tool = function() {
   if (selected_menu_tool == 'Boot' && loaded_textures['Boot']) {
     cur_tool_node_tex = loaded_textures['Boot'];
     cur_tool_node_type = 'Boot';
+    cur_tool_node_color = 'green';
     menu_tool_selected = true;
   }
   // 'Delay' node.
   else if (selected_menu_tool == 'Delay' && loaded_textures['Delay']) {
     cur_tool_node_tex = loaded_textures['Delay'];
     cur_tool_node_type = 'Delay';
+    cur_tool_node_color = 'blue';
     menu_tool_selected = true;
   }
   // 'GPIO Init' node; setup a GPIO pin.
   else if (selected_menu_tool == 'Setup GPIO Pin' && loaded_textures['GPIO_Init']) {
     cur_tool_node_tex = loaded_textures['GPIO_Init'];
     cur_tool_node_type = 'GPIO_Init';
+    cur_tool_node_color = 'green';
     menu_tool_selected = true;
   }
   // 'GPIO Deinit' node; disable a previously-initialized GPIO pin.
   else if (selected_menu_tool == 'Disable GPIO Pin' && loaded_textures['GPIO_Deinit']) {
     cur_tool_node_tex = loaded_textures['GPIO_Deinit'];
     cur_tool_node_type = 'GPIO_Deinit';
+    cur_tool_node_color = 'pink';
     menu_tool_selected = true;
   }
   // 'GPIO Output' node; set a previously-setup GPIO output pin to 0 or 1.
   else if (selected_menu_tool == 'Write Output Pin' && loaded_textures['GPIO_Output']) {
     cur_tool_node_tex = loaded_textures['GPIO_Output'];
     cur_tool_node_type = 'GPIO_Output';
+    cur_tool_node_color = 'blue';
     menu_tool_selected = true;
   }
   // 'RCC Enable' node; enable a peripheral clock.
   else if (selected_menu_tool == 'Enable Peripheral Clock' && loaded_textures['RCC_Enable']) {
     cur_tool_node_tex = loaded_textures['RCC_Enable'];
     cur_tool_node_type = 'RCC_Enable';
+    cur_tool_node_color = 'green';
     menu_tool_selected = true;
   }
   // 'RCC Disable' node; turn off a peripheral clock.
   else if (selected_menu_tool == 'Disable Peripheral Clock' && loaded_textures['RCC_Disable']) {
     cur_tool_node_tex = loaded_textures['RCC_Disable'];
     cur_tool_node_type = 'RCC_Disable';
+    cur_tool_node_color = 'pink';
     menu_tool_selected = true;
   }
   // 'New variable' node; define a variable. It's not 'new' as in
@@ -393,6 +405,7 @@ check_selected_menu_tool = function() {
   else if (selected_menu_tool == 'Define Variable' && loaded_textures['New_Variable']) {
     cur_tool_node_tex = loaded_textures['New_Variable'];
     cur_tool_node_type = 'New_Variable';
+    cur_tool_node_color = 'green';
     menu_tool_selected = true;
   }
   // 'Set variable' node; set a variable which was previously defined
@@ -401,6 +414,7 @@ check_selected_menu_tool = function() {
   else if (selected_menu_tool == 'Set Variable' && loaded_textures['Set_Variable']) {
     cur_tool_node_tex = loaded_textures['Set_Variable'];
     cur_tool_node_type = 'Set_Variable';
+    cur_tool_node_color = 'blue';
     menu_tool_selected = true;
   }
   // 'Variable modification' nodes; for now, just add a 'logic not'
@@ -409,6 +423,7 @@ check_selected_menu_tool = function() {
   else if (selected_menu_tool == 'Logical Not' && loaded_textures['Set_Var_Logic_Not']) {
     cur_tool_node_tex = loaded_textures['Set_Var_Logic_Not'];
     cur_tool_node_type = 'Set_Var_Logic_Not';
+    cur_tool_node_color = 'blue';
     menu_tool_selected = true;
   }
   // No match.
@@ -577,21 +592,20 @@ redraw_canvas = function() {
         gl.uniform2fv(gl.getUniformLocation(conn_shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
         gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'node_grid_x'), fsm_nodes[node_ind].grid_coord_x);
         gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'node_grid_y'), fsm_nodes[node_ind].grid_coord_y);
-        // TODO: Arrow colors matching node colors.
         // Top
         gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_position'), 0);
         gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_tex_w'), 8);
         gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_tex_h'), 32);
         if (fsm_nodes[node_ind].connections.up == 'input') {
-          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['down_arrow_green']);
-          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['down_arrow_green']);
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['down_arrow_' + fsm_nodes[node_ind].node_color]);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['down_arrow_' + fsm_nodes[node_ind].node_color]);
           // Draw.
           gl.viewport(0, 0, canvas.width, canvas.height);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
         else if (fsm_nodes[node_ind].connections.up == 'output') {
-          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['up_arrow_green']);
-          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['up_arrow_green']);
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['up_arrow_' + fsm_nodes[node_ind].node_color]);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['up_arrow_' + fsm_nodes[node_ind].node_color]);
           // Draw.
           gl.viewport(0, 0, canvas.width, canvas.height);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -599,15 +613,15 @@ redraw_canvas = function() {
         // Bottom
         gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_position'), 2);
         if (fsm_nodes[node_ind].connections.down == 'input') {
-          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['up_arrow_green']);
-          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['up_arrow_green']);
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['up_arrow_' + fsm_nodes[node_ind].node_color]);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['up_arrow_' + fsm_nodes[node_ind].node_color]);
           // Draw.
           gl.viewport(0, 0, canvas.width, canvas.height);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
         else if (fsm_nodes[node_ind].connections.down == 'output') {
-          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['down_arrow_green']);
-          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['down_arrow_green']);
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['down_arrow_' + fsm_nodes[node_ind].node_color]);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['down_arrow_' + fsm_nodes[node_ind].node_color]);
           // Draw.
           gl.viewport(0, 0, canvas.width, canvas.height);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -617,15 +631,15 @@ redraw_canvas = function() {
         gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_tex_w'), 32);
         gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_tex_h'), 8);
         if (fsm_nodes[node_ind].connections.left == 'input') {
-          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['right_arrow_green']);
-          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['right_arrow_green']);
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['right_arrow_' + fsm_nodes[node_ind].node_color]);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['right_arrow_' + fsm_nodes[node_ind].node_color]);
           // Draw.
           gl.viewport(0, 0, canvas.width, canvas.height);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
         else if (fsm_nodes[node_ind].connections.left == 'output') {
-          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['left_arrow_green']);
-          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['left_arrow_green']);
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['left_arrow_' + fsm_nodes[node_ind].node_color]);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['left_arrow_' + fsm_nodes[node_ind].node_color]);
           // Draw.
           gl.viewport(0, 0, canvas.width, canvas.height);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -633,15 +647,15 @@ redraw_canvas = function() {
         // Right
         gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_position'), 3);
         if (fsm_nodes[node_ind].connections.right == 'input') {
-          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['left_arrow_green']);
-          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['left_arrow_green']);
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['left_arrow_' + fsm_nodes[node_ind].node_color]);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['left_arrow_' + fsm_nodes[node_ind].node_color]);
           // Draw.
           gl.viewport(0, 0, canvas.width, canvas.height);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
         else if (fsm_nodes[node_ind].connections.right == 'output') {
-          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['right_arrow_green']);
-          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['right_arrow_green']);
+          gl.bindTexture(gl.TEXTURE_2D, loaded_textures['right_arrow_' + fsm_nodes[node_ind].node_color]);
+          gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['right_arrow_' + fsm_nodes[node_ind].node_color]);
           // Draw.
           gl.viewport(0, 0, canvas.width, canvas.height);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -1047,6 +1061,7 @@ project_show_onload = function() {
         fsm_nodes[index_to_use].tex_sampler = cur_tool_node_tex;
         fsm_nodes[index_to_use].node_type = cur_tool_node_type;
         fsm_nodes[index_to_use].node_status = 0;
+        fsm_nodes[index_to_use].node_color = cur_tool_node_color;
         fsm_nodes[index_to_use].connections = {
           left: 'none',
           right: 'none',
