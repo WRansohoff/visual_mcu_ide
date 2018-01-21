@@ -1456,6 +1456,78 @@ var apply_rcc_disable_node_options_listeners = function () {
   };
 };
 
+var apply_gpio_init_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var gpio_bank_tag = document.getElementById('init_gpio_options_pin_bank_tag');
+  var gpio_pin_tag = document.getElementById('init_gpio_options_pin_number_tag');
+  var gpio_func_tag = document.getElementById('init_gpio_options_pin_func_tag');
+  var gpio_otype_tag = document.getElementById('init_gpio_options_otype_tag');
+  var gpio_ospeed_tag = document.getElementById('init_gpio_options_ospeed_tag');
+  var gpio_pupdr_tag = document.getElementById('init_gpio_options_pupdr_tag');
+
+  // Set values according to node options.
+  if (cur_node.options.gpio_bank) {
+    gpio_bank_tag.value = cur_node.options.gpio_bank;
+  }
+  if (cur_node.options.gpio_pin) {
+    gpio_pin_tag.value = cur_node.options.gpio_pin;
+  }
+  if (cur_node.options.gpio_func) {
+    gpio_func_tag.value = cur_node.options.gpio_func;
+  }
+  if (cur_node.options.gpio_otype) {
+    gpio_otype_tag.value = cur_node.options.gpio_otype;
+  }
+  if (cur_node.options.gpio_ospeed) {
+    gpio_ospeed_tag.value = cur_node.options.gpio_ospeed;
+  }
+  if (cur_node.options.gpio_pupdr) {
+    gpio_pupdr_tag.value = cur_node.options.gpio_pupdr;
+  }
+
+  // Set click listener functions.
+  gpio_bank_tag.onchange = function() {
+    cur_node.options.gpio_bank = gpio_bank_tag.value;
+  };
+  gpio_pin_tag.onchange = function() {
+    cur_node.options.gpio_pin = gpio_pin_tag.value;
+  };
+  gpio_func_tag.onchange = function() {
+    cur_node.options.gpio_func = gpio_func_tag.value;
+  };
+  gpio_otype_tag.onchange = function() {
+    cur_node.options.gpio_otype = gpio_otype_tag.value;
+  };
+  gpio_ospeed_tag.onchange = function() {
+    cur_node.options.gpio_ospeed = gpio_ospeed_tag.value;
+  };
+  gpio_pupdr_tag.onchange = function() {
+    cur_node.options.gpio_pupdr = gpio_pupdr_tag.value;
+  };
+};
+
+var apply_gpio_deinit_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var gpio_bank_tag = document.getElementById('deinit_gpio_options_pin_bank_tag');
+  var gpio_pin_tag = document.getElementById('deinit_gpio_options_pin_number_tag');
+
+  // Set values according to node options.
+  if (cur_node.options.gpio_bank) {
+    gpio_bank_tag.value = cur_node.options.gpio_bank;
+  }
+  if (cur_node.options.gpio_pin) {
+    gpio_pin_tag.value = cur_node.options.gpio_pin;
+  }
+
+  // Set click listener functions.
+  gpio_bank_tag.onchange = function() {
+    cur_node.options.gpio_bank = gpio_bank_tag.value;
+  };
+  gpio_pin_tag.onchange = function() {
+    cur_node.options.gpio_pin = gpio_pin_tag.value;
+  };
+};
+
 // Common 'new node selected' call.
 var apply_selected_node_option_listeners = function(node_type) {
   // 'Global' nodes have no I/O connections table.
@@ -1469,6 +1541,12 @@ var apply_selected_node_option_listeners = function(node_type) {
   }
   else if (node_type == 'Delay') {
     apply_delay_node_options_listeners();
+  }
+  else if (node_type == 'GPIO_Init') {
+    apply_gpio_init_options_listeners();
+  }
+  else if (node_type == 'GPIO_Deinit') {
+    apply_gpio_deinit_options_listeners();
   }
   else if (node_type == 'RCC_Enable') {
     apply_rcc_enable_node_options_listeners();
