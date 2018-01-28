@@ -174,7 +174,7 @@ var defined_variables_list_table_row = function(tag_prefix) {
     </td>
     <td class="` + tag_prefix + `_var_list_opt">
       <select id="` + tag_prefix + `_var_list_tag" class="` + tag_prefix + `_var_list_select">
-        <option selected="true" value="(None)" class="` + tag_prefix + `_var_list_option">
+        <option selected="true" value="(None)" id="` + tag_prefix + `_var_list_n/a" class="` + tag_prefix + `_var_list_option">
           (None defined)
         </option>
       </select>
@@ -403,7 +403,7 @@ var define_var_node_options_html = `
     <td class="define_var_options_var_val_text">
       Starting value:
     </td>
-    <td class="define_var_options_var_val_opt">
+    <td id="define_var_options_var_val_cell" class="define_var_options_var_val_opt">
     </td>
   </tr>
 </table>
@@ -417,7 +417,7 @@ var set_var_node_options_html = `
     <td class="set_var_options_var_new_value_text">
       New value:
     </td>
-    <td class="set_var_options_var_new_value_opt">
+    <td id="set_var_options_var_new_value_cell" class="set_var_options_var_new_value_opt">
     </td>
   </tr>
 </table>

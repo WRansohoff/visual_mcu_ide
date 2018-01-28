@@ -237,9 +237,12 @@ var cur_tool_node_grid_x = 0;
 var cur_tool_node_grid_y = 0;
 // Preloaded textures
 var loaded_textures = [];
-// Global program values.
+// Global FSM program variables.
 var mcu_chip = 'STM32F030F4';
-var rcc_opts = {
+var defined_vars = [];
+
+// Global FSM program constants.
+const rcc_opts = {
   STM32F03xFx: {
     GPIOA:   'GPIO Bank A',
     GPIOB:   'GPIO Bank B',
@@ -346,6 +349,39 @@ preload_textures = function() {
   load_one_texture('right_arrow_pink', '/static/fsm_assets/conn_RtoL_pink.png');
   load_one_texture('down_arrow_pink', '/static/fsm_assets/conn_TtoB_pink.png');
   load_one_texture('up_arrow_pink', '/static/fsm_assets/conn_BtoT_pink.png');
+};
+
+// Refresh the current set of 'defined variables' from the current FSM nodes.
+refresh_defined_vars = function() {
+  // Empty the storage array...
+  defined_vars.length = 0;
+  // ...and fill it with the current values.
+  for (var node_ind = 0; node_ind < 256; ++node_ind) {
+    if (fsm_nodes[node_ind]) {
+      cur_node = fsm_nodes[node_ind];
+      if (cur_node && cur_node.node_type == 'New_Variable') {
+        // Add the variable name & options.
+        if (cur_node.options.var_name) {
+          // (Default values)
+          var var_type = 'int';
+          var var_init = 0;
+          // (Set values)
+          if (cur_node.options.var_type) {
+            var_type = cur_node.options.var_type;
+          }
+          if (cur_node.options.var_init) {
+            var_init = cur_node.options.var_init;
+          }
+          // (Add variable)
+          defined_vars[cur_node.options.var_name] = {
+            name: cur_node.options.var_name,
+            type: var_type,
+            init: var_init,
+          };
+        }
+      }
+    }
+  }
 };
 
 check_selected_menu_tool = function() {
@@ -1097,6 +1133,7 @@ project_show_onload = function() {
             fsm_nodes[node_ind] = null;
             // Squash the array of nodes.
             fsm_nodes = fsm_nodes.filter(array_filter_nulls);
+            refresh_defined_vars();
           }
         }
       }
@@ -1580,6 +1617,124 @@ var apply_gpio_output_options_listeners = function() {
   }
 };
 
+// 'Define New Variable' Global node.
+var apply_new_var_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var var_name_tag = document.getElementById('define_var_options_var_name_tag');
+  var var_type_tag = document.getElementById('define_var_options_var_type_tag');
+  var var_val_cell = document.getElementById('define_var_options_var_val_cell');
+
+  // Set values according to node options.
+  if (cur_node.options.var_name) {
+    var_name_tag.value = cur_node.options.var_name;
+  }
+  if (cur_node.options.var_type) {
+    var_type_tag.value = cur_node.options.var_type;
+  }
+
+  // Fill 'var value' cell based on current type.
+  var var_val_tag = null;
+  if (var_type_tag.value == 'int') {
+    var_val_cell.innerHTML = `
+      <input id="define_var_options_int_tag" class="define_var_options_int_input" type="number" value="0">
+    `;
+    var_val_tag = document.getElementById('define_var_options_int_tag');
+  }
+  else if (var_type_tag.value == 'float') {
+    var_val_cell.innerHTML = `
+      <input id="define_var_options_float_tag" class="define_var_options_float_input" type="number" value="0" step="0.000001">
+    `;
+    var_val_tag = document.getElementById('define_var_options_float_tag');
+  }
+  else if (var_type_tag.value == 'bool') {
+    var_val_cell.innerHTML = `
+      <select id="define_var_options_bool_tag" class="define_var_options_bool_input">
+        <option selected="true" value="true">True</option>
+        <option value="false">False</option>
+      </select>
+    `;
+    var_val_tag = document.getElementById('define_var_options_bool_tag');
+  }
+  else if (var_type_tag.value == 'char') {
+    var_val_cell.innerHTML = `
+      <input id="define_var_options_char_tag" class="define_var_options_char_input" type="text" maxlength="1">
+    `;
+    var_val_tag = document.getElementById('define_var_options_char_tag');
+  }
+
+  // Set 'var value' type according to node option.
+  if (cur_node.options.var_val && var_val_tag) {
+    var_val_tag.value = cur_node.options.var_val;
+  }
+
+  // Set click listener functions.
+  var_name_tag.oninput = function() {
+    cur_node.options.var_name = var_name_tag.value;
+    refresh_defined_vars();
+  };
+  var_type_tag.onchange = function() {
+    cur_node.options.var_type = var_type_tag.value;
+    var var_val_tag = null;
+    if (var_type_tag.value == 'int') {
+      var_val_cell.innerHTML = `
+        <input id="define_var_options_int_tag" class="define_var_options_int_input" type="number" value="0">
+      `;
+      var_val_tag = document.getElementById('define_var_options_int_tag');
+      var_val_tag.value = 0;
+    }
+    else if (var_type_tag.value == 'float') {
+      var_val_cell.innerHTML = `
+        <input id="define_var_options_float_tag" class="define_var_options_float_input" type="number" value="0" step="0.000001">
+      `;
+      var_val_tag = document.getElementById('define_var_options_float_tag');
+      var_val_tag.value = 0.0;
+    }
+    else if (var_type_tag.value == 'bool') {
+      var_val_cell.innerHTML = `
+        <select id="define_var_options_bool_tag" class="define_var_options_bool_input">
+          <option selected="true" value="true">True</option>
+          <option value="false">False</option>
+        </select>
+      `;
+      var_val_tag = document.getElementById('define_var_options_bool_tag');
+    }
+    else if (var_type_tag.value == 'char') {
+      var_val_cell.innerHTML = `
+        <input id="define_var_options_char_tag" class="define_var_options_char_input" type="text" maxlength="1">
+      `;
+      var_val_tag = document.getElementById('define_var_options_char_tag');
+      var_val_tag.value = 'c';
+    }
+  };
+  var_val_tag.onchange = function() {
+    cur_node.options.var_val = var_val_tag.value;
+  };
+};
+
+// 'Set Variable' node.
+var apply_set_var_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var var_name_tag = document.getElementById('set_var_options_var_list_tag');
+  // (Needs to be created based on var type.)
+  var var_val_tag = null;
+  var var_val_cell = document.getElementById('set_var_options_var_new_value_cel');
+  // Populate the dropdown select menu with currently-defined variables.
+  var sel_html_opts = `
+    <option selected="true" value="(None)" id="set_var_options_var_list_n/a" class="set_var_options_var_list_option">
+      (None defined)
+    </option>
+  `;
+  for (var var_name in defined_vars) {
+    var var_def = defined_vars[var_name];
+    sel_html_opts += `
+      <option selected="true" value="` + var_def.name + `" id="set_var_options_var_list_` + var_def.name + `" class="set_var_options_var_list_option">
+        ` + var_def.name + `
+      </option>
+    `;
+  }
+  var_name_tag.innerHTML = sel_html_opts;
+};
+
 // Common 'new node selected' call.
 var apply_selected_node_option_listeners = function(node_type) {
   // 'Global' nodes have no I/O connections table.
@@ -1608,5 +1763,11 @@ var apply_selected_node_option_listeners = function(node_type) {
   }
   else if (node_type == 'RCC_Disable') {
     apply_rcc_disable_node_options_listeners();
+  }
+  else if (node_type == 'New_Variable') {
+    apply_new_var_node_options_listeners();
+  }
+  else if (node_type == 'Set_Variable') {
+    apply_set_var_node_options_listeners();
   }
 };
