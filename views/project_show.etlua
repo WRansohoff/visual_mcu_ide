@@ -162,5 +162,6 @@
   <div class="header_panel">
     Project Title: <%= current_project.title %>
     <a href="/projects" class="back_link">Back</a>
+    <a href="#" id="precompile_button" class="precompile_link">Precompile</a>
   </div>
 </div>

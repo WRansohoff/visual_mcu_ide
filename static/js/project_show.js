@@ -1204,6 +1204,85 @@ project_show_onload = function() {
       }
     }
   };
+
+  // Add a click listener for the 'precompile' button/link.
+  document.getElementById('precompile_button').onclick = function(e) {
+    precompile_project();
+  };
+};
+
+// 'Precompile' the project, and save a .zip file with code and a
+// Makefile for use with the arm-none-eabi-gcc toolchain.
+var precompile_project = function() {
+  // So the basic idea is, we start at the 'Boot' node, and follow
+  // the 'output' arrows until we don't have anymore visited nodes.
+  // Process 'Define variable' nodes first - for now, variable
+  // initialization is all in a 'global' scope.
+  // TODO: Branching nodes, like if/else.
+  // Failure happens if/when:
+  //   - No 'Boot' node.
+  //   - An 'output' arrow points to grid node without an 'input' arrow.
+  //   - A node has no 'output' arrow (except with special node types).
+  //   - Multiple 'input' arrows lead away fron the grid coordinate
+  //     pointed to by an 'output' arrow.
+  //   - More than one variable with the same name is defined.
+  // Produce warning messages if/when (TODO):
+  //   - A node will never be reached.
+  //   - A defined variable is never used.
+  // Otherwise, each 'node' begins with a label, and can be branched to
+  // with 'GOTO'. I know that's bad practice for human coders, but it
+  // should work for now with simple single-scope auto-generated code.
+  var boot_node = null;
+  // TODO: Maybe update/use existing 'defined_vars' variable?
+  var global_vars = [];
+  var pre_pre_process_error = null;
+  // First pass through the nodes, to gather variable definitions and
+  // make sure that basic conditions are met (exactly one 'Boot' node, etc)
+  // For ease of lookup, we will also use this first pass to generate a
+  // set of nodes indexed on grid coordinates.
+  // One will be [x][y], the other [y][x].
+  grid_nodes_xy = [];
+  grid_nodes_yx = [];
+  for (var node_index in fsm_nodes) {
+    if (fsm_nodes[node_index]) {
+      cur_node = fsm_nodes[node_index];
+      // Insert the node into the 'indexed-by-grid coordinates' structure.
+      if (!grid_nodes_xy[cur_node.grid_coord_x]) {
+        grid_nodes_xy[cur_node.grid_coord_x] = [];
+      }
+      if (!grid_nodes_yx[cur_node.grid_coord_y]) {
+        grid_nodes_yx[cur_node.grid_coord_y] = [];
+      }
+      if (grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y] ||
+          grid_nodes_yx[cur_node.grid_coord_y][cur_node.grid_coord_x]) {
+        pre_pre_process_error = "Error: Multiple nodes on the same grid coordinate: (" + cur_node.grid_coord_x + ", " + cur_node.grid_coord_y + ").";
+      }
+      grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y] = cur_node;
+      grid_nodes_yx[cur_node.grid_coord_y][cur_node.grid_coord_x] = cur_node;
+      // Specific logic for individual node types.
+      if (cur_node.node_type == 'New_Variable') {
+        // Global variable definition.
+      }
+      else if (cur_node.node_type == 'Boot') {
+        // 'Boot' node. There should only be one of these.
+        if (boot_node) {
+          pre_pre_process_error = "Error: More than one 'Boot' node defined. There can only be one 'Boot' node, where the program starts.";
+        }
+        else {
+          boot_node = cur_node;
+        }
+      }
+    }
+  }
+  if (!boot_node) {
+    pre_pre_process_error = "Error: No 'Boot' node - the program has no starting point.";
+  }
+  if (pre_pre_process_error) {
+    alert("Precompilation error message: " + pre_pre_process_error);
+  }
+  else {
+    alert("No errors!");
+  }
 };
 
 /*
