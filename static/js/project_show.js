@@ -1218,7 +1218,8 @@ project_show_onload = function() {
 // Makefile for use with the arm-none-eabi-gcc toolchain.
 var precompile_project = function() {
   // So the basic idea is, we start at the 'Boot' node, and follow
-  // the 'output' arrows until we don't have anymore visited nodes.
+  // the 'output' arrows until all branches reach a previously-
+  // visited node.
   // Process 'Define variable' nodes first - for now, variable
   // initialization is all in a 'global' scope.
   // TODO: Branching nodes, like if/else.
@@ -1278,7 +1279,7 @@ var precompile_project = function() {
       });
       // Specific logic for individual node types.
       if (cur_node.node_type == 'New_Variable') {
-        // Global variable definition.
+        // Global variable definition. TODO.
       }
       else if (cur_node.node_type == 'Boot') {
         // 'Boot' node. There should only be one of these.
