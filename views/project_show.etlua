@@ -42,6 +42,17 @@
       <% end %>
     <% end %>
   };
+
+  submit_precompile_request = function(nodes_json) {
+    //alert("Precompilation requested:\n" + nodes_json.toString());
+    $.post("/precompile_project/<%= proj_id %>", nodes_json.toString())
+      .done(function() {
+        alert("POST success");
+      })
+      .fail(function() {
+        alert("POST fail");
+      });
+  };
 </script>
 
 <div id="main_container" class="main_content">

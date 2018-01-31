@@ -82,7 +82,7 @@ app:match("/project/:project_id", function(self)
   if not self.params.project_id or self.params.project_id == "" then
     return { redirect_to "/projects" }
   end
-  local proj_id = tonumber(self.params.project_id)
+  proj_id = tonumber(self.params.project_id)
   -- If no project exists with the given ID, return without action.
   current_project = Project:find(proj_id)
   if not current_project then
@@ -139,6 +139,10 @@ app:match("/project/:project_id", function(self)
   tool_list["Variables and Logic"] = vars_logic_list
 
   return { render = "project_show" }
+end)
+
+app:post("/precompile_project/:project_id", function(self)
+  return { json = { precompile_status='success' }, status = 200 }
 end)
 
 app:match("/project/delete/:project_id", function(self)

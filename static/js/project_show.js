@@ -240,6 +240,8 @@ var loaded_textures = [];
 // Global FSM program variables.
 var mcu_chip = 'STM32F030F4';
 var defined_vars = [];
+// JSON struct representing a precompiled program.
+var json_fsm_nodes = null;
 
 // Global FSM program constants.
 const rcc_opts = {
@@ -1207,7 +1209,8 @@ project_show_onload = function() {
 
   // Add a click listener for the 'precompile' button/link.
   document.getElementById('precompile_button').onclick = function(e) {
-    precompile_project();
+    json_fsm_nodes = precompile_project();
+    submit_precompile_request(JSON.stringify(json_fsm_nodes));
   };
 };
 
@@ -1241,8 +1244,10 @@ var precompile_project = function() {
   // For ease of lookup, we will also use this first pass to generate a
   // set of nodes indexed on grid coordinates.
   // One will be [x][y], the other [y][x].
-  grid_nodes_xy = [];
-  grid_nodes_yx = [];
+  var grid_nodes_xy = [];
+  var grid_nodes_yx = [];
+  // Also keep an array of processed nodes and their output[s].
+  var program_nodes = [];
   for (var node_index in fsm_nodes) {
     if (fsm_nodes[node_index]) {
       cur_node = fsm_nodes[node_index];
@@ -1257,8 +1262,20 @@ var precompile_project = function() {
           grid_nodes_yx[cur_node.grid_coord_y][cur_node.grid_coord_x]) {
         pre_pre_process_error += "Error: Multiple nodes on the same grid coordinate: (" + cur_node.grid_coord_x + ", " + cur_node.grid_coord_y + ").\n";
       }
+      // (Store both the node and info about its 'program_node' location.)
       grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y] = cur_node;
+      grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y].pn_index = program_nodes.length;
       grid_nodes_yx[cur_node.grid_coord_y][cur_node.grid_coord_x] = cur_node;
+      grid_nodes_yx[cur_node.grid_coord_y][cur_node.grid_coord_x].pn_index = program_nodes.length;
+      // Insert the node's information (minus 'output[s]') into the
+      // JSON object to send to the controller action.
+      // TODO: Method to set default node options?
+      program_nodes.push({
+        node_type: cur_node.node_type,
+        grid_coord_x: cur_node.grid_coord_x,
+        grid_coord_y: cur_node.grid_coord_y,
+        options: cur_node.options
+      });
       // Specific logic for individual node types.
       if (cur_node.node_type == 'New_Variable') {
         // Global variable definition.
@@ -1269,7 +1286,7 @@ var precompile_project = function() {
           pre_pre_process_error += "Error: More than one 'Boot' node defined. There can only be one 'Boot' node, where the program starts.\n";
         }
         else {
-          boot_node = cur_node;
+          boot_node = grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y];
         }
       }
     }
@@ -1288,9 +1305,6 @@ var precompile_project = function() {
   if (!pre_pre_process_error) {
     var cur_grid_x = boot_node.grid_coord_x;
     var cur_grid_y = boot_node.grid_coord_y;
-    // TODO: Process 'Boot' node logic, produce startup code and
-    // skeleton project structure.
-    // Starting from the 'Boot' node, follow the 'output' path.
     if (boot_node.connections.up == 'output') {
       cur_grid_y += 1;
     }
@@ -1310,6 +1324,7 @@ var precompile_project = function() {
     // Now, enter the main node processing loop.
     var visited_nodes = [];
     visited_nodes["("+boot_node.grid_coord_x+","+boot_node.grid_coord_y+")"] = true;
+    var cur_proc_node = boot_node;
     var done_processing = false;
     while (!done_processing) {
       // Find any nodes which have 'input' arrows originating from
@@ -1390,6 +1405,9 @@ var precompile_project = function() {
         done_processing = true;
       }
       else {
+        program_nodes[cur_proc_node.pn_index].output = {
+          single: next_node.pn_index
+        };
         if (visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"]) {
           done_processing = true;
         }
@@ -1397,6 +1415,7 @@ var precompile_project = function() {
           cur_grid_x = next_node.grid_coord_x;
           cur_grid_y = next_node.grid_coord_y;
           // TODO: Process the next node.
+          cur_proc_node = next_node;
           visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"] = true;
           if (next_node.connections.up == 'output') {
             cur_grid_y += 1;
@@ -1422,9 +1441,12 @@ var precompile_project = function() {
   // 'Finished' - alert to any error messages.
   if (pre_pre_process_error) {
     alert("Precompilation error messages: " + pre_pre_process_error);
+    return null;
   }
   else {
-    alert("No errors!");
+    // If there weren't any errors, report the program's collected JSON.
+    //alert("No errors! program_nodes:\n" + JSON.stringify(program_nodes));
+    return program_nodes;
   }
 };
 
