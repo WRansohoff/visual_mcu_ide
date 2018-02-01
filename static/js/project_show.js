@@ -318,7 +318,7 @@ load_one_texture = function(tex_key, tex_path) {
 
 array_filter_nulls = function(x) {
   return (x != null);
-}
+};
 
 preload_textures = function() {
   load_one_texture('Boot', '/static/fsm_assets/boot_node.png');
@@ -382,6 +382,32 @@ refresh_defined_vars = function() {
       }
     }
   }
+};
+
+node_array_to_json = function(node_arr) {
+  var nodes_json = {
+    nodes: []
+  };
+  for (var node_ind in node_arr) {
+    var cur_node = node_arr[node_ind];
+    if (cur_node && cur_node.connections) {
+      var node_json = {
+        node_type:    cur_node.node_type,
+        grid_coord_x: cur_node.grid_coord_x,
+        grid_coord_y: cur_node.grid_coord_y,
+        connections: {
+          left:  cur_node.connections.left,
+          right: cur_node.connections.right,
+          up:    cur_node.connections.up,
+          down:  cur_node.connections.down
+        },
+      };
+      // TODO: node-specific 'options' hash.
+      nodes_json.nodes.push(node_json);
+    }
+  }
+  nodes_json.nodes_str = JSON.stringify(nodes_json.nodes, null, 2)
+  return nodes_json;
 };
 
 check_selected_menu_tool = function() {
@@ -1203,6 +1229,11 @@ project_show_onload = function() {
         redraw_canvas();
       }
     }
+  };
+
+  document.getElementById('save_fsm_project_link').onclick = function() {
+    var nodes_string = node_array_to_json(fsm_nodes);
+    submit_project_save_request(nodes_string);
   };
 };
 

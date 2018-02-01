@@ -42,6 +42,16 @@
       <% end %>
     <% end %>
   };
+
+  submit_project_save_request = function(fsm_nodes_str) {
+    $.post("/save_project/<%= proj_id %>", fsm_nodes_str)
+     .done(function(data) {
+       alert("Saved!\n"+JSON.stringify(data));
+     })
+     .fail(function() {
+       alert("Error saving.");
+     });
+  };
 </script>
 
 <div id="main_container" class="main_content">
@@ -161,6 +171,7 @@
 
   <div class="header_panel">
     Project Title: <%= current_project.title %>
+    <a href="#" id="save_fsm_project_link" class="save_project_link">Save</a>
     <a href="/projects" class="back_link">Back</a>
   </div>
 </div>
