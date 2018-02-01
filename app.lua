@@ -139,6 +139,7 @@ app:match("/project/:project_id", function(self)
   tool_list["Variables and Logic"] = vars_logic_list
 
   -- Check for a previously-saved file.
+  -- TODO: Decryption? (After encrypting saved files)
   local i_file = io.open("project_storage/project_" .. proj_id .. ".json", "r")
   loaded_nodes_str = nil
   if i_file then
@@ -201,6 +202,7 @@ app:post("/save_project/:project_id", function(self)
   end
 
   -- Save the provided JSON string to a file.
+  -- TODO: Encryption?
   local o_file = io.open("project_storage/project_" .. proj_id .. ".json", "w")
   o_file:write(self.params.nodes_str)
   o_file:close()

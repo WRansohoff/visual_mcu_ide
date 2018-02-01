@@ -6,6 +6,7 @@
 
 <script type="text/javascript">
   window.onload = function() {
+    // TODO: Make this a GET call to directly return JSON?
     <% if loaded_nodes_str and loaded_nodes_str ~= "" then %>
       loaded_fsm_nodes = `<%= loaded_nodes_str %>`.replace(/&quot;/g, '"');
       loaded_fsm_nodes = JSON.parse(loaded_fsm_nodes);
