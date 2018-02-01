@@ -138,6 +138,14 @@ app:match("/project/:project_id", function(self)
   vars_logic_list["Variable Modification"] = logic_mods_list
   tool_list["Variables and Logic"] = vars_logic_list
 
+  -- Check for a previously-saved file.
+  local i_file = io.open("project_storage/project_" .. proj_id .. ".json", "r")
+  loaded_nodes_str = nil
+  if i_file then
+    loaded_nodes_str = i_file:read("*a")
+    i_file:close()
+  end
+
   return { render = "project_show" }
 end)
 

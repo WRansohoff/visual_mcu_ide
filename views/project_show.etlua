@@ -6,6 +6,13 @@
 
 <script type="text/javascript">
   window.onload = function() {
+    <% if loaded_nodes_str and loaded_nodes_str ~= "" then %>
+      loaded_fsm_nodes = `<%= loaded_nodes_str %>`.replace(/&quot;/g, '"');
+      loaded_fsm_nodes = JSON.parse(loaded_fsm_nodes);
+    <% else %>
+      loaded_fsm_nodes = null;
+    <% end %>
+
     project_show_onload();
 
     // (etlua-templated javascript setup stuff)
