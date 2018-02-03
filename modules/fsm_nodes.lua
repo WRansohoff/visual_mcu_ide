@@ -49,9 +49,42 @@ end
 -- specified options (from the 'Boot' node.) It resets the 'bss' portions of
 -- RAM to 0s, copies the 'data' portions, sets the core clock frequency,
 -- that sort of annoying bookkeeping stuff.
+-- Return the relative path to the generated boot script.
 -- TODO: This will start with simply copying one common script per MCU.
 function FSMNodes.gen_boot_script(boot_node, cur_proj_state)
-  return nil
+  -- (Default value)
+  local chip_type = 'STM32F030F4'
+  if boot_node.options and boot_node.options.chip_type then
+    local boot_chip = boot_node.options.chip_type
+    -- (Accepted options.)
+    if boot_chip == 'STM32F030F4' or
+       boot_chip == 'STM32F031F6' then
+      chip_type = boot_chip
+     end
+  end
+
+  -- Copy the appropriate boot script.
+  local boot_script_fn = chip_type .. 'T6_boot.S'
+  local boot_script_source_dir = 'static/node_code/boot/boot/'
+  local boot_script_source_path = boot_script_source_dir .. boot_script_fn
+  local boot_script_dest_dir = cur_proj_state.base_dir .. 'boot_s/'
+  local boot_script_dest_path = boot_script_dest_dir .. boot_script_fn
+  -- Open the 'source' script and 'destination' files.
+  local boot_script_source_file = io.open(boot_script_source_path, 'r')
+  if not boot_script_source_file then
+    return nil
+  end
+  local boot_script_dest_file = io.open(boot_script_dest_path, 'w')
+  if not boot_script_dest_file then
+    boot_script_source_file:close()
+    return nil
+  end
+  -- Copy file contents.
+  boot_script_dest_file:write(boot_script_source_file:read("*a"))
+  -- Close files.
+  boot_script_source_file:close()
+  boot_script_dest_file:close()
+  return boot_script_dest_path
 end
 
 -- Copy a linker script for the given MCU chip into the 'ld/' directory.

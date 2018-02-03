@@ -414,6 +414,7 @@ node_array_to_json = function(node_arr) {
         },
       };
       // TODO: node-specific 'options' hash.
+      node_json.options = {}
       nodes_json.nodes.push(node_json);
     }
   }
@@ -462,6 +463,8 @@ node_array_from_json = function(node_arr_json) {
         valid_node = false;
       }
       if (valid_node) {
+        // TODO: Node-specific options hash.
+        cur_fsm_node.options = {};
         nodes_map[cur_node_index] = cur_fsm_node;
         cur_node_index += 1;
       }
@@ -1742,16 +1745,20 @@ var apply_node_io_table_listeners = function(node_type) {
 };
 
 var apply_boot_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
   var chip_sel_tag = document.getElementById("boot_options_mcu_chip_tag");
   if (mcu_chip == 'STM32F030F4') {
     chip_sel_tag.value = 'STM32F030F4';
+    cur_node.options.chip_type = 'STM32F030F4';
   }
   else if (mcu_chip == 'STM32F031F6') {
     chip_sel_tag.value = 'STM32F031F6';
+    cur_node.options.chip_type = 'STM32F031F6';
   }
   // 'MCU Chip Type' selection listener.
   chip_sel_tag.onchange = function() {
     mcu_chip = chip_sel_tag.value;
+    cur_node.options.chip_type = chip_sel_tag.value;
   };
 };
 
