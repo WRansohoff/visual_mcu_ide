@@ -18,12 +18,12 @@ function FSMNodes.init_project_state(boot_node, node_graph, proj_id)
     -- Verify or create other required directories for the project skeleton.
     -- Also empty the directory contents, if any.
     if varm_util.ensure_dir_empty(proj_dir .. 'boot_s/') and
-       varm_util.ensure_dir_exists(proj_dir .. 'ld/') and
-       varm_util.ensure_dir_exists(proj_dir .. 'lib/') and
-       varm_util.ensure_dir_exists(proj_dir .. 'vector_tables/') and
-       varm_util.ensure_dir_exists(proj_dir .. 'src/') and
-       varm_util.ensure_dir_exists(proj_dir .. 'src/std_periph/') and
-       varm_util.ensure_dir_exists(proj_dir .. 'src/arm_include/') then
+       varm_util.ensure_dir_empty(proj_dir .. 'ld/') and
+       varm_util.ensure_dir_empty(proj_dir .. 'lib/') and
+       varm_util.ensure_dir_empty(proj_dir .. 'vector_tables/') and
+       varm_util.ensure_dir_empty(proj_dir .. 'src/') and
+       varm_util.ensure_dir_empty(proj_dir .. 'src/std_periph/') and
+       varm_util.ensure_dir_empty(proj_dir .. 'src/arm_include/') then
       p_state.dir_structure = 'valid'
       -- Generate the 'boot' assembly script.
       p_state.boot_script = FSMNodes.gen_boot_script(boot_node, p_state)
@@ -46,16 +46,10 @@ function FSMNodes.init_project_state(boot_node, node_graph, proj_id)
   return p_state
 end
 
--- Generate a .S assembly script to boot the specified chip with the
--- specified options (from the 'Boot' node.) It resets the 'bss' portions of
--- RAM to 0s, copies the 'data' portions, sets the core clock frequency,
--- that sort of annoying bookkeeping stuff.
--- Return the relative path to the generated boot script.
--- TODO: This will start with simply copying one common script per MCU.
-function FSMNodes.gen_boot_script(boot_node, cur_proj_state)
+function FSMNodes.get_boot_chip_type(boot_node)
   -- (Default value)
   local chip_type = 'STM32F030F4'
-  if boot_node.options and boot_node.options.chip_type then
+  if boot_node and boot_node.options and boot_node.options.chip_type then
     local boot_chip = boot_node.options.chip_type
     -- (Accepted options.)
     if boot_chip == 'STM32F030F4' or
@@ -63,6 +57,17 @@ function FSMNodes.gen_boot_script(boot_node, cur_proj_state)
       chip_type = boot_chip
      end
   end
+  return chip_type
+end
+
+-- Generate a .S assembly script to boot the specified chip with the
+-- specified options (from the 'Boot' node.) It resets the 'bss' portions of
+-- RAM to 0s, copies the 'data' portions, sets the core clock frequency,
+-- that sort of annoying bookkeeping stuff.
+-- Return the relative path to the generated boot script.
+-- TODO: This will start with simply copying one common script per MCU.
+function FSMNodes.gen_boot_script(boot_node, cur_proj_state)
+  local chip_type = FSMNodes.get_boot_chip_type(boot_node)
 
   -- Copy the appropriate boot script.
   local boot_script_fn = chip_type .. 'T6_boot.S'
@@ -93,7 +98,30 @@ end
 -- the chip has available, so the compiler knows which addresses to use.
 -- TODO
 function FSMNodes.gen_ld_script(boot_node, cur_proj_state)
-  return nil
+  local chip_type = FSMNodes.get_boot_chip_type(boot_node)
+
+  -- Copy the appropriate linker script.
+  local ld_script_fn = chip_type .. 'T6.ld'
+  local ld_script_source_dir = 'static/node_code/boot/ld/'
+  local ld_script_source_path = ld_script_source_dir .. ld_script_fn
+  local ld_script_dest_dir = cur_proj_state.base_dir .. 'ld/'
+  local ld_script_dest_path = ld_script_dest_dir .. ld_script_fn
+  -- Open the 'source' script and 'destination' files.
+  local ld_script_source_file = io.open(ld_script_source_path, 'r')
+  if not ld_script_source_file then
+    return nil
+  end
+  local ld_script_dest_file = io.open(ld_script_dest_path, 'w')
+  if not ld_script_dest_file then
+    ld_script_source_file:close()
+    return nil
+  end
+  -- Copy file contents.
+  ld_script_dest_file:write(ld_script_source_file:read("*a"))
+  -- Close files.
+  ld_script_source_file:close()
+  ld_script_dest_file:close()
+  return ld_script_dest_path
 end
 
 -- Copy library files. TODO: These files are too big. They should come with
