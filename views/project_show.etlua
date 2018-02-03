@@ -53,12 +53,12 @@
 
   submit_precompile_request = function(nodes_json) {
     //alert("Precompilation requested:\n" + nodes_json.toString());
-    $.post("/precompile_project/<%= proj_id %>", nodes_json.toString())
-      .done(function() {
-        alert("POST success");
+    $.post("/precompile_project/<%= proj_id %>", nodes_json)
+      .done(function(data) {
+        alert("Precompiled!\n"+JSON.stringify(data));
       })
-      .fail(function() {
-        alert("POST fail");
+      .fail(function(data) {
+        alert("Error precompiling.\n"+JSON.stringify(data));
       });
   };
 

@@ -151,7 +151,30 @@ app:match("/project/:project_id", function(self)
 end)
 
 app:post("/precompile_project/:project_id", function(self)
-  return { json = { precompile_status='success' }, status = 200 }
+  local nodes = self.params.nodes
+  local boot_index = -1
+  local ret_status = 200
+  local status_msg = 'success'
+  -- Find the 'Boot' node.
+  for i, val in pairs(nodes) do
+    if val and val.node_type == 'Boot' then
+      if boot_index == -1 then
+        boot_index = i
+      else
+        ret_status = 500
+        status_msg = 'More than one Boot node passed in.'
+      end
+    end
+  end
+  return {
+    json = {
+      precompile_status = status_msg,
+      boot_index = boot_index,
+      nodes = self.params.nodes,
+      next_node_type = self.params.nodes[self.params.nodes[boot_index].output.single].node_type
+    },
+    status = ret_status
+  }
 end)
 
 app:match("/project/delete/:project_id", function(self)

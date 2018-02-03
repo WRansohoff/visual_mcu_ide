@@ -1311,7 +1311,7 @@ project_show_onload = function() {
   // Add a click listener for the 'precompile' button/link.
   document.getElementById('precompile_button').onclick = function(e) {
     json_fsm_nodes = precompile_project();
-    submit_precompile_request(JSON.stringify(json_fsm_nodes));
+    submit_precompile_request(json_fsm_nodes);
   };
 };
 
@@ -1548,7 +1548,9 @@ var precompile_project = function() {
   else {
     // If there weren't any errors, report the program's collected JSON.
     //alert("No errors! program_nodes:\n" + JSON.stringify(program_nodes));
-    return program_nodes;
+    return {
+      nodes: program_nodes,
+    };
   }
 
   document.getElementById('save_fsm_project_link').onclick = function() {
