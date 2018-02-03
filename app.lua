@@ -3,6 +3,9 @@ local bcrypt = require("bcrypt")
 local lapis = require("lapis")
 local config = require("lapis.config").get()
 
+-- Local modules
+local FSMNodes = require("modules/fsm_nodes")
+
 -- Database models
 local User = require("models/user")
 local Project = require("models/project")
@@ -151,6 +154,27 @@ app:match("/project/:project_id", function(self)
 end)
 
 app:post("/precompile_project/:project_id", function(self)
+  -- If there isn't a signed-in user, return without action.
+  if not self.session.current_user then
+    self.session.err_msg = "You must be signed in to use this page."
+    return { status = 403 }
+  end
+  -- If no ID is provided, return without action.
+  if not self.params.project_id or self.params.project_id == "" then
+    return { status = 400 }
+  end
+  local proj_id = tonumber(self.params.project_id)
+  -- If no project exists with the given ID, return without action.
+  local proj = Project:find(proj_id)
+  if not proj then
+    return { status = 404 }
+  end
+  -- If the current user does not own the given project,
+  -- return without action.
+  if proj.user_id ~= self.session.current_user.id then
+    return { status = 403 }
+  end
+
   local nodes = self.params.nodes
   local boot_index = -1
   local ret_status = 200
@@ -170,6 +194,9 @@ app:post("/precompile_project/:project_id", function(self)
     ret_status = 500
     status_msg = 'No Boot node passed in.'
   end
+
+  -- Create an empty 'project state'
+  local proj_state = {}
   -- Starting at 'Boot', process each node in order.
   local cur_ind = boot_index
   local cur_node = nil
