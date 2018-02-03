@@ -204,11 +204,18 @@ app:post("/precompile_project/:project_id", function(self)
   local preprocessing = true
   if ret_status == 200 then
     cur_node = self.params.nodes[cur_ind]
+    proj_state = FSMNodes.init_project_state(cur_node, self.params.nodes, proj_id)
     while preprocessing do
-      -- TODO: Preprocess current node.
+      local node_processed = FSMNodes.process_node(cur_node, self.params.nodes, proj_state)
+      if not node_processed then
+        preprocessing = false
+        ret_status = 500
+        status_msg = 'Error processing node: ' .. cur_ind
+      end
       if visited_nodes[cur_ind] then
         preprocessing = false
-      else
+      end
+      if preprocessing then
         if cur_node.output and cur_node.output.single then
           visited_nodes[cur_ind] = true;
           cur_ind = cur_node.output.single
@@ -216,13 +223,13 @@ app:post("/precompile_project/:project_id", function(self)
           if not cur_node then
             preprocessing = false
             ret_status = 500
-            status_msg = 'Node does not exist: ' + cur_ind
+            status_msg = 'Node does not exist: ' .. cur_ind
           end
         else
           -- TODO: Support branching.
           preprocessing = false
           ret_status = 500
-          status_msg = 'Invalid output options passed in node ' + cur_ind
+          status_msg = 'Invalid output options passed in node ' .. cur_ind
         end
       end
     end
