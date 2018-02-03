@@ -36,4 +36,33 @@ function varm_util.ensure_dir_exists(dir_str)
   return false
 end
 
+-- Ensure that the given directory exists, and delete any files
+-- that are currently within it. This will not perform recursive deletes,
+-- so directories will be left alone.
+-- Return true if the directory exists and is empty at the end of the method.
+-- Return false otherwise.
+function varm_util.ensure_dir_empty(dir_path)
+  -- (This also verifies that the path contains no special characters)
+  if not varm_util.ensure_dir_exists(dir_path) then
+    return false
+  end
+  -- Check for files in the given path.
+  local iter = 0
+  local ls_files = {}
+  local sh_file = io.popen('ls -p "' .. dir_path .. '" | grep -v /')
+  local deletions_success = true
+  if sh_file then
+    for fn in sh_file:lines() do
+      -- Delete the file.
+      if not os.remove(dir_path .. fn) then
+        deleteions_success = false
+      end
+    end
+    sh_file:close()
+    return deletions_success
+  end
+  -- TODO: Does a failed 'ls' command count as success, or failure?
+  return false
+end
+
 return varm_util

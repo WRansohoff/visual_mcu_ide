@@ -16,7 +16,8 @@ function FSMNodes.init_project_state(boot_node, node_graph, proj_id)
   if varm_util.ensure_dir_exists(proj_dir) then
     p_state.base_dir = proj_dir
     -- Verify or create other required directories for the project skeleton.
-    if varm_util.ensure_dir_exists(proj_dir .. 'boot_s/') and
+    -- Also empty the directory contents, if any.
+    if varm_util.ensure_dir_empty(proj_dir .. 'boot_s/') and
        varm_util.ensure_dir_exists(proj_dir .. 'ld/') and
        varm_util.ensure_dir_exists(proj_dir .. 'lib/') and
        varm_util.ensure_dir_exists(proj_dir .. 'vector_tables/') and
