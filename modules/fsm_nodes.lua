@@ -65,7 +65,6 @@ end
 -- RAM to 0s, copies the 'data' portions, sets the core clock frequency,
 -- that sort of annoying bookkeeping stuff.
 -- Return the relative path to the generated boot script.
--- TODO: This will start with simply copying one common script per MCU.
 function FSMNodes.gen_boot_script(boot_node, cur_proj_state)
   local chip_type = FSMNodes.get_boot_chip_type(boot_node)
 
@@ -96,7 +95,6 @@ end
 -- Copy a linker script for the given MCU chip into the 'ld/' directory.
 -- Linker scripts specify things like how much RAM and Flash storage
 -- the chip has available, so the compiler knows which addresses to use.
--- TODO
 function FSMNodes.gen_ld_script(boot_node, cur_proj_state)
   local chip_type = FSMNodes.get_boot_chip_type(boot_node)
 
@@ -127,9 +125,51 @@ end
 -- Copy library files. TODO: These files are too big. They should come with
 -- the GCC toolchain, but I've had trouble with getting it to recognize
 -- the correct 'libc' libraries for local armv6m builds automatically.
--- TODO
+-- (These library files are a little over 10MB put together)
 function FSMNodes.copy_static_libs(boot_node, cur_proj_state)
-  return nil
+  -- These are the same for all armv6m chips, although lines other than
+  -- Cortex-M0 chips may be armv7m. But really, these libraries shouldn't
+  -- need to be served as part of a generated project.
+  local libc_fn = 'libc.a'
+  local libgcc_fn = 'libgcc.a'
+  local clib_source_dir = 'static/node_code/boot/lib/'
+  local libc_source_path = clib_source_dir .. libc_fn
+  local libgcc_source_path = clib_source_dir .. libgcc_fn
+  local clib_dest_dir = cur_proj_state.base_dir .. 'lib/'
+  local libc_dest_path = clib_dest_dir .. libc_fn
+  local libgcc_dest_path = clib_dest_dir .. libgcc_fn
+  -- Open the source/destination 'libc' files. Use 'binary' mode.
+  local libc_source_file = io.open(libc_source_path, 'rb')
+  if not libc_source_file then
+    return nil
+  end
+  local libc_dest_file = io.open(libc_dest_path, 'wb')
+  if not libc_dest_file then
+    libc_source_file:close()
+    return nil
+  end
+  -- Copy the 'libc' file.
+  libc_dest_file:write(libc_source_file:read("*a"))
+  -- Close the 'libc' files.
+  libc_source_file:close()
+  libc_dest_file:close()
+  -- Open the source/destination 'libgcc' files. Use 'binary' mode.
+  local libgcc_source_file = io.open(libgcc_source_path, 'rb')
+  if not libgcc_source_file then
+    return nil
+  end
+  local libgcc_dest_file = io.open(libgcc_dest_path, 'wb')
+  if not libgcc_dest_file then
+    libgcc_source_file:close()
+    return nil
+  end
+  -- Copy the 'libc' file.
+  libgcc_dest_file:write(libgcc_source_file:read("*a"))
+  -- Close the 'libc' files.
+  libgcc_source_file:close()
+  libgcc_dest_file:close()
+  -- This method just returns a flag for 'toolchain libraries okay/not okay'
+  return true
 end
 
 -- Generate a vector table for the given chip. Eventually, this can be used
