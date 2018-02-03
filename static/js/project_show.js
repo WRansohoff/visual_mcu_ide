@@ -220,6 +220,7 @@ var gl = null;
 var grid_shader_prog = null;
 var node_shader_prog = null;
 var img_lock = false;
+var imgs_loaded = 0;
 // Array for keeping track of FSM node structs to send to the shader.
 var fsm_nodes = [];
 // (Fields sent to the shaders)
@@ -312,6 +313,7 @@ load_one_texture = function(tex_key, tex_path) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     loaded_textures[tex_key] = tex;
     img_lock = false;
+    imgs_loaded += 1;
   };
   img.src = tex_path;
 };
@@ -408,6 +410,55 @@ node_array_to_json = function(node_arr) {
   }
   nodes_json.nodes_str = JSON.stringify(nodes_json.nodes, null, 2)
   return nodes_json;
+};
+
+node_array_from_json = function(node_arr_json) {
+  var nodes_map = [];
+  var cur_node_index = 0;
+  for (var index in node_arr_json) {
+    var cur_node = node_arr_json[index];
+    if (cur_node) {
+      // Add the loaded node to the FSM array.
+      var valid_node = true;
+      var cur_fsm_node = [];
+      cur_fsm_node.node_type = cur_node.node_type;
+      cur_fsm_node.grid_coord_x = cur_node.grid_coord_x;
+      cur_fsm_node.grid_coord_y = cur_node.grid_coord_y;
+      if (cur_node.connections) {
+        cur_fsm_node.connections = {
+          left: cur_node.connections.left,
+          right: cur_node.connections.right,
+          up: cur_node.connections.up,
+          down: cur_node.connections.down
+        };
+      }
+      else {
+        cur_fsm_node.connections = {
+          left: 'none',
+          right: 'none',
+          up: 'none',
+          down: 'none'
+        };
+      }
+      cur_fsm_node.node_status = 0;
+      if (cur_fsm_node.node_type == 'Boot' && loaded_textures['Boot']) {
+        cur_fsm_node.tex_sampler = loaded_textures['Boot'];
+        cur_fsm_node.node_color = 'green';
+      }
+      else if (cur_fsm_node.node_type == 'Delay' && loaded_textures['Delay']) {
+        cur_fsm_node.tex_sampler = loaded_textures['Delay'];
+        cur_fsm_node.node_color = 'blue';
+      }
+      else {
+        valid_node = false;
+      }
+      if (valid_node) {
+        nodes_map[cur_node_index] = cur_fsm_node;
+        cur_node_index += 1;
+      }
+    }
+  }
+  return nodes_map;
 };
 
 check_selected_menu_tool = function() {
@@ -772,6 +823,16 @@ redraw_canvas = function() {
 
 project_show_onload = function() {
   init_fsm_layout_canvas();
+
+  // TODO: Geez javascript, be more asynchronous...
+  var interval_id = setInterval(function() {
+    // TODO: Constant for number of images to load.
+    if (imgs_loaded == 26) {
+      fsm_nodes = node_array_from_json(loaded_fsm_nodes);
+      redraw_canvas();
+      clearInterval(interval_id);
+    }
+  }, 500);
 
   // Input handling from HTML GUI.
   // Main 'tool select' buttons.

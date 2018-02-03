@@ -54,7 +54,7 @@
   submit_project_save_request = function(fsm_nodes_str) {
     $.post("/save_project/<%= proj_id %>", fsm_nodes_str)
      .done(function(data) {
-       alert("Saved!\n"+JSON.stringify(data));
+       //alert("Saved!\n"+JSON.stringify(data));
      })
      .fail(function() {
        alert("Error saving.");
