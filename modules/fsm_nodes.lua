@@ -13,7 +13,7 @@ function FSMNodes.init_project_state(boot_node, node_graph, proj_id)
   end
   -- Set the base directory, and make it if it doesn't exist.
   local proj_dir = 'project_storage/precomp_' .. proj_int .. '/'
-  if varm_util.ensure_dir_exists(proj_dir) then
+  if varm_util.ensure_dir_empty(proj_dir) then
     p_state.base_dir = proj_dir
     -- Verify or create other required directories for the project skeleton.
     -- Also empty the directory contents, if any.
@@ -36,7 +36,7 @@ function FSMNodes.init_project_state(boot_node, node_graph, proj_id)
       -- Generate the bare-bones source files.
       p_state.src_base = FSMNodes.gen_bare_source_files(boot_node, p_state)
       -- Generate the Makefile, and add LICENSE/README.md files.
-      p_state.build_files = FSMNodes.gen_build_files(boot_node, p_state)
+      p_state.build_files_generated = FSMNodes.gen_build_files(boot_node, p_state)
      else
        return p_state
      end
@@ -175,11 +175,10 @@ end
 -- Generate a vector table for the given chip. Eventually, this can be used
 -- to set hardware interrupts, but for now just copy a common one which
 -- routes all interrupts to a common default 'error/infinite loop' handler.
--- TODO
 function FSMNodes.gen_vector_table(boot_node, cur_proj_state)
   local chip_type = FSMNodes.get_boot_chip_type(boot_node)
 
-  -- Copy the appropriate linker script.
+  -- Copy the appropriate vector table file.
   local vt_script_fn = chip_type .. 'T6_vt.S'
   local vt_script_source_dir = 'static/node_code/boot/vector_tables/'
   local vt_script_source_path = vt_script_source_dir .. vt_script_fn
@@ -216,7 +215,65 @@ end
 -- code, and an MIT LICENSE file.
 -- TODO
 function FSMNodes.gen_build_files(boot_node, cur_proj_state)
-  return nil
+  local chip_type = FSMNodes.get_boot_chip_type(boot_node)
+
+  -- Copy the common README.md/LICENSE files, along with a
+  -- chip-specific Makefile for GNU Make.
+  local makefile_source_fn = 'Make_' .. chip_type
+  local makefile_source_dir = 'static/node_code/boot/makefiles/'
+  local makefile_source_path = makefile_source_dir .. makefile_source_fn
+  local license_source_path = 'static/node_code/boot/LICENSE'
+  local readme_source_path = 'static/node_code/boot/README.md'
+  local makefile_dest_path = cur_proj_state.base_dir .. 'Makefile'
+  local license_dest_path = cur_proj_state.base_dir .. 'LICENSE'
+  local readme_dest_path = cur_proj_state.base_dir .. 'README.md'
+  -- Open the Makefile's source/dest files.
+  local makefile_source_file = io.open(makefile_source_path, 'r')
+  if not makefile_source_file then
+    return nil
+  end
+  local makefile_dest_file = io.open(makefile_dest_path, 'w')
+  if not makefile_dest_file then
+    makefile_source_file:close()
+    return nil
+  end
+  -- Copy file contents.
+  makefile_dest_file:write(makefile_source_file:read("*a"))
+  -- Close Makefiles
+  makefile_source_file:close()
+  makefile_dest_file:close()
+  -- Open the LICENSE source/dest files.
+  local license_source_file = io.open(license_source_path, 'r')
+  if not license_source_file then
+    return nil
+  end
+  local license_dest_file = io.open(license_dest_path, 'w')
+  if not license_dest_file then
+    license_source_file:close()
+    return nil
+  end
+  -- Copy file contents.
+  license_dest_file:write(license_source_file:read("*a"))
+  -- Close LICENSE files
+  license_source_file:close()
+  license_dest_file:close()
+  -- Open the README source/dest files.
+  local readme_source_file = io.open(readme_source_path, 'r')
+  if not readme_source_file then
+    return nil
+  end
+  local readme_dest_file = io.open(readme_dest_path, 'w')
+  if not readme_dest_file then
+    readme_source_file:close()
+    return nil
+  end
+  -- Copy file contents.
+  readme_dest_file:write(readme_source_file:read("*a"))
+  -- Close LICENSE files
+  readme_source_file:close()
+  readme_dest_file:close()
+  -- This method just returns a 'build files generated/not generated' flag.
+  return true
 end
 
 -- Process a single node in the FSM graph.
