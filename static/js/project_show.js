@@ -259,20 +259,20 @@ var imgs_to_load = {
   // these should be svg files anyways so just...ugh, TODO
   left_arrow_blue:   '/static/fsm_assets/conn_LtoR_blue.png',
   right_arrow_blue:  '/static/fsm_assets/conn_RtoL_blue.png',
-  up_arrow_blue:     '/static/fsm_assets/conn_TtoB_blue.png',
-  down_arrow_blue:   '/static/fsm_assets/conn_BtoT_blue.png',
+  up_arrow_blue:     '/static/fsm_assets/conn_BtoT_blue.png',
+  down_arrow_blue:   '/static/fsm_assets/conn_TtoB_blue.png',
   left_arrow_green:   '/static/fsm_assets/conn_LtoR_green.png',
   right_arrow_green:  '/static/fsm_assets/conn_RtoL_green.png',
-  up_arrow_green:     '/static/fsm_assets/conn_TtoB_green.png',
-  down_arrow_green:   '/static/fsm_assets/conn_BtoT_green.png',
+  up_arrow_green:     '/static/fsm_assets/conn_BtoT_green.png',
+  down_arrow_green:   '/static/fsm_assets/conn_TtoB_green.png',
   left_arrow_canary:   '/static/fsm_assets/conn_LtoR_canary.png',
   right_arrow_canary:  '/static/fsm_assets/conn_RtoL_canary.png',
-  up_arrow_canary:     '/static/fsm_assets/conn_TtoB_canary.png',
-  down_arrow_canary:   '/static/fsm_assets/conn_BtoT_canary.png',
+  up_arrow_canary:     '/static/fsm_assets/conn_BtoT_canary.png',
+  down_arrow_canary:   '/static/fsm_assets/conn_TtoB_canary.png',
   left_arrow_pink:   '/static/fsm_assets/conn_LtoR_pink.png',
   right_arrow_pink:  '/static/fsm_assets/conn_RtoL_pink.png',
-  up_arrow_pink:     '/static/fsm_assets/conn_TtoB_pink.png',
-  down_arrow_pink:   '/static/fsm_assets/conn_BtoT_pink.png',
+  up_arrow_pink:     '/static/fsm_assets/conn_BtoT_pink.png',
+  down_arrow_pink:   '/static/fsm_assets/conn_TtoB_pink.png',
 };
 var num_imgs = 0;
 
