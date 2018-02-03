@@ -177,7 +177,30 @@ end
 -- routes all interrupts to a common default 'error/infinite loop' handler.
 -- TODO
 function FSMNodes.gen_vector_table(boot_node, cur_proj_state)
-  return nil
+  local chip_type = FSMNodes.get_boot_chip_type(boot_node)
+
+  -- Copy the appropriate linker script.
+  local vt_script_fn = chip_type .. 'T6_vt.S'
+  local vt_script_source_dir = 'static/node_code/boot/vector_tables/'
+  local vt_script_source_path = vt_script_source_dir .. vt_script_fn
+  local vt_script_dest_dir = cur_proj_state.base_dir .. 'vector_tables/'
+  local vt_script_dest_path = vt_script_dest_dir .. vt_script_fn
+  -- Open the 'source' script and 'destination' files.
+  local vt_script_source_file = io.open(vt_script_source_path, 'r')
+  if not vt_script_source_file then
+    return nil
+  end
+  local vt_script_dest_file = io.open(vt_script_dest_path, 'w')
+  if not vt_script_dest_file then
+    vt_script_source_file:close()
+    return nil
+  end
+  -- Copy file contents.
+  vt_script_dest_file:write(vt_script_source_file:read("*a"))
+  -- Close files.
+  vt_script_source_file:close()
+  vt_script_dest_file:close()
+  return vt_script_dest_path
 end
 
 -- Generate bare-bones source files; basically, some mostly-empty headers
