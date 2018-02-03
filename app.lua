@@ -166,12 +166,48 @@ app:post("/precompile_project/:project_id", function(self)
       end
     end
   end
+  if boot_index == -1 then
+    ret_status = 500
+    status_msg = 'No Boot node passed in.'
+  end
+  -- Starting at 'Boot', process each node in order.
+  local cur_ind = boot_index
+  local cur_node = nil
+  local visited_nodes = {}
+  local preprocessing = true
+  if ret_status == 200 then
+    cur_node = self.params.nodes[cur_ind]
+    while preprocessing do
+      -- TODO: Preprocess current node.
+      if visited_nodes[cur_ind] then
+        preprocessing = false
+      else
+        if cur_node.output and cur_node.output.single then
+          visited_nodes[cur_ind] = true;
+          cur_ind = cur_node.output.single
+          cur_node = self.params.nodes[cur_ind]
+          if not cur_node then
+            preprocessing = false
+            ret_status = 500
+            status_msg = 'Node does not exist: ' + cur_ind
+          end
+        else
+          -- TODO: Support branching.
+          preprocessing = false
+          ret_status = 500
+          status_msg = 'Invalid output options passed in node ' + cur_ind
+        end
+      end
+    end
+  end
+  -- Done; return information about the precompilation.
   return {
     json = {
       precompile_status = status_msg,
       boot_index = boot_index,
       nodes = self.params.nodes,
-      next_node_type = self.params.nodes[self.params.nodes[boot_index].output.single].node_type
+      last_index = cur_ind,
+      visited_nodes = visited_nodes
     },
     status = ret_status
   }
