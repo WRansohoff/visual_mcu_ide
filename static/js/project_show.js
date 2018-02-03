@@ -241,6 +241,38 @@ var loaded_textures = [];
 // Global FSM program variables.
 var mcu_chip = 'STM32F030F4';
 var defined_vars = [];
+// TODO: Shouldn't this be an array of strings, and a .length()?
+var imgs_to_load = {
+  Boot:              '/static/fsm_assets/boot_node.png',
+  Delay:             '/static/fsm_assets/delay_node.png',
+  GPIO_Init:         '/static/fsm_assets/init_gpio_node.png',
+  GPIO_Deinit:       '/static/fsm_assets/disable_pin_node.png',
+  GPIO_Output:       '/static/fsm_assets/set_output_pin_node.png',
+  RCC_Enable:        '/static/fsm_assets/enable_clock_node.png',
+  RCC_Disable:       '/static/fsm_assets/disable_clock_node.png',
+  New_Variable:      '/static/fsm_assets/new_var_node.png',
+  Set_Variable:      '/static/fsm_assets/set_variable_node.png',
+  Set_Var_Logic_Not: '/static/fsm_assets/set_not_node.png',
+  // Sooo I mixed up 'LtoR' and 'RtoL' in the png filenames. But long-term,
+  // these should be svg files anyways so just...ugh, TODO
+  left_arrow_blue:   '/static/fsm_assets/conn_LtoR_blue.png',
+  right_arrow_blue:  '/static/fsm_assets/conn_RtoL_blue.png',
+  up_arrow_blue:     '/static/fsm_assets/conn_TtoB_blue.png',
+  down_arrow_blue:   '/static/fsm_assets/conn_BtoT_blue.png',
+  left_arrow_green:   '/static/fsm_assets/conn_LtoR_green.png',
+  right_arrow_green:  '/static/fsm_assets/conn_RtoL_green.png',
+  up_arrow_green:     '/static/fsm_assets/conn_TtoB_green.png',
+  down_arrow_green:   '/static/fsm_assets/conn_BtoT_green.png',
+  left_arrow_canary:   '/static/fsm_assets/conn_LtoR_canary.png',
+  right_arrow_canary:  '/static/fsm_assets/conn_RtoL_canary.png',
+  up_arrow_canary:     '/static/fsm_assets/conn_TtoB_canary.png',
+  down_arrow_canary:   '/static/fsm_assets/conn_BtoT_canary.png',
+  left_arrow_pink:   '/static/fsm_assets/conn_LtoR_pink.png',
+  right_arrow_pink:  '/static/fsm_assets/conn_RtoL_pink.png',
+  up_arrow_pink:     '/static/fsm_assets/conn_TtoB_pink.png',
+  down_arrow_pink:   '/static/fsm_assets/conn_BtoT_pink.png',
+};
+var num_imgs = 0;
 
 // Global FSM program constants.
 const rcc_opts = {
@@ -323,34 +355,9 @@ array_filter_nulls = function(x) {
 };
 
 preload_textures = function() {
-  load_one_texture('Boot', '/static/fsm_assets/boot_node.png');
-  load_one_texture('Delay', '/static/fsm_assets/delay_node.png');
-  load_one_texture('GPIO_Init', '/static/fsm_assets/init_gpio_node.png');
-  load_one_texture('GPIO_Deinit', '/static/fsm_assets/disable_pin_node.png');
-  load_one_texture('GPIO_Output', '/static/fsm_assets/set_output_pin_node.png');
-  load_one_texture('RCC_Enable', '/static/fsm_assets/enable_clock_node.png');
-  load_one_texture('RCC_Disable', '/static/fsm_assets/disable_clock_node.png');
-  load_one_texture('New_Variable', '/static/fsm_assets/new_var_node.png');
-  load_one_texture('Set_Variable', '/static/fsm_assets/set_variable_node.png');
-  load_one_texture('Set_Var_Logic_Not', '/static/fsm_assets/set_not_node.png');
-  // Sooo I mixed up 'LtoR' and 'RtoL' in the png filenames. But long-term,
-  // these should be svg files anyways so just...ugh, TODO
-  load_one_texture('left_arrow_blue', '/static/fsm_assets/conn_LtoR_blue.png');
-  load_one_texture('right_arrow_blue', '/static/fsm_assets/conn_RtoL_blue.png');
-  load_one_texture('down_arrow_blue', '/static/fsm_assets/conn_TtoB_blue.png');
-  load_one_texture('up_arrow_blue', '/static/fsm_assets/conn_BtoT_blue.png');
-  load_one_texture('left_arrow_green', '/static/fsm_assets/conn_LtoR_green.png');
-  load_one_texture('right_arrow_green', '/static/fsm_assets/conn_RtoL_green.png');
-  load_one_texture('down_arrow_green', '/static/fsm_assets/conn_TtoB_green.png');
-  load_one_texture('up_arrow_green', '/static/fsm_assets/conn_BtoT_green.png');
-  load_one_texture('left_arrow_canary', '/static/fsm_assets/conn_LtoR_canary.png');
-  load_one_texture('right_arrow_canary', '/static/fsm_assets/conn_RtoL_canary.png');
-  load_one_texture('down_arrow_canary', '/static/fsm_assets/conn_TtoB_canary.png');
-  load_one_texture('up_arrow_canary', '/static/fsm_assets/conn_BtoT_canary.png');
-  load_one_texture('left_arrow_pink', '/static/fsm_assets/conn_LtoR_pink.png');
-  load_one_texture('right_arrow_pink', '/static/fsm_assets/conn_RtoL_pink.png');
-  load_one_texture('down_arrow_pink', '/static/fsm_assets/conn_TtoB_pink.png');
-  load_one_texture('up_arrow_pink', '/static/fsm_assets/conn_BtoT_pink.png');
+  for (var key in imgs_to_load) {
+    load_one_texture(key, imgs_to_load[key]);
+  }
 };
 
 // Refresh the current set of 'defined variables' from the current FSM nodes.
@@ -824,15 +831,22 @@ redraw_canvas = function() {
 project_show_onload = function() {
   init_fsm_layout_canvas();
 
+  // Calculate number of images to load. Since they're string-keyed.
+  for (var key in imgs_to_load) {
+    if (imgs_to_load[key]) {
+      num_imgs += 1;
+    }
+  }
+
   // TODO: Geez javascript, be more asynchronous...
   var interval_id = setInterval(function() {
     // TODO: Constant for number of images to load.
-    if (imgs_loaded == 26) {
+    if (imgs_loaded == num_imgs) {
       fsm_nodes = node_array_from_json(loaded_fsm_nodes);
       redraw_canvas();
       clearInterval(interval_id);
     }
-  }, 500);
+  }, 50);
 
   // Input handling from HTML GUI.
   // Main 'tool select' buttons.
