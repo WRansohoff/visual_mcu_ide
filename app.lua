@@ -5,6 +5,7 @@ local config = require("lapis.config").get()
 
 -- Local modules
 local FSMNodes = require("modules/fsm_nodes")
+local varm_util = require("modules/varm_util")
 
 -- Database models
 local User = require("models/user")
