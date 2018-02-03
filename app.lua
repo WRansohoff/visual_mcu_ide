@@ -138,6 +138,15 @@ app:match("/project/:project_id", function(self)
   vars_logic_list["Variable Modification"] = logic_mods_list
   tool_list["Variables and Logic"] = vars_logic_list
 
+  -- Check for a previously-saved file.
+  -- TODO: Decryption? (After encrypting saved files)
+  local i_file = io.open("project_storage/project_" .. proj_id .. ".json", "r")
+  loaded_nodes_str = nil
+  if i_file then
+    loaded_nodes_str = i_file:read("*a")
+    i_file:close()
+  end
+
   return { render = "project_show" }
 end)
 
@@ -172,6 +181,38 @@ app:match("/project/delete/:project_id", function(self)
 
   -- Return to the base 'projects' page.
   return { redirect_to = "/projects" }
+end)
+
+app:post("/save_project/:project_id", function(self)
+  -- If there isn't a signed-in user, redirect to the landing page.
+  if not self.session.current_user then
+    self.session.err_msg = "You must be signed in to use this page."
+    return { status = 403 }
+  end
+  -- If no ID is provided, return without action.
+  if not self.params.project_id or self.params.project_id == "" then
+    return { status = 400 }
+  end
+  local proj_id = tonumber(self.params.project_id)
+  -- If no project exists with the given ID, return without action.
+  local proj = Project:find(proj_id)
+  if not proj then
+    return { status = 404 }
+  end
+  -- If the current user does not own the given project,
+  -- return without action.
+  if proj.user_id ~= self.session.current_user.id then
+    return { status = 403 }
+  end
+
+  -- Save the provided JSON string to a file.
+  -- TODO: Encryption?
+  local o_file = io.open("project_storage/project_" .. proj_id .. ".json", "w")
+  o_file:write(self.params.nodes_str)
+  o_file:close()
+
+  -- Done.
+  return { json = { status = 'success', nodes = self.params.nodes }, status = 200 }
 end)
 
 app:post("/sign_up", function(self)

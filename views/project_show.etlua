@@ -6,6 +6,14 @@
 
 <script type="text/javascript">
   window.onload = function() {
+    // TODO: Make this a GET call to directly return JSON?
+    <% if loaded_nodes_str and loaded_nodes_str ~= "" then %>
+      loaded_fsm_nodes = `<%= loaded_nodes_str %>`.replace(/&quot;/g, '"');
+      loaded_fsm_nodes = JSON.parse(loaded_fsm_nodes);
+    <% else %>
+      loaded_fsm_nodes = null;
+    <% end %>
+
     project_show_onload();
 
     // (etlua-templated javascript setup stuff)
@@ -52,6 +60,16 @@
       .fail(function() {
         alert("POST fail");
       });
+  };
+
+  submit_project_save_request = function(fsm_nodes_str) {
+    $.post("/save_project/<%= proj_id %>", fsm_nodes_str)
+     .done(function(data) {
+       //alert("Saved!\n"+JSON.stringify(data));
+     })
+     .fail(function() {
+       alert("Error saving.");
+     });
   };
 </script>
 
@@ -172,6 +190,7 @@
 
   <div class="header_panel">
     Project Title: <%= current_project.title %>
+    <a href="#" id="save_fsm_project_link" class="save_project_link">Save</a>
     <a href="/projects" class="back_link">Back</a>
     <a href="#" id="precompile_button" class="precompile_link">Precompile</a>
   </div>
