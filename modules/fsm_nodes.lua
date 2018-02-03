@@ -15,6 +15,18 @@ function FSMNodes.init_project_state(boot_node, node_graph, proj_id)
   local proj_dir = 'project_storage/precomp_' .. proj_int .. '/'
   if varm_util.ensure_dir_exists(proj_dir) then
     p_state.base_dir = proj_dir
+    -- Verify or create other required directories for the project skeleton.
+    if varm_util.ensure_dir_exists(proj_dir .. 'boot_s/') and
+       varm_util.ensure_dir_exists(proj_dir .. 'ld/') and
+       varm_util.ensure_dir_exists(proj_dir .. 'lib/') and
+       varm_util.ensure_dir_exists(proj_dir .. 'vector_tables/') and
+       varm_util.ensure_dir_exists(proj_dir .. 'src/') and
+       varm_util.ensure_dir_exists(proj_dir .. 'src/std_periph/') and
+       varm_util.ensure_dir_exists(proj_dir .. 'src/arm_include/') then
+       p_state.dir_structure = 'valid'
+     else
+       return p_state
+     end
   else
     return p_state
   end
