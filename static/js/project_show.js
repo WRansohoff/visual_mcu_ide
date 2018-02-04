@@ -1368,14 +1368,16 @@ var precompile_project = function() {
         pre_pre_process_error += "Error: Multiple nodes on the same grid coordinate: (" + cur_node.grid_coord_x + ", " + cur_node.grid_coord_y + ").\n";
       }
       // (Store both the node and info about its 'program_node' location.)
+      var prog_node_ind = program_nodes.length;
       grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y] = cur_node;
-      grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y].pn_index = program_nodes.length;
+      grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y].pn_index = prog_node_ind;
       grid_nodes_yx[cur_node.grid_coord_y][cur_node.grid_coord_x] = cur_node;
-      grid_nodes_yx[cur_node.grid_coord_y][cur_node.grid_coord_x].pn_index = program_nodes.length;
+      grid_nodes_yx[cur_node.grid_coord_y][cur_node.grid_coord_x].pn_index = prog_node_ind;
       // Insert the node's information (minus 'output[s]') into the
       // JSON object to send to the controller action.
       // TODO: Method to set default node options?
       program_nodes.push({
+        node_ind: prog_node_ind,
         node_type: cur_node.node_type,
         grid_coord_x: cur_node.grid_coord_x,
         grid_coord_y: cur_node.grid_coord_y,
