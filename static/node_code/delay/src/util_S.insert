@@ -16,6 +16,7 @@ UTIL_S_DELAY_CYCLES_DEF_START:
  */
 .type delay_cycles,%function
 .section .text.delay_cycles,"ax",%progbits
+delay_cycles:
   PUSH { r0, lr }
   POP  { r0, pc }
 .size delay_cycles, .-delay_cycles
@@ -28,6 +29,7 @@ UTIL_S_DELAY_US_DEF_START:
  */
 .type delay_us,%function
 .section .text.delay_us,"ax",%progbits
+delay_us:
   PUSH { r0, lr }
   POP  { r0, pc }
 .size delay_us, .-delay_us
@@ -40,6 +42,7 @@ UTIL_S_DELAY_MS_DEF_START:
  */
 .type delay_ms,%function
 .section .text.delay_ms,"ax",%progbits
+delay_ms:
   PUSH { r0, lr }
   POP  { r0, pc }
 .size delay_ms, .-delay_ms

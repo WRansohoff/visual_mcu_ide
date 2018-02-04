@@ -266,9 +266,12 @@ function FSMNodes.append_boot_node(node, node_graph, proj_state)
   -- There's no real code needed for the 'Boot' node, but we still have
   -- to add a label for the node and a GOTO to make sure that the
   -- program starts with the right node.
-  local node_text = '  // (Boot node: TODO)\n  // (ID: ' .. node.node_ind .. ')\n'
+  local node_text = '  NODE_' .. node.node_ind .. ':\n'
+  node_text = node_text .. ' // TODO: boot code?\n'
   if node.output and node.output.single then
-    node_text = node_text .. '  // (next node: ' .. node.output.single .. ')\n'
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
   end
   node_text = node_text .. '\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
@@ -358,9 +361,12 @@ end
 
 -- Append code to the 'main' method for a 'Delay' node.
 function FSMNodes.append_delay_node(node, node_graph, proj_state)
-  local node_text = '  // (Delay node: TODO)\n  // (ID: ' .. node.node_ind .. ')\n'
+  local node_text = '  NODE_' .. node.node_ind .. ':\n'
+  node_text = node_text .. '  // TODO: delay code\n'
   if node.output and node.output.single then
-    node_text = node_text .. '  // (next node: ' .. node.output.single .. ')\n'
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
   end
   node_text = node_text .. '\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
