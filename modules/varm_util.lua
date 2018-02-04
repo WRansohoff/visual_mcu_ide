@@ -260,4 +260,48 @@ function varm_util.replace_lines_in_file(file_path, old_line, new_line)
   return true
 end
 
+-- Import a standard peripheral library file.
+-- The 'which_lib' value defines which library to pull in. Examples:
+-- 'rcc', 'gpio', 'misc', 'rtc', 'adc', 'i2c', 'tim', and so on.
+-- The 'from_dir' path should contain both the .c and .h files
+-- for the library that is being imported.
+-- Currently, only STM32F0 chips are supported, but later that can be an opt.
+-- Returns true if the library has already been imported, or if it did
+-- not previously exist but was successfully imported.
+function varm_util.import_std_periph_lib(which_lib, from_dir, proj_base_dir)
+  local from_c = from_dir .. 'stm32f0xx_' .. which_lib .. '.c'
+  local from_h = from_dir .. 'stm32f0xx_' .. which_lib .. '.h'
+  local to_c = proj_base_dir .. 'src/std_periph/stm32f0xx_' .. which_lib .. '.c'
+  local to_h = proj_base_dir .. 'src/std_periph/stm32f0xx_' .. which_lib .. '.h'
+  if varm_util.path_exists(to_c) and varm_util.path_exists(to_h) then
+    -- The library has already been imported.
+    return true
+  end
+
+  -- Import the library.
+  -- Copy source and header files.
+  if not varm_util.copy_text_file(from_h, to_h) then
+    return nil
+  end
+  if not varm_util.copy_text_file(from_c, to_c) then
+    return nil
+  end
+  -- Un-comment the include in the 'stm32f0xx_conf.h' header file.
+  if not varm_util.replace_lines_in_file(
+      proj_base_dir .. 'src/stm32f0xx_conf.h',
+      '//#include "stm32f0xx_' .. which_lib .. '.h"',
+      '#include "stm32f0xx_' .. which_lib .. '.h"') then
+    return nil
+  end
+  -- Add the source file to the Makefile's build targets.
+  if not varm_util.insert_into_file(proj_base_dir .. 'Makefile',
+      '# STD_PERIPH_SRCS',
+      'C_SRC  += ./src/std_periph/stm32f0xx_' .. which_lib .. '.c\n') then
+    return nil
+  end
+
+  -- Done.
+  return true
+end
+
 return varm_util
