@@ -277,15 +277,16 @@ function FSMNodes.append_boot_node(node, node_graph, proj_state)
   -- to add a label for the node and a GOTO to make sure that the
   -- program starts with the right node.
   -- (Start with 'goto Boot', to avoid compiler warnings for an unused label.
-  local node_text = '  goto NODE_' .. node.node_ind .. ';\n'
+  local node_text = '  // ("Boot" node, program entry point)\n'
+  node_text = node_text .. '  goto NODE_' .. node.node_ind .. ';\n'
   node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  node_text = node_text .. ' // TODO: boot code?\n'
+  node_text = node_text .. '  // TODO: boot code?\n'
   if node.output and node.output.single then
     node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
   else
     return nil
   end
-  node_text = node_text .. '\n'
+  node_text = node_text .. '  // (End "Boot" node)\n\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
                                     '/ MAIN_ENTRY:',
                                     node_text) then
@@ -331,14 +332,21 @@ end
 
 -- Append code to the 'main' method for a 'Delay' node.
 function FSMNodes.append_delay_node(node, node_graph, proj_state)
-  local node_text = '  NODE_' .. node.node_ind .. ':\n'
-  node_text = node_text .. '  // TODO: delay code\n'
+  local node_text = '  // ("Delay" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- Get the number of cycles to delay. TODO: Support other 'delay_units'.
+  node_text = node_text .. '  delay_cycles('
+  if node.options and node.options.delay_value then
+    node_text = node_text .. node.options.delay_value .. ');\n'
+  else
+    node_text = node_text .. '0); // TODO: Default options\n'
+  end
   if node.output and node.output.single then
     node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
   else
     return nil
   end
-  node_text = node_text .. '\n'
+  node_text = node_text .. '  // (End "Delay" node)\n\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
                                     "/ MAIN_ENTRY:",
                                     node_text) then
@@ -355,14 +363,15 @@ end
 
 -- Append code to the 'main' method for a 'Setup GPIO Pin' node.
 function FSMNodes.append_gpio_init_node(node, node_graph, proj_state)
-  local node_text = '  NODE_' .. node.node_ind .. ':\n'
+  local node_text = '  // ("Setup GPIO Pin" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
   node_text = node_text .. '  // TODO: GPIO pin initialization code\n'
   if node.output and node.output.single then
     node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
   else
     return nil
   end
-  node_text = node_text .. '\n'
+  node_text = node_text .. '  // (End "Setup GPIO Pin" node)\n\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
                                     "/ MAIN_ENTRY:",
                                     node_text) then
@@ -379,14 +388,15 @@ end
 
 -- Append code to the 'main' method for a 'Set GPIO Pin Output' node.
 function FSMNodes.append_gpio_output_node(node, node_graph, proj_state)
-  local node_text = '  NODE_' .. node.node_ind .. ':\n'
+  local node_text = '  // ("Set GPIO Output" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
   node_text = node_text .. '  // TODO: GPIO pin output code\n'
   if node.output and node.output.single then
     node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
   else
     return nil
   end
-  node_text = node_text .. '\n'
+  node_text = node_text .. '  // (End "Set GPIO Output" node)\n\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
                                     "/ MAIN_ENTRY:",
                                     node_text) then
