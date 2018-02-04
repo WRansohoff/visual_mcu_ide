@@ -415,6 +415,52 @@ end
 -- hardware features to work)
 -- TODO
 function FSMNodes.ensure_support_methods_rcc_enable_node(node, proj_state)
+  -- For now, just use the standard peripherals library's method.
+  -- Copy the appropriate files, and uncomment their include statements.
+  -- Also add the source files to the Makefile.
+  local stdp_s_path = 'static/node_code/rcc_enable/src/std_periph/'
+  local stdp_d_path = proj_state.base_dir .. 'src/std_periph/'
+  local misc_h_fn = 'stm32f0xx_misc.h'
+  local misc_c_fn = 'stm32f0xx_misc.c'
+  local rcc_h_fn = 'stm32f0xx_rcc.h'
+  local rcc_c_fn = 'stm32f0xx_rcc.c'
+  -- (Copy files.)
+  if not varm_util.copy_text_file(stdp_s_path .. misc_h_fn, stdp_d_path .. misc_h_fn) then
+    return nil
+  end
+  if not varm_util.copy_text_file(stdp_s_path .. misc_c_fn, stdp_d_path .. misc_c_fn) then
+    return nil
+  end
+  if not varm_util.copy_text_file(stdp_s_path .. rcc_h_fn, stdp_d_path .. rcc_h_fn) then
+    return nil
+  end
+  if not varm_util.copy_text_file(stdp_s_path .. rcc_c_fn, stdp_d_path .. rcc_c_fn) then
+    return nil
+  end
+  -- (stm32f0xx_conf.h)
+  if not varm_util.replace_lines_in_file(
+             proj_state.base_dir .. 'src/stm32f0xx_conf.h',
+             '//#include "stm32f0xx_misc.h"',
+             '#include "stm32f0xx_misc.h"') then
+    return nil
+  end
+  if not varm_util.replace_lines_in_file(
+             proj_state.base_dir .. 'src/stm32f0xx_conf.h',
+             '//#include "stm32f0xx_rcc.h"',
+             '#include "stm32f0xx_rcc.h"') then
+    return nil
+  end
+  -- (Makefile)
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'Makefile',
+        '# STD_PERIPH_SRCS',
+        'C_SRC  += ./src/std_periph/' .. 'stm32f0xx_misc.c\n') then
+    return nil
+  end
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'Makefile',
+        '# STD_PERIPH_SRCS',
+        'C_SRC  += ./src/std_periph/' .. 'stm32f0xx_rcc.c\n') then
+    return nil
+  end
   return true
 end
 
@@ -422,7 +468,16 @@ end
 function FSMNodes.append_rcc_enable_node(node, node_graph, proj_state)
   local node_text = '  // ("Enable Clock" (RCC) node)\n'
   node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  node_text = node_text .. '  // TODO: RCC peripheral clock enable code\n'
+  -- TODO: Support more RCC periph clock values.
+  if node.options and node.options.periph_clock then
+    if node.options.periph_clock == 'GPIOA' then
+      node_text = node_text .. '  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);\n'
+    else
+      node_text = node_text .. '  // TODO: RCC peripheral clock enable defaults\n'
+    end
+  else
+    node_text = node_text .. '  // TODO: RCC peripheral clock enable defaults\n'
+  end
   if node.output and node.output.single then
     node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
   else

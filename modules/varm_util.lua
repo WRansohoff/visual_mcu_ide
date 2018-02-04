@@ -214,4 +214,42 @@ function varm_util.copy_block_into_file(source_file_path,
   return true
 end
 
+-- Similar to the 'insert_into_file' method, but this replaces a single
+-- line. Mostly just used for uncommenting imports.
+function varm_util.replace_lines_in_file(file_path, old_line, new_line)
+  -- Verify the desired file path.
+  local actual_src_path = file_path:gsub("[^a-zA-Z0-9_%/%.]", "")
+  if actual_src_path ~= file_path then
+    return nil
+  end
+  -- Open the R/W files.
+  local old_file = io.open(file_path, 'r')
+  if not old_file then
+    return nil
+  end
+  local temp_path = file_path .. '.tmp'
+  local temp_file = io.open(temp_path, 'w')
+  if not temp_file then
+    old_file:close()
+    return nil
+  end
+  -- Copy the old file, line-by-line. When/if we hit the 'old_line' value,
+  -- insert the 'new_line' value instead.
+  for l in old_file:lines() do
+    if l:find(old_line) ~= nil then
+      temp_file:write(new_line .. '\n')
+    else
+      temp_file:write(l .. '\n')
+    end
+  end
+  old_file:close()
+  temp_file:close()
+  -- Rename the temp file, to overwrite the old one.
+  if not os.rename(temp_path, file_path) then
+    return nil
+  end
+  -- Done.
+  return true
+end
+
 return varm_util
