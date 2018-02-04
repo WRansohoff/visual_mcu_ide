@@ -133,7 +133,7 @@ function varm_util.insert_into_file(file_path, line_match, new_text)
   -- append text before the 'match' line with a trailing newline.
   for l in old_file:lines() do
     if l:find(line_match) then
-      temp_file:write(new_text .. '\n')
+      temp_file:write(new_text)
     end
     temp_file:write(l .. '\n')
   end
@@ -144,6 +144,73 @@ function varm_util.insert_into_file(file_path, line_match, new_text)
     return nil
   end
   -- Done.
+  return true
+end
+
+function varm_util.copy_block_into_file(source_file_path,
+                                        dest_file_path,
+                                        source_start_tag,
+                                        source_end_tag,
+                                        dest_line_match)
+  -- Verify file paths / prevent arbitrary code execution.
+  local actual_src_path = source_file_path:gsub("[^a-zA-Z0-9_%/%.]", "")
+  if actual_src_path ~= source_file_path then
+    return nil
+  end
+  local actual_dest_path = dest_file_path:gsub("[^a-zA-Z0-9_%/%.]", "")
+  if actual_dest_path ~= dest_file_path then
+    return nil
+  end
+  -- Open the source/destination files.
+  local source_file = io.open(actual_src_path, 'r')
+  if not source_file then
+    return nil
+  end
+  local dest_file = io.open(actual_dest_path, 'r')
+  if not dest_file then
+    source_file:close()
+    return nil
+  end
+  -- Search the destination file for the start/end tags. If either
+  -- are found, don't perform the copy because it has already been done.
+  for l in dest_file:lines() do
+    if l:find(source_start_tag) or l:find(source_end_tag) then
+      -- 'The block has already been copied' is considered a success.
+      return true
+    end
+  end
+  -- Read the source file, line-by-line. If/when we find the 'start_tag'
+  -- value in a line, start adding lines to the 'text to insert' value.
+  -- The 'start_tag' can be a subset of the line, so make it unique.
+  -- If/when we find the 'end_tag' value in a line, stop.
+  local text_to_insert = ''
+  local currently_copying = false
+  for l in source_file:lines() do
+    if not currently_copying then
+      if l:find(source_start_tag) then
+        currently_copying = true
+        text_to_insert = text_to_insert .. '//' .. source_start_tag .. '\n'
+      end
+    else
+      if l:find(source_end_tag) then
+        currently_copying = false
+        text_to_insert = text_to_insert .. '//' .. source_end_tag .. '\n'
+        break
+      else
+        text_to_insert = text_to_insert .. l .. '\n'
+      end
+    end
+  end
+  -- Close the source file.
+  source_file:close()
+  dest_file:close()
+  -- If there is any text to insert, insert it into the 'destination' file.
+  -- Also, only insert if the 'end_tag' value was found.
+  if text_to_insert ~= '' and not currently_copying then
+    return varm_util.insert_into_file(actual_dest_path,
+                                      dest_line_match,
+                                      text_to_insert)
+  end
   return true
 end
 
