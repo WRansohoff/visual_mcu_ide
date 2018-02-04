@@ -17,7 +17,7 @@ endif
 
 LD_SCRIPT = ${CHIP_FILE}.ld
 VECT_TBL  = ./vector_tables/${CHIP_FILE}_vt.S
-BOOT_FILE = ./boot/${CHIP_FILE}_boot.S
+BOOT_FILE = ./boot_s/${CHIP_FILE}_boot.S
 
 ifeq ($(MCU_CLASS), F0)
 	MCU_SPEC = cortex-m0
@@ -111,5 +111,5 @@ $(TARGET).bin: $(TARGET).elf
 clean:
 	rm -f $(OBJS)
 	rm -f ./vector_tables/*.o
-	rm -f ./boot/*.o
+	rm -f ./boot_s/*.o
 	rm -f $(TARGET).elf $(TARGET).bin

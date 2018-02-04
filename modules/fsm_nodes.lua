@@ -74,22 +74,10 @@ function FSMNodes.gen_boot_script(boot_node, cur_proj_state)
   local boot_script_source_path = boot_script_source_dir .. boot_script_fn
   local boot_script_dest_dir = cur_proj_state.base_dir .. 'boot_s/'
   local boot_script_dest_path = boot_script_dest_dir .. boot_script_fn
-  -- Open the 'source' script and 'destination' files.
-  local boot_script_source_file = io.open(boot_script_source_path, 'r')
-  if not boot_script_source_file then
-    return nil
+  if varm_util.copy_text_file(boot_script_source_path, boot_script_dest_path) then
+    return boot_script_dest_path
   end
-  local boot_script_dest_file = io.open(boot_script_dest_path, 'w')
-  if not boot_script_dest_file then
-    boot_script_source_file:close()
-    return nil
-  end
-  -- Copy file contents.
-  boot_script_dest_file:write(boot_script_source_file:read("*a"))
-  -- Close files.
-  boot_script_source_file:close()
-  boot_script_dest_file:close()
-  return boot_script_dest_path
+  return nil
 end
 
 -- Copy a linker script for the given MCU chip into the 'ld/' directory.
@@ -104,22 +92,10 @@ function FSMNodes.gen_ld_script(boot_node, cur_proj_state)
   local ld_script_source_path = ld_script_source_dir .. ld_script_fn
   local ld_script_dest_dir = cur_proj_state.base_dir .. 'ld/'
   local ld_script_dest_path = ld_script_dest_dir .. ld_script_fn
-  -- Open the 'source' script and 'destination' files.
-  local ld_script_source_file = io.open(ld_script_source_path, 'r')
-  if not ld_script_source_file then
-    return nil
+  if varm_util.copy_text_file(ld_script_source_path, ld_script_dest_path) then
+    return ld_script_dest_path
   end
-  local ld_script_dest_file = io.open(ld_script_dest_path, 'w')
-  if not ld_script_dest_file then
-    ld_script_source_file:close()
-    return nil
-  end
-  -- Copy file contents.
-  ld_script_dest_file:write(ld_script_source_file:read("*a"))
-  -- Close files.
-  ld_script_source_file:close()
-  ld_script_dest_file:close()
-  return ld_script_dest_path
+  return nil
 end
 
 -- Copy library files. TODO: These files are too big. They should come with
@@ -138,36 +114,12 @@ function FSMNodes.copy_static_libs(boot_node, cur_proj_state)
   local clib_dest_dir = cur_proj_state.base_dir .. 'lib/'
   local libc_dest_path = clib_dest_dir .. libc_fn
   local libgcc_dest_path = clib_dest_dir .. libgcc_fn
-  -- Open the source/destination 'libc' files. Use 'binary' mode.
-  local libc_source_file = io.open(libc_source_path, 'rb')
-  if not libc_source_file then
+  if not varm_util.copy_text_file(libc_source_path, libc_dest_path) then
     return nil
   end
-  local libc_dest_file = io.open(libc_dest_path, 'wb')
-  if not libc_dest_file then
-    libc_source_file:close()
+  if not varm_util.copy_text_file(libgcc_source_path, libgcc_dest_path) then
     return nil
   end
-  -- Copy the 'libc' file.
-  libc_dest_file:write(libc_source_file:read("*a"))
-  -- Close the 'libc' files.
-  libc_source_file:close()
-  libc_dest_file:close()
-  -- Open the source/destination 'libgcc' files. Use 'binary' mode.
-  local libgcc_source_file = io.open(libgcc_source_path, 'rb')
-  if not libgcc_source_file then
-    return nil
-  end
-  local libgcc_dest_file = io.open(libgcc_dest_path, 'wb')
-  if not libgcc_dest_file then
-    libgcc_source_file:close()
-    return nil
-  end
-  -- Copy the 'libc' file.
-  libgcc_dest_file:write(libgcc_source_file:read("*a"))
-  -- Close the 'libc' files.
-  libgcc_source_file:close()
-  libgcc_dest_file:close()
   -- This method just returns a flag for 'toolchain libraries okay/not okay'
   return true
 end
@@ -184,36 +136,67 @@ function FSMNodes.gen_vector_table(boot_node, cur_proj_state)
   local vt_script_source_path = vt_script_source_dir .. vt_script_fn
   local vt_script_dest_dir = cur_proj_state.base_dir .. 'vector_tables/'
   local vt_script_dest_path = vt_script_dest_dir .. vt_script_fn
-  -- Open the 'source' script and 'destination' files.
-  local vt_script_source_file = io.open(vt_script_source_path, 'r')
-  if not vt_script_source_file then
-    return nil
+  -- Copy files.
+  if varm_util.copy_text_file(vt_script_source_path, vt_script_dest_path) then
+    return vt_script_dest_path
   end
-  local vt_script_dest_file = io.open(vt_script_dest_path, 'w')
-  if not vt_script_dest_file then
-    vt_script_source_file:close()
-    return nil
-  end
-  -- Copy file contents.
-  vt_script_dest_file:write(vt_script_source_file:read("*a"))
-  -- Close files.
-  vt_script_source_file:close()
-  vt_script_dest_file:close()
-  return vt_script_dest_path
+  return nil
 end
 
 -- Generate bare-bones source files; basically, some mostly-empty headers
 -- / utility files, and an empty main method which should get called after
 -- booting, if you compiled everything after the 'init_project_state' method.
--- TODO
 function FSMNodes.gen_bare_source_files(boot_node, cur_proj_state)
-  return nil
+  local chip_type = FSMNodes.get_boot_chip_type(boot_node)
+
+  -- Right now, it looks like we should copy:
+  -- - src/core.S
+  -- - src/util.S
+  -- - src/main.c
+  -- - src/main.h
+  -- - src/global.h
+  -- - src/util_c.h
+  -- - src/util_c.c
+  -- - src/stm32f0xx.h
+  -- - src/stm32f0xx_conf.h
+  -- - src/std_periph
+  --   - (none)
+  -- - src/arm_include/
+  --   - arm_common_tables.h
+  --   - arm_const_structs.h
+  --   - arm_math.h
+  --   - core_cm0.h
+  --   - core_cm0plus.h
+  --   - core_cmFunc.h
+  --   - core_cmInstr.h
+  local files_to_copy = { 'src/core.S', 'src/util.S', 'src/global.h',
+                          'src/main.h', 'src/main.c', 'src/stm32f0xx.h',
+                          'src/util_c.h', 'src/util_c.c',
+                          'src/stm32f0xx_conf.h',
+                          'src/arm_include/arm_common_tables.h',
+                          'src/arm_include/arm_const_structs.h',
+                          'src/arm_include/arm_math.h',
+                          'src/arm_include/core_cm0.h',
+                          'src/arm_include/core_cm0plus.h', --TODO: delete?
+                          'src/arm_include/core_cmFunc.h',
+                          'src/arm_include/core_cmInstr.h',
+                        }
+  local copy_success = true
+  for k, val in pairs(files_to_copy) do
+    if val then
+      local src_p = 'static/node_code/boot/' .. val
+      local dest_p = cur_proj_state.base_dir .. val
+      if not varm_util.copy_text_file(src_p, dest_p) then
+        copy_success = false
+      end
+    end
+  end
+  return copy_success
 end
 
 -- Generate build files. So, a GNU Makefile, a README.md which advises
 -- users not to take programming tips from the autogenerated GOTO-riddled
 -- code, and an MIT LICENSE file.
--- TODO
 function FSMNodes.gen_build_files(boot_node, cur_proj_state)
   local chip_type = FSMNodes.get_boot_chip_type(boot_node)
 
@@ -227,51 +210,16 @@ function FSMNodes.gen_build_files(boot_node, cur_proj_state)
   local makefile_dest_path = cur_proj_state.base_dir .. 'Makefile'
   local license_dest_path = cur_proj_state.base_dir .. 'LICENSE'
   local readme_dest_path = cur_proj_state.base_dir .. 'README.md'
-  -- Open the Makefile's source/dest files.
-  local makefile_source_file = io.open(makefile_source_path, 'r')
-  if not makefile_source_file then
+  -- Copy files.
+  if not varm_util.copy_text_file(makefile_source_path, makefile_dest_path) then
     return nil
   end
-  local makefile_dest_file = io.open(makefile_dest_path, 'w')
-  if not makefile_dest_file then
-    makefile_source_file:close()
+  if not varm_util.copy_text_file(license_source_path, license_dest_path) then
     return nil
   end
-  -- Copy file contents.
-  makefile_dest_file:write(makefile_source_file:read("*a"))
-  -- Close Makefiles
-  makefile_source_file:close()
-  makefile_dest_file:close()
-  -- Open the LICENSE source/dest files.
-  local license_source_file = io.open(license_source_path, 'r')
-  if not license_source_file then
+  if not varm_util.copy_text_file(readme_source_path, readme_dest_path) then
     return nil
   end
-  local license_dest_file = io.open(license_dest_path, 'w')
-  if not license_dest_file then
-    license_source_file:close()
-    return nil
-  end
-  -- Copy file contents.
-  license_dest_file:write(license_source_file:read("*a"))
-  -- Close LICENSE files
-  license_source_file:close()
-  license_dest_file:close()
-  -- Open the README source/dest files.
-  local readme_source_file = io.open(readme_source_path, 'r')
-  if not readme_source_file then
-    return nil
-  end
-  local readme_dest_file = io.open(readme_dest_path, 'w')
-  if not readme_dest_file then
-    readme_source_file:close()
-    return nil
-  end
-  -- Copy file contents.
-  readme_dest_file:write(readme_source_file:read("*a"))
-  -- Close LICENSE files
-  readme_source_file:close()
-  readme_dest_file:close()
   -- This method just returns a 'build files generated/not generated' flag.
   return true
 end
