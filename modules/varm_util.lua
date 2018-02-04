@@ -106,4 +106,45 @@ function varm_util.copy_file(src_path, dest_path, mode_suffix)
   return true
 end
 
+-- Insert text into a file at a given point.
+-- Technically, the easiest way to do this is to create a new file,
+-- copy the existing one into it, add the new text at the right place,
+-- finish copying the rest of the file, and then move the temporary
+-- / copied file to overwrite the old file.
+-- Return true if the insertion succeeds, nil/false-y if not.
+function varm_util.insert_into_file(file_path, line_match, new_text)
+  -- Verify the desired file path.
+  local actual_src_path = file_path:gsub("[^a-zA-Z0-9_%/%.]", "")
+  if actual_src_path ~= file_path then
+    return nil
+  end
+  -- Open the R/W files.
+  local old_file = io.open(file_path, 'r')
+  if not old_file then
+    return nil
+  end
+  local temp_path = file_path .. '.tmp'
+  local temp_file = io.open(temp_path, 'w')
+  if not temp_file then
+    old_file:close()
+    return nil
+  end
+  -- Copy the old file, line-by-line. When we hit the 'line_match' value,
+  -- append text before the 'match' line with a trailing newline.
+  for l in old_file:lines() do
+    if l:find(line_match) then
+      temp_file:write(new_text .. '\n')
+    end
+    temp_file:write(l .. '\n')
+  end
+  old_file:close()
+  temp_file:close()
+  -- Rename the temp file, to overwrite the old one.
+  if not os.rename(temp_path, file_path) then
+    return nil
+  end
+  -- Done.
+  return true
+end
+
 return varm_util

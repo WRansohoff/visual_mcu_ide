@@ -227,6 +227,73 @@ end
 -- Process a single node in the FSM graph.
 -- Return true if the processing succeeds, false if it doesn't.
 function FSMNodes.process_node(node, node_graph, proj_state)
+  -- Loading a node takes two steps.
+  -- - First, we verify that all of the necessary utility methods/includes
+  -- exist, and copy them into the project files if they aren't.
+  -- - Second, we add the code to the end of the 'main' method. Like this:
+  --     <This node's unique label>:
+  --     <node code>
+  --     GOTO <Next node's label>
+  -- But this method will really just call other ones based on the node type.
+  if (not node) or (not node.node_type) then
+    return nil
+  end
+  if node.node_type == 'Boot' then
+    if (FSMNodes.ensure_support_methods_boot_node(node, proj_state) and
+        FSMNodes.append_boot_node(node, node_graph, proj_state)) then
+      return true
+    end
+  elseif node.node_type == 'Delay' then
+    if (FSMNodes.ensure_support_methods_delay_node(node, proj_state) and
+        FSMNodes.append_delay_node(node, node_graph, proj_state)) then
+      return true
+    end
+  end
+  -- (Unrecognized node type.)
+  return nil
+end
+
+-- Ensure that all of the supporting methods needed by the 'Boot'
+-- node are present, and add any that aren't.
+function FSMNodes.ensure_support_methods_boot_node(node, proj_state)
+  -- The 'Boot' mode doesn't really need any supporting methods, right now.
+  -- Everything is included in the 'init_project_state' method.
+  return true
+end
+
+-- Append code to the 'main' method for the 'Boot' node.
+function FSMNodes.append_boot_node(node, node_graph, proj_state)
+  -- There's no real code needed for the 'Boot' node, but we still have
+  -- to add a label for the node and a GOTO to make sure that the
+  -- program starts with the right node.
+  local node_text = '  // (Boot node: TODO)\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    'MAIN_ENTRY:',
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Ensure that all of the supporting methods needed by a 'Delay'
+-- node are present, and add any that aren't.
+-- TODO
+function FSMNodes.ensure_support_methods_delay_node(node, proj_state)
+  -- The 'Delay' node requires a 'delay' assembly method, depending on
+  -- the chosen units. We want to add the method to the 'util.S' method,
+  -- define it in the 'global.h' file, and ... well I think that's it.
+  -- TODO
+  return true
+end
+
+-- Append code to the 'main' method for a 'Delay' node.
+function FSMNodes.append_delay_node(node, node_graph, proj_state)
+  local node_text = '  // (Delay node: TODO)\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    'MAIN_ENTRY:',
+                                    node_text) then
+    return nil
+  end
   return true
 end
 

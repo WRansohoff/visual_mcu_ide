@@ -207,14 +207,15 @@ app:post("/precompile_project/:project_id", function(self)
     cur_node = self.params.nodes[cur_ind]
     proj_state = FSMNodes.init_project_state(cur_node, self.params.nodes, proj_id)
     while preprocessing do
+      if visited_nodes[cur_ind] then
+        preprocessing = false
+        break
+      end
       local node_processed = FSMNodes.process_node(cur_node, self.params.nodes, proj_state)
       if not node_processed then
         preprocessing = false
         ret_status = 500
         status_msg = 'Error processing node: ' .. cur_ind
-      end
-      if visited_nodes[cur_ind] then
-        preprocessing = false
       end
       if preprocessing then
         if cur_node.output and cur_node.output.single then
