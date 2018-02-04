@@ -466,6 +466,10 @@ node_array_from_json = function(node_arr_json) {
         cur_fsm_node.tex_sampler = loaded_textures['GPIO_Output'];
         cur_fsm_node.node_color = 'blue';
       }
+      else if (cur_fsm_node.node_type == 'RCC_Enable' && loaded_textures['RCC_Enable']) {
+        cur_fsm_node.tex_sampler = loaded_textures['RCC_Enable'];
+        cur_fsm_node.node_color = 'green';
+      }
       else {
         valid_node = false;
       }

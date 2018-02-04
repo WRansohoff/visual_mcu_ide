@@ -258,6 +258,11 @@ function FSMNodes.process_node(node, node_graph, proj_state)
         FSMNodes.append_gpio_output_node(node, node_graph, proj_state)) then
       return true
     end
+  elseif node.node_type == 'RCC_Enable' then
+    if (FSMNodes.ensure_support_methods_rcc_enable_node(node, proj_state) and
+        FSMNodes.append_rcc_enable_node(node, node_graph, proj_state)) then
+      return true
+    end
   end
   -- (Unrecognized node type.)
   return nil
@@ -397,6 +402,33 @@ function FSMNodes.append_gpio_output_node(node, node_graph, proj_state)
     return nil
   end
   node_text = node_text .. '  // (End "Set GPIO Output" node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Ensure that all necessary supporting functions for 'RCC Enable' exist.
+-- ('RCC' controls the peripheral clocks which must be enabled for on-chip
+-- hardware features to work)
+-- TODO
+function FSMNodes.ensure_support_methods_rcc_enable_node(node, proj_state)
+  return true
+end
+
+-- Append code to the 'main' method for an 'RCC Enable' node.
+function FSMNodes.append_rcc_enable_node(node, node_graph, proj_state)
+  local node_text = '  // ("Enable Clock" (RCC) node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  node_text = node_text .. '  // TODO: RCC peripheral clock enable code\n'
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "Enable Clock" (RCC) node)\n\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
                                     "/ MAIN_ENTRY:",
                                     node_text) then
