@@ -268,7 +268,7 @@ function FSMNodes.append_boot_node(node, node_graph, proj_state)
   -- program starts with the right node.
   local node_text = '  // (Boot node: TODO)\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    'MAIN_ENTRY:',
+                                    '/ MAIN_ENTRY:',
                                     node_text) then
     return nil
   end
@@ -288,21 +288,21 @@ function FSMNodes.ensure_support_methods_delay_node(node, proj_state)
                                         proj_state.base_dir .. 'src/util.S',
                                         'UTIL_S_DELAY_CYCLES_DEC_START:',
                                         'UTIL_S_DELAY_CYCLES_DEC_DONE:',
-                                        'ASM_GLOBAL_UTIL_DECLARES:') then
+                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(util_s_insert_path,
                                         proj_state.base_dir .. 'src/util.S',
                                         'UTIL_S_DELAY_US_DEC_START:',
                                         'UTIL_S_DELAY_US_DEC_DONE:',
-                                        'ASM_GLOBAL_UTIL_DECLARES:') then
+                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(util_s_insert_path,
                                         proj_state.base_dir .. 'src/util.S',
                                         'UTIL_S_DELAY_MS_DEC_START:',
                                         'UTIL_S_DELAY_MS_DEC_DONE:',
-                                        'ASM_GLOBAL_UTIL_DECLARES:') then
+                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
     return nil
   end
   -- 'util.S' defines.
@@ -310,21 +310,21 @@ function FSMNodes.ensure_support_methods_delay_node(node, proj_state)
                                         proj_state.base_dir .. 'src/util.S',
                                         'UTIL_S_DELAY_CYCLES_DEF_START:',
                                         'UTIL_S_DELAY_CYCLES_DEF_DONE:',
-                                        'ASM_GLOBAL_UTIL_DEFINES:') then
+                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(util_s_insert_path,
                                         proj_state.base_dir .. 'src/util.S',
                                         'UTIL_S_DELAY_US_DEF_START:',
                                         'UTIL_S_DELAY_US_DEF_DONE:',
-                                        'ASM_GLOBAL_UTIL_DEFINES:') then
+                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(util_s_insert_path,
                                         proj_state.base_dir .. 'src/util.S',
                                         'UTIL_S_DELAY_MS_DEF_START:',
                                         'UTIL_S_DELAY_MS_DEF_DONE:',
-                                        'ASM_GLOBAL_UTIL_DEFINES:') then
+                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
     return nil
   end
   -- 'global.h' declare.
@@ -332,21 +332,21 @@ function FSMNodes.ensure_support_methods_delay_node(node, proj_state)
                                         proj_state.base_dir .. 'src/global.h',
                                         'GLOBAL_EXTERN_DELAY_CYCLES_START:',
                                         'GLOBAL_EXTERN_DELAY_CYCLES_DONE:',
-                                        'ASM_METHOD_DEFINES:') then
+                                        '/ ASM_METHOD_DEFINES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(global_h_insert_path,
                                         proj_state.base_dir .. 'src/global.h',
                                         'GLOBAL_EXTERN_DELAY_US_START:',
                                         'GLOBAL_EXTERN_DELAY_US_DONE:',
-                                        'ASM_METHOD_DEFINES:') then
+                                        '/ ASM_METHOD_DEFINES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(global_h_insert_path,
                                         proj_state.base_dir .. 'src/global.h',
                                         'GLOBAL_EXTERN_DELAY_MS_START:',
                                         'GLOBAL_EXTERN_DELAY_MS_DONE:',
-                                        'ASM_METHOD_DEFINES:') then
+                                        '/ ASM_METHOD_DEFINES:') then
     return nil
   end
   return true
@@ -356,7 +356,7 @@ end
 function FSMNodes.append_delay_node(node, node_graph, proj_state)
   local node_text = '  // (Delay node: TODO)\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    'MAIN_ENTRY:',
+                                    "/ MAIN_ENTRY:",
                                     node_text) then
     return nil
   end
