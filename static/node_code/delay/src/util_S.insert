@@ -20,7 +20,9 @@ delay_cycles:
   PUSH { r0, lr }
   POP  { r0, pc }
 .size delay_cycles, .-delay_cycles
+
 UTIL_S_DELAY_CYCLES_DEF_DONE:
+
 UTIL_S_DELAY_US_DEF_START:
 /*
  * Delay a given number of microseconds.
@@ -33,7 +35,9 @@ delay_us:
   PUSH { r0, lr }
   POP  { r0, pc }
 .size delay_us, .-delay_us
+
 UTIL_S_DELAY_US_DEF_DONE:
+
 UTIL_S_DELAY_MS_DEF_START:
 /*
  * Delay a given number of milliseconds.
@@ -46,4 +50,5 @@ delay_ms:
   PUSH { r0, lr }
   POP  { r0, pc }
 .size delay_ms, .-delay_ms
+
 UTIL_S_DELAY_MS_DEF_DONE:

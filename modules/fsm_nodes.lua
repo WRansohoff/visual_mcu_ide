@@ -248,6 +248,16 @@ function FSMNodes.process_node(node, node_graph, proj_state)
         FSMNodes.append_delay_node(node, node_graph, proj_state)) then
       return true
     end
+  elseif node.node_type == 'GPIO_Init' then
+    if (FSMNodes.ensure_support_methods_gpio_init_node(node, proj_state) and
+        FSMNodes.append_gpio_init_node(node, node_graph, proj_state)) then
+      return true
+    end
+  elseif node.node_type == 'GPIO_Output' then
+    if (FSMNodes.ensure_support_methods_gpio_output_node(node, proj_state) and
+        FSMNodes.append_gpio_output_node(node, node_graph, proj_state)) then
+      return true
+    end
   end
   -- (Unrecognized node type.)
   return nil
@@ -363,6 +373,54 @@ end
 function FSMNodes.append_delay_node(node, node_graph, proj_state)
   local node_text = '  NODE_' .. node.node_ind .. ':\n'
   node_text = node_text .. '  // TODO: delay code\n'
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Ensure that supporting methods for GPIO pin initialization are present.
+-- TODO
+function FSMNodes.ensure_support_methods_gpio_init_node(node, proj_state)
+  return true
+end
+
+-- Append code to the 'main' method for a 'Setup GPIO Pin' node.
+function FSMNodes.append_gpio_init_node(node, node_graph, proj_state)
+  local node_text = '  NODE_' .. node.node_ind .. ':\n'
+  node_text = node_text .. '  // TODO: GPIO pin initialization code\n'
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Ensure that all necessary supporting functions for GPIO Output exist.
+-- TODO
+function FSMNodes.ensure_support_methods_gpio_output_node(node, proj_state)
+  return true
+end
+
+-- Append code to the 'main' method for a 'Set GPIO Pin Output' node.
+function FSMNodes.append_gpio_output_node(node, node_graph, proj_state)
+  local node_text = '  NODE_' .. node.node_ind .. ':\n'
+  node_text = node_text .. '  // TODO: GPIO pin output code\n'
   if node.output and node.output.single then
     node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
   else
