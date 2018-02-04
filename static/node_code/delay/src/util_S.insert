@@ -1,0 +1,46 @@
+UTIL_S_DELAY_CYCLES_DEC_START:
+.global delay_cycles
+UTIL_S_DELAY_CYCLES_DEC_DONE:
+UTIL_S_DELAY_US_DEC_START:
+.global delay_us
+UTIL_S_DELAY_US_DEC_DONE:
+UTIL_S_DELAY_MS_DEC_START:
+.global delay_ms
+UTIL_S_DELAY_MS_DEC_DONE:
+
+UTIL_S_DELAY_CYCLES_DEF_START:
+/*
+ * Delay a given number of MCU cycles.
+ * Expects:
+ *  r0 contains the number of cycles to wait.
+ */
+.type delay_cycles,%function
+.section .text.delay_cycles,"ax",%progbits
+  PUSH { r0, lr }
+  POP  { r0, pc }
+.size delay_cycles, .-delay_cycles
+UTIL_S_DELAY_CYCLES_DEF_DONE:
+UTIL_S_DELAY_US_DEF_START:
+/*
+ * Delay a given number of microseconds.
+ * Expects:
+ *  r0 contains the number of us to wait.
+ */
+.type delay_us,%function
+.section .text.delay_us,"ax",%progbits
+  PUSH { r0, lr }
+  POP  { r0, pc }
+.size delay_us, .-delay_us
+UTIL_S_DELAY_US_DEF_DONE:
+UTIL_S_DELAY_MS_DEF_START:
+/*
+ * Delay a given number of milliseconds.
+ * Expects:
+ *  r0 contains the number of ms to wait.
+ */
+.type delay_ms,%function
+.section .text.delay_ms,"ax",%progbits
+  PUSH { r0, lr }
+  POP  { r0, pc }
+.size delay_ms, .-delay_ms
+UTIL_S_DELAY_MS_DEF_DONE:

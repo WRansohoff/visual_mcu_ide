@@ -1,0 +1,9 @@
+GLOBAL_EXTERN_DELAY_CYCLES_START:
+extern void delay_cycles(unsigned int d);
+GLOBAL_EXTERN_DELAY_CYCLES_DONE:
+GLOBAL_EXTERN_DELAY_US_START:
+extern void delay_us(unsigned int d);
+GLOBAL_EXTERN_DELAY_US_DONE:
+GLOBAL_EXTERN_DELAY_MS_START:
+extern void delay_ms(unsigned int d);
+GLOBAL_EXTERN_DELAY_MS_DONE:
