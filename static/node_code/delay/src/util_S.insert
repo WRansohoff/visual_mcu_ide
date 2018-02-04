@@ -1,12 +1,6 @@
 UTIL_S_DELAY_CYCLES_DEC_START:
 .global delay_cycles
 UTIL_S_DELAY_CYCLES_DEC_DONE:
-UTIL_S_DELAY_US_DEC_START:
-.global delay_us
-UTIL_S_DELAY_US_DEC_DONE:
-UTIL_S_DELAY_MS_DEC_START:
-.global delay_ms
-UTIL_S_DELAY_MS_DEC_DONE:
 
 UTIL_S_DELAY_CYCLES_DEF_START:
 /*
@@ -17,38 +11,25 @@ UTIL_S_DELAY_CYCLES_DEF_START:
 .type delay_cycles,%function
 .section .text.delay_cycles,"ax",%progbits
 delay_cycles:
+  // TODO: Currently delays (r0+4) cycles, I think.
+  // PUSH/LSRS/CMP/BEQ (no branch) in the beginning.
   PUSH { r0, lr }
+  // Divide the number of cycles by 4 (loop takes 4 cycles)
+  LSRS r0, r0, #2
+  // (Pre-loop cycle, in case 0-3 is passed in)
+  // CMP, BEQ (no branch) = 2 cycles.
+  CMP  r0, #0
+  BEQ  delay_cycles_done
+  cycle_delay_loop:
+  // Subtract takes 1 instruction
+  SUBS r0, r0, #1
+  // SUBS already sets condition flags, but this CMP makes
+  // it an even four cycles per loop.
+  CMP  r0, #0
+  // Branch takes 2 instructions (except the last time)
+  BEQ  cycle_delay_loop
+  delay_cycles_done:
   POP  { r0, pc }
 .size delay_cycles, .-delay_cycles
 
 UTIL_S_DELAY_CYCLES_DEF_DONE:
-
-UTIL_S_DELAY_US_DEF_START:
-/*
- * Delay a given number of microseconds.
- * Expects:
- *  r0 contains the number of us to wait.
- */
-.type delay_us,%function
-.section .text.delay_us,"ax",%progbits
-delay_us:
-  PUSH { r0, lr }
-  POP  { r0, pc }
-.size delay_us, .-delay_us
-
-UTIL_S_DELAY_US_DEF_DONE:
-
-UTIL_S_DELAY_MS_DEF_START:
-/*
- * Delay a given number of milliseconds.
- * Expects:
- *  r0 contains the number of ms to wait.
- */
-.type delay_ms,%function
-.section .text.delay_ms,"ax",%progbits
-delay_ms:
-  PUSH { r0, lr }
-  POP  { r0, pc }
-.size delay_ms, .-delay_ms
-
-UTIL_S_DELAY_MS_DEF_DONE:

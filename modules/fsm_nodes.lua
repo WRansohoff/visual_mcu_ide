@@ -276,7 +276,9 @@ function FSMNodes.append_boot_node(node, node_graph, proj_state)
   -- There's no real code needed for the 'Boot' node, but we still have
   -- to add a label for the node and a GOTO to make sure that the
   -- program starts with the right node.
-  local node_text = '  NODE_' .. node.node_ind .. ':\n'
+  -- (Start with 'goto Boot', to avoid compiler warnings for an unused label.
+  local node_text = '  goto NODE_' .. node.node_ind .. ';\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
   node_text = node_text .. ' // TODO: boot code?\n'
   if node.output and node.output.single then
     node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
@@ -308,20 +310,6 @@ function FSMNodes.ensure_support_methods_delay_node(node, proj_state)
                                         '/ ASM_GLOBAL_UTIL_DECLARES:') then
     return nil
   end
-  if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_DELAY_US_DEC_START:',
-                                        'UTIL_S_DELAY_US_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
-    return nil
-  end
-  if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_DELAY_MS_DEC_START:',
-                                        'UTIL_S_DELAY_MS_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
-    return nil
-  end
   -- 'util.S' defines.
   if not varm_util.copy_block_into_file(util_s_insert_path,
                                         proj_state.base_dir .. 'src/util.S',
@@ -330,39 +318,11 @@ function FSMNodes.ensure_support_methods_delay_node(node, proj_state)
                                         '/ ASM_GLOBAL_UTIL_DEFINES:') then
     return nil
   end
-  if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_DELAY_US_DEF_START:',
-                                        'UTIL_S_DELAY_US_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
-    return nil
-  end
-  if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_DELAY_MS_DEF_START:',
-                                        'UTIL_S_DELAY_MS_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
-    return nil
-  end
   -- 'global.h' declare.
   if not varm_util.copy_block_into_file(global_h_insert_path,
                                         proj_state.base_dir .. 'src/global.h',
                                         'GLOBAL_EXTERN_DELAY_CYCLES_START:',
                                         'GLOBAL_EXTERN_DELAY_CYCLES_DONE:',
-                                        '/ ASM_METHOD_DEFINES:') then
-    return nil
-  end
-  if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_DELAY_US_START:',
-                                        'GLOBAL_EXTERN_DELAY_US_DONE:',
-                                        '/ ASM_METHOD_DEFINES:') then
-    return nil
-  end
-  if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_DELAY_MS_START:',
-                                        'GLOBAL_EXTERN_DELAY_MS_DONE:',
                                         '/ ASM_METHOD_DEFINES:') then
     return nil
   end
