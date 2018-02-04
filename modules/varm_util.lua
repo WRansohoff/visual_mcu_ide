@@ -65,9 +65,19 @@ function varm_util.ensure_dir_empty(dir_path)
   return false
 end
 
+-- Copy a text file from path A to B.
+function varm_util.copy_text_file(src_path, dest_path)
+  return varm_util.copy_file(src_path, dest_path, '')
+end
+
+-- Copy a binary file from path A to B.
+function varm_util.copy_bin_file(src_path, dest_path)
+  return varm_util.copy_file(src_path, dest_path, 'b')
+end
+
 -- Copy a file from path A to B.
 -- Returns true if the file was copied, false if not.
-function varm_util.copy_text_file(src_path, dest_path)
+function varm_util.copy_file(src_path, dest_path, mode_suffix)
   -- Verify paths. (Strip special characters besides '_', '/', '.')
   local actual_src_path = src_path:gsub("[^a-zA-Z0-9_%/%.]", "")
   if actual_src_path ~= src_path then
@@ -78,11 +88,11 @@ function varm_util.copy_text_file(src_path, dest_path)
     return nil
   end
   -- Open both files.
-  local src_file = io.open(src_path, 'r')
+  local src_file = io.open(src_path, 'r' .. mode_suffix)
   if not src_file then
     return nil
   end
-  local dest_file = io.open(dest_path, 'w')
+  local dest_file = io.open(dest_path, 'w' .. mode_suffix)
   if not dest_file then
     src_file:close()
     return nil

@@ -114,10 +114,10 @@ function FSMNodes.copy_static_libs(boot_node, cur_proj_state)
   local clib_dest_dir = cur_proj_state.base_dir .. 'lib/'
   local libc_dest_path = clib_dest_dir .. libc_fn
   local libgcc_dest_path = clib_dest_dir .. libgcc_fn
-  if not varm_util.copy_text_file(libc_source_path, libc_dest_path) then
+  if not varm_util.copy_bin_file(libc_source_path, libc_dest_path) then
     return nil
   end
-  if not varm_util.copy_text_file(libgcc_source_path, libgcc_dest_path) then
+  if not varm_util.copy_bin_file(libgcc_source_path, libgcc_dest_path) then
     return nil
   end
   -- This method just returns a flag for 'toolchain libraries okay/not okay'
