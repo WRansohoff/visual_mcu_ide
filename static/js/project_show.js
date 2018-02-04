@@ -413,8 +413,7 @@ node_array_to_json = function(node_arr) {
           down:  cur_node.connections.down
         },
       };
-      // TODO: node-specific 'options' hash.
-      node_json.options = {}
+      node_json.options = cur_node.options
       nodes_json.nodes.push(node_json);
     }
   }
@@ -471,8 +470,12 @@ node_array_from_json = function(node_arr_json) {
         valid_node = false;
       }
       if (valid_node) {
-        // TODO: Node-specific options hash.
-        cur_fsm_node.options = {};
+        if (cur_node.options) {
+          cur_fsm_node.options = cur_node.options;
+        }
+        else {
+          cur_fsm_node.options = {}
+        }
         nodes_map[cur_node_index] = cur_fsm_node;
         cur_node_index += 1;
       }
