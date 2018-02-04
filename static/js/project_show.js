@@ -1316,6 +1316,11 @@ project_show_onload = function() {
     json_fsm_nodes = precompile_project();
     submit_precompile_request(json_fsm_nodes);
   };
+
+  document.getElementById('save_fsm_project_link').onclick = function() {
+    var nodes_string = node_array_to_json(fsm_nodes);
+    submit_project_save_request(nodes_string);
+  };
 };
 
 // 'Precompile' the project, and save a .zip file with code and a
@@ -1557,11 +1562,6 @@ var precompile_project = function() {
       nodes: program_nodes,
     };
   }
-
-  document.getElementById('save_fsm_project_link').onclick = function() {
-    var nodes_string = node_array_to_json(fsm_nodes);
-    submit_project_save_request(nodes_string);
-  };
 };
 
 /*
