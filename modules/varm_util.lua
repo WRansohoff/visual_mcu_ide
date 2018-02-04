@@ -3,7 +3,12 @@ local varm_util = {}
 -- This, uh...seems to work.
 -- If it returns truth-y, the path exists. If it returns nil, it doesn't.
 function varm_util.path_exists(path_str)
-  return os.rename(path_str, path_str)
+  -- Verify path. (Necessary? I'm not sure if the os module strips input)
+  local actual_path = path_str:gsub("[^a-zA-Z0-9_%/%.]", "")
+  if actual_path ~= path_str then
+    return nil
+  end
+  return os.rename(actual_path, actual_path)
 end
 
 -- Attempt to create a directory.
@@ -216,6 +221,9 @@ end
 
 -- Similar to the 'insert_into_file' method, but this replaces a single
 -- line. Mostly just used for uncommenting imports.
+-- Return true if the processing suceeded, false otherwise.
+-- If the 'old_line' pattern is not found, the file is simply copied
+-- without alteration, and the operation is considered a success.
 function varm_util.replace_lines_in_file(file_path, old_line, new_line)
   -- Verify the desired file path.
   local actual_src_path = file_path:gsub("[^a-zA-Z0-9_%/%.]", "")

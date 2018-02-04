@@ -363,6 +363,14 @@ end
 -- Ensure that supporting methods for GPIO pin initialization are present.
 -- TODO
 function FSMNodes.ensure_support_methods_gpio_init_node(node, proj_state)
+  -- I have an assembly method for STM32F0 GPIO setup, but for the sake
+  -- of simplicity, just use the standard peripheral library. TODO
+  local stdp_s_path = 'static/node_code/rcc_enable/src/std_periph/'
+  local stdp_d_path = proj_state.base_dir .. 'src/std_periph/'
+  local misc_h_fn = 'stm32f0xx_misc.h'
+  local misc_c_fn = 'stm32f0xx_misc.c'
+  local gpio_h_fn = 'stm32f0xx_gpio.h'
+  local gpio_c_fn = 'stm32f0xx_gpio.c'
   return true
 end
 
@@ -424,42 +432,52 @@ function FSMNodes.ensure_support_methods_rcc_enable_node(node, proj_state)
   local misc_c_fn = 'stm32f0xx_misc.c'
   local rcc_h_fn = 'stm32f0xx_rcc.h'
   local rcc_c_fn = 'stm32f0xx_rcc.c'
-  -- (Copy files.)
-  if not varm_util.copy_text_file(stdp_s_path .. misc_h_fn, stdp_d_path .. misc_h_fn) then
-    return nil
+  local misc_h_d = stdp_d_path .. misc_h_fn
+  local misc_c_d = stdp_d_path .. misc_c_fn
+  local rcc_h_d = stdp_d_path .. rcc_h_fn
+  local rcc_c_d = stdp_d_path .. rcc_c_fn
+  -- (Only process files that don't exist already.)
+  -- stm32f0xx_misc.[ch]
+  if not varm_util.path_exists(misc_h_d) or
+     not varm_util.path_exists(misc_c_d) then
+    if not varm_util.copy_text_file(stdp_s_path .. misc_h_fn, misc_h_d) then
+      return nil
+    end
+    if not varm_util.copy_text_file(stdp_s_path .. misc_c_fn, misc_c_d) then
+      return nil
+    end
+    if not varm_util.replace_lines_in_file(
+               proj_state.base_dir .. 'src/stm32f0xx_conf.h',
+               '//#include "stm32f0xx_misc.h"',
+               '#include "stm32f0xx_misc.h"') then
+      return nil
+    end
+    if not varm_util.insert_into_file(proj_state.base_dir .. 'Makefile',
+          '# STD_PERIPH_SRCS',
+          'C_SRC  += ./src/std_periph/' .. 'stm32f0xx_misc.c\n') then
+      return nil
+    end
   end
-  if not varm_util.copy_text_file(stdp_s_path .. misc_c_fn, stdp_d_path .. misc_c_fn) then
-    return nil
-  end
-  if not varm_util.copy_text_file(stdp_s_path .. rcc_h_fn, stdp_d_path .. rcc_h_fn) then
-    return nil
-  end
-  if not varm_util.copy_text_file(stdp_s_path .. rcc_c_fn, stdp_d_path .. rcc_c_fn) then
-    return nil
-  end
-  -- (stm32f0xx_conf.h)
-  if not varm_util.replace_lines_in_file(
-             proj_state.base_dir .. 'src/stm32f0xx_conf.h',
-             '//#include "stm32f0xx_misc.h"',
-             '#include "stm32f0xx_misc.h"') then
-    return nil
-  end
-  if not varm_util.replace_lines_in_file(
-             proj_state.base_dir .. 'src/stm32f0xx_conf.h',
-             '//#include "stm32f0xx_rcc.h"',
-             '#include "stm32f0xx_rcc.h"') then
-    return nil
-  end
-  -- (Makefile)
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'Makefile',
-        '# STD_PERIPH_SRCS',
-        'C_SRC  += ./src/std_periph/' .. 'stm32f0xx_misc.c\n') then
-    return nil
-  end
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'Makefile',
-        '# STD_PERIPH_SRCS',
-        'C_SRC  += ./src/std_periph/' .. 'stm32f0xx_rcc.c\n') then
-    return nil
+  -- stm32f0xx_rcc.[ch]
+  if not varm_util.path_exists(rcc_h_d) or
+     not varm_util.path_exists(rcc_c_d) then
+    if not varm_util.copy_text_file(stdp_s_path .. rcc_h_fn, rcc_h_d) then
+      return nil
+    end
+    if not varm_util.copy_text_file(stdp_s_path .. rcc_c_fn, rcc_c_d) then
+      return nil
+    end
+    if not varm_util.replace_lines_in_file(
+               proj_state.base_dir .. 'src/stm32f0xx_conf.h',
+               '//#include "stm32f0xx_rcc.h"',
+               '#include "stm32f0xx_rcc.h"') then
+      return nil
+    end
+    if not varm_util.insert_into_file(proj_state.base_dir .. 'Makefile',
+          '# STD_PERIPH_SRCS',
+          'C_SRC  += ./src/std_periph/' .. 'stm32f0xx_rcc.c\n') then
+      return nil
+    end
   end
   return true
 end
