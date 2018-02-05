@@ -394,6 +394,34 @@ refresh_defined_vars = function() {
   }
 };
 
+var update_var_names = function(old_name, new_name) {
+  // Cycle through the array of nodes, and make sure that no other
+  // 'New Variable' nodes have the same name. If one does, retain old name.
+  for (var index in fsm_nodes) {
+    var cur_node = fsm_nodes[index];
+    if (cur_node) {
+      if (cur_node.node_type == 'New_Variable') {
+        if (cur_node.options.var_name == new_name) {
+          return old_name;
+        }
+      }
+    }
+  }
+  // If the name can change, rename any other nodes that were using
+  // the old variable name.
+  for (var index in fsm_nodes) {
+    var cur_node = fsm_nodes[index];
+    if (cur_node) {
+      if (cur_node.node_type == 'Set_Variable') {
+        if (cur_node.options.var_name == old_name) {
+          cur_node.options.var_name = new_name;
+        }
+      }
+    }
+  }
+  return new_name;
+};
+
 node_array_to_json = function(node_arr) {
   var nodes_json = {
     nodes: []
@@ -2033,7 +2061,8 @@ var apply_new_var_node_options_listeners = function() {
 
   // Set click listener functions.
   var_name_tag.oninput = function() {
-    cur_node.options.var_name = var_name_tag.value;
+    cur_node.options.var_display_name = var_name_tag.value;
+    cur_node.options.var_name = update_var_names(cur_node.options.var_name, cur_node.options.var_display_name);
     refresh_defined_vars();
   };
   var_type_tag.onchange = function() {
@@ -2185,6 +2214,7 @@ var default_options_for_type = function(type) {
   else if (type == 'New_Variable') {
     return {
       var_name: '',
+      var_display_name: '',
       var_type: 'int',
       var_val: 0,
     };
