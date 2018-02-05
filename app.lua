@@ -107,9 +107,6 @@ app:match("/project/:project_id", function(self)
   core_utils_list["Delay"] = "Node"
   tool_list["Core Utilities"] = core_utils_list
   gpio_list = { }
-  -- gpio_list["Setup Input Pin"] = "Node"
-  -- gpio_list["Setup Output Pin"] = "Node"
-  -- gpio_list["Setup Alt. Func. Pin"] = "Node"
   gpio_list["Setup GPIO Pin"] = "Node"
   gpio_list["Read Input Pin"] = "Node"
   gpio_list["Write Output Pin"] = "Node"

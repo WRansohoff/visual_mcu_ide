@@ -364,7 +364,7 @@ preload_textures = function() {
 // Refresh the current set of 'defined variables' from the current FSM nodes.
 refresh_defined_vars = function() {
   // Empty the storage array...
-  defined_vars.length = 0;
+  defined_vars = [];
   // ...and fill it with the current values.
   for (var node_ind = 0; node_ind < 256; ++node_ind) {
     if (fsm_nodes[node_ind]) {
@@ -468,6 +468,18 @@ node_array_from_json = function(node_arr_json) {
       else if (cur_fsm_node.node_type == 'RCC_Enable' && loaded_textures['RCC_Enable']) {
         cur_fsm_node.tex_sampler = loaded_textures['RCC_Enable'];
         cur_fsm_node.node_color = 'green';
+      }
+      else if (cur_fsm_node.node_type == 'RCC_Disable' && loaded_textures['RCC_Disable']) {
+        cur_fsm_node.tex_sampler = loaded_textures['RCC_Disable'];
+        cur_fsm_node.node_color = 'pink';
+      }
+      else if (cur_fsm_node.node_type == 'New_Variable' && loaded_textures['New_Variable']) {
+        cur_fsm_node.tex_sampler = loaded_textures['New_Variable'];
+        cur_fsm_node.node_color = 'green';
+      }
+      else if (cur_fsm_node.node_type == 'Set_Variable' && loaded_textures['Set_Variable']) {
+        cur_fsm_node.tex_sampler = loaded_textures['Set_Variable'];
+        cur_fsm_node.node_color = 'blue';
       }
       else {
         valid_node = false;
@@ -855,6 +867,7 @@ project_show_onload = function() {
     // TODO: Constant for number of images to load.
     if (imgs_loaded == num_imgs) {
       fsm_nodes = node_array_from_json(loaded_fsm_nodes);
+      refresh_defined_vars();
       redraw_canvas();
       clearInterval(interval_id);
     }
@@ -2075,15 +2088,25 @@ var apply_set_var_node_options_listeners = function() {
       (None defined)
     </option>
   `;
+  var var_defined = false;
   for (var var_name in defined_vars) {
     var var_def = defined_vars[var_name];
+    var selected_val = '';
+    if (cur_node.options && cur_node.options.var_name == var_name) {
+      var_defined = true;
+      selected_val = 'selected="true" ';
+    }
     sel_html_opts += `
-      <option selected="true" value="` + var_def.name + `" id="set_var_options_var_list_` + var_def.name + `" class="set_var_options_var_list_option">
+      <option ` + selected_val + `value="` + var_def.name + `" id="set_var_options_var_list_` + var_def.name + `" class="set_var_options_var_list_option">
         ` + var_def.name + `
       </option>
     `;
   }
   var_name_tag.innerHTML = sel_html_opts;
+
+  if (var_defined) {
+    // TODO: add 'input' field.
+  }
 
   var_name_tag.onchange = function() {
     cur_node.options.var_name = var_name_tag.value;
