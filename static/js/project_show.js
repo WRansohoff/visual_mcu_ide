@@ -1225,7 +1225,7 @@ project_show_onload = function() {
           up: 'none',
           down: 'none',
         };
-        fsm_nodes[index_to_use].options = {};
+        fsm_nodes[index_to_use].options = default_options_for_type(cur_tool_node_type);
         fsm_nodes[index_to_use].grid_coord_x = cur_tool_node_grid_x;
         fsm_nodes[index_to_use].grid_coord_y = cur_tool_node_grid_y;
       }
@@ -1329,7 +1329,9 @@ project_show_onload = function() {
   // Add a click listener for the 'precompile' button/link.
   document.getElementById('precompile_button').onclick = function(e) {
     json_fsm_nodes = precompile_project();
-    submit_precompile_request(json_fsm_nodes);
+    if (json_fsm_nodes) {
+      submit_precompile_request(json_fsm_nodes);
+    }
   };
 
   document.getElementById('save_fsm_project_link').onclick = function() {
@@ -1764,13 +1766,18 @@ var apply_node_io_table_listeners = function(node_type) {
 var apply_boot_node_options_listeners = function() {
   var cur_node = fsm_nodes[selected_node_id];
   var chip_sel_tag = document.getElementById("boot_options_mcu_chip_tag");
-  if (mcu_chip == 'STM32F030F4') {
+  if (cur_node.options && cur_node.options.chip_type == 'STM32F030F4') {
     chip_sel_tag.value = 'STM32F030F4';
     cur_node.options.chip_type = 'STM32F030F4';
   }
-  else if (mcu_chip == 'STM32F031F6') {
+  else if (cur_node.options && cur_node.options.chip_type == 'STM32F031F6') {
     chip_sel_tag.value = 'STM32F031F6';
     cur_node.options.chip_type = 'STM32F031F6';
+  }
+  else {
+    // Set a default value.
+    chip_sel_tag.value = 'STM32F030F4';
+    cur_node.options.chip_type = 'STM32F030F4';
   }
   // 'MCU Chip Type' selection listener.
   chip_sel_tag.onchange = function() {
@@ -2146,5 +2153,44 @@ var apply_selected_node_option_listeners = function(node_type) {
   }
   else if (node_type == 'Set_Variable') {
     apply_set_var_node_options_listeners();
+  }
+};
+
+var default_options_for_type = function(type) {
+  if (type == 'Boot') {
+    return {
+      chip_type: 'STM32F030F4',
+    };
+  }
+  else if (type == 'Delay') {
+    return {
+      delay_units: 'cycles',
+      delay_value: 0,
+    };
+  }
+  else if (type == 'GPIO_Init') {
+    return {
+      gpio_bank: 'GPIOA',
+      gpio_pin: 0,
+      gpio_func: 'Output',
+      gpio_otype: 'Push-Pull',
+      gpio_ospeed: 'H',
+      gpio_pupdr: 'PU',
+    };
+  }
+  else if (type == 'GPIO_Output') {
+    return {
+      gpio_bank: 'GPIOA',
+      gpio_pin: 0,
+      gpio_val: 0,
+    };
+  }
+  else if (type == 'RCC_Enable') {
+    return {
+      periph_clock: 'GPIOA',
+    };
+  }
+  else {
+    return {};
   }
 };
