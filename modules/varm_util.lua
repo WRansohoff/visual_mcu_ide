@@ -247,7 +247,8 @@ function varm_util.replace_lines_in_file(file_path, old_line, new_line)
     if l:find(old_line) ~= nil then
       temp_file:write(new_line .. '\n')
     else
-      temp_file:write(l .. '\n')
+      -- (The gsub removes Windows-y return carriages.)
+      temp_file:write(l:gsub('\r', '') .. '\n')
     end
   end
   old_file:close()
