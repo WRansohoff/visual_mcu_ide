@@ -388,7 +388,6 @@ end
 function FSMNodes.append_gpio_init_node(node, node_graph, proj_state)
   local node_text = '  // ("Setup GPIO Pin" node)\n'
   node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  node_text = node_text .. '  // TODO: GPIO pin initialization code\n'
   -- Gather 'GPIO_Init' values.
   -- (Default values.)
   local gpio_bank = 'GPIOA'
@@ -441,7 +440,7 @@ function FSMNodes.append_gpio_init_node(node, node_graph, proj_state)
       end
     end
     if node.options.gpio_pupdr then
-      if node.options.gpio_pupdr == 'NONE' then
+      if node.options.gpio_pupdr == 'None' then
         gpio_pupdr = 'NOPULL'
       elseif node.options.gpio_pupdr == 'PU' then
         gpio_pupdr = 'UP'
