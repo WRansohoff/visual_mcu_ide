@@ -2117,6 +2117,11 @@ var apply_set_var_node_options_listeners = function() {
     `;
   }
   var_name_tag.innerHTML = sel_html_opts;
+
+  var_name_tag.onchange = function() {
+    cur_node.options.var_name = var_name_tag.value;
+    // TODO: Make the 'var_val_tag'.
+  };
 };
 
 // Common 'new node selected' call.
@@ -2178,6 +2183,12 @@ var default_options_for_type = function(type) {
       gpio_pupdr: 'PU',
     };
   }
+  else if (type == 'GPIO_Deinit') {
+    return {
+      gpio_bank: 'GPIOA',
+      gpio_pin: 0,
+    };
+  }
   else if (type == 'GPIO_Output') {
     return {
       gpio_bank: 'GPIOA',
@@ -2185,9 +2196,21 @@ var default_options_for_type = function(type) {
       gpio_val: 0,
     };
   }
-  else if (type == 'RCC_Enable') {
+  else if (type == 'RCC_Enable' || type == 'RCC_Disable') {
     return {
       periph_clock: 'GPIOA',
+    };
+  }
+  else if (type == 'New_Variable') {
+    return {
+      var_name: '',
+      var_type: 'int',
+      var_val: 0,
+    };
+  }
+  else if (type == 'Set_Variable') {
+    return {
+      var_name: '(None)',
     };
   }
   else {
