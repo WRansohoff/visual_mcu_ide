@@ -285,7 +285,6 @@ function FSMNodes.append_boot_node(node, node_graph, proj_state)
   local node_text = '  // ("Boot" node, program entry point)\n'
   node_text = node_text .. '  goto NODE_' .. node.node_ind .. ';\n'
   node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  node_text = node_text .. '  // TODO: boot code?\n'
   if node.output and node.output.single then
     node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
   else
@@ -357,7 +356,7 @@ function FSMNodes.append_delay_node(node, node_graph, proj_state)
     local delay_cyc = tonumber(node.options.delay_value) * delay_scale
     node_text = node_text .. delay_cyc .. ');\n'
   else
-    node_text = node_text .. '0); // TODO: Default options\n'
+    node_text = node_text .. '0);\n'
   end
   if node.output and node.output.single then
     node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
@@ -374,7 +373,6 @@ function FSMNodes.append_delay_node(node, node_graph, proj_state)
 end
 
 -- Ensure that supporting methods for GPIO pin initialization are present.
--- TODO
 function FSMNodes.ensure_support_methods_gpio_init_node(node, proj_state)
   -- I have an assembly method for STM32F0 GPIO setup, but for the sake
   -- of simplicity, just use the standard peripheral library. TODO
@@ -486,7 +484,6 @@ function FSMNodes.append_gpio_init_node(node, node_graph, proj_state)
 end
 
 -- Ensure that all necessary supporting functions for GPIO Output exist.
--- TODO
 function FSMNodes.ensure_support_methods_gpio_output_node(node, proj_state)
   -- GPIO output shouldn't require any standard peripheral libraries
   -- or supporting code. It's just setting a single register.
@@ -547,7 +544,6 @@ end
 -- Ensure that all necessary supporting functions for 'RCC Enable' exist.
 -- ('RCC' controls the peripheral clocks which must be enabled for on-chip
 -- hardware features to work)
--- TODO
 function FSMNodes.ensure_support_methods_rcc_enable_node(node, proj_state)
   -- For now, just use the standard peripherals library's method.
   -- Copy the appropriate files, and uncomment their include statements.
@@ -574,6 +570,16 @@ function FSMNodes.append_rcc_enable_node(node, node_graph, proj_state)
   if node.options and node.options.periph_clock then
     if node.options.periph_clock == 'GPIOA' then
       node_text = node_text .. '  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);\n'
+    elseif node.options.periph_clock == 'GPIOB' then
+      node_text = node_text .. '  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);\n'
+    elseif node.options.periph_clock == 'GPIOC' then
+      node_text = node_text .. '  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);\n'
+    elseif node.options.periph_clock == 'GPIOD' then
+      node_text = node_text .. '  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOD, ENABLE);\n'
+    elseif node.options.periph_clock == 'GPIOE' then
+      node_text = node_text .. '  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOE, ENABLE);\n'
+    elseif node.options.periph_clock == 'GPIOF' then
+      node_text = node_text .. '  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOF, ENABLE);\n'
     else
       node_text = node_text .. '  // TODO: RCC peripheral clock enable defaults\n'
     end
