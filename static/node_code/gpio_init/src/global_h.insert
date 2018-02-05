@@ -1,0 +1,5 @@
+SYS_GLOBAL_GPIO_INIT_STRUCT_START:
+// Define a glocal 'GPIO_Init' struct for code autogenerators
+// to use with the GPIO standard peripherals library.
+GPIO_InitTypeDef global_gpio_init_struct;
+SYS_GLOBAL_GPIO_INIT_STRUCT_DONE:
