@@ -4,9 +4,19 @@
 #include "stm32f0xx.h"
 
 // Assembly methods.
-// ASM_METHOD_DEFINES:
 
-// Global variables.
-// GLOBAL_VAR_DEFINES:
+// ASM_METHOD_DEFINES: ^
+
+// ----------------------
+
+// User-defined global variables.
+
+// GLOBAL_VAR_DEFINES: ^
+
+// ----------------------
+
+// System-defined global variables.
+
+// SYS_GLOBAL_VAR_DEFINES: ^
 
 #endif

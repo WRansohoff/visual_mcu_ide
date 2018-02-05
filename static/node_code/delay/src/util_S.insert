@@ -27,7 +27,7 @@ delay_cycles:
   // it an even four cycles per loop.
   CMP  r0, #0
   // Branch takes 2 instructions (except the last time)
-  BEQ  cycle_delay_loop
+  BNE  cycle_delay_loop
   delay_cycles_done:
   POP  { r0, pc }
 .size delay_cycles, .-delay_cycles
