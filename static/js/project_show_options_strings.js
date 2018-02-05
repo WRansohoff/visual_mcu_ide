@@ -322,14 +322,6 @@ var init_gpio_node_options_html = `
 </table>
 `;
 
-// 'Disable GPIO Pin' node options.
-var deinit_gpio_node_options_html = `
-<table class="deinit_gpio_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + select_gpio_bank_table_row('deinit_gpio_options')
-    + select_gpio_pin_table_row('deinit_gpio_options') + `
-</table>
-`;
-
 // 'Set GPIO Output' node options.
 var set_gpio_out_node_options_html = `
 <table class="set_gpio_out_options_table" cellpadding="0" cellspacing="0" border="0">

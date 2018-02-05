@@ -111,7 +111,6 @@ app:match("/project/:project_id", function(self)
   -- gpio_list["Setup Output Pin"] = "Node"
   -- gpio_list["Setup Alt. Func. Pin"] = "Node"
   gpio_list["Setup GPIO Pin"] = "Node"
-  gpio_list["Disable GPIO Pin"] = "Node"
   gpio_list["Read Input Pin"] = "Node"
   gpio_list["Write Output Pin"] = "Node"
   tool_list["GPIO"] = gpio_list

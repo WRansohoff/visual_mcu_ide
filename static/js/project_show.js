@@ -248,7 +248,6 @@ var imgs_to_load = {
   Boot:              '/static/fsm_assets/boot_node.png',
   Delay:             '/static/fsm_assets/delay_node.png',
   GPIO_Init:         '/static/fsm_assets/init_gpio_node.png',
-  GPIO_Deinit:       '/static/fsm_assets/disable_pin_node.png',
   GPIO_Output:       '/static/fsm_assets/set_output_pin_node.png',
   RCC_Enable:        '/static/fsm_assets/enable_clock_node.png',
   RCC_Disable:       '/static/fsm_assets/disable_clock_node.png',
@@ -509,13 +508,6 @@ check_selected_menu_tool = function() {
     cur_tool_node_tex = loaded_textures['GPIO_Init'];
     cur_tool_node_type = 'GPIO_Init';
     cur_tool_node_color = 'green';
-    menu_tool_selected = true;
-  }
-  // 'GPIO Deinit' node; disable a previously-initialized GPIO pin.
-  else if (selected_menu_tool == 'Disable GPIO Pin' && loaded_textures['GPIO_Deinit']) {
-    cur_tool_node_tex = loaded_textures['GPIO_Deinit'];
-    cur_tool_node_type = 'GPIO_Deinit';
-    cur_tool_node_color = 'pink';
     menu_tool_selected = true;
   }
   // 'GPIO Output' node; set a previously-setup GPIO output pin to 0 or 1.
@@ -1140,9 +1132,6 @@ project_show_onload = function() {
             }
             else if (sel_type == 'GPIO_Init') {
               selected_node_options_html += init_gpio_node_options_html;
-            }
-            else if (sel_type == 'GPIO_Deinit') {
-              selected_node_options_html += deinit_gpio_node_options_html;
             }
             else if (sel_type == 'GPIO_Output') {
               selected_node_options_html += set_gpio_out_node_options_html;
@@ -1942,28 +1931,6 @@ var apply_gpio_init_options_listeners = function() {
   };
 };
 
-var apply_gpio_deinit_options_listeners = function() {
-  var cur_node = fsm_nodes[selected_node_id];
-  var gpio_bank_tag = document.getElementById('deinit_gpio_options_pin_bank_tag');
-  var gpio_pin_tag = document.getElementById('deinit_gpio_options_pin_number_tag');
-
-  // Set values according to node options.
-  if (cur_node.options.gpio_bank) {
-    gpio_bank_tag.value = cur_node.options.gpio_bank;
-  }
-  if (cur_node.options.gpio_pin) {
-    gpio_pin_tag.value = cur_node.options.gpio_pin;
-  }
-
-  // Set click listener functions.
-  gpio_bank_tag.onchange = function() {
-    cur_node.options.gpio_bank = gpio_bank_tag.value;
-  };
-  gpio_pin_tag.onchange = function() {
-    cur_node.options.gpio_pin = gpio_pin_tag.value;
-  };
-};
-
 var apply_gpio_output_options_listeners = function() {
   var cur_node = fsm_nodes[selected_node_id];
   var gpio_bank_tag = document.getElementById('set_gpio_out_options_pin_bank_tag');
@@ -2141,9 +2108,6 @@ var apply_selected_node_option_listeners = function(node_type) {
   else if (node_type == 'GPIO_Init') {
     apply_gpio_init_options_listeners();
   }
-  else if (node_type == 'GPIO_Deinit') {
-    apply_gpio_deinit_options_listeners();
-  }
   else if (node_type == 'GPIO_Output') {
     apply_gpio_output_options_listeners();
   }
@@ -2181,12 +2145,6 @@ var default_options_for_type = function(type) {
       gpio_otype: 'Push-Pull',
       gpio_ospeed: 'H',
       gpio_pupdr: 'PU',
-    };
-  }
-  else if (type == 'GPIO_Deinit') {
-    return {
-      gpio_bank: 'GPIOA',
-      gpio_pin: 0,
     };
   }
   else if (type == 'GPIO_Output') {
