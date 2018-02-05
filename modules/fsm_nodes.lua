@@ -406,7 +406,39 @@ end
 function FSMNodes.append_gpio_output_node(node, node_graph, proj_state)
   local node_text = '  // ("Set GPIO Output" node)\n'
   node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  node_text = node_text .. '  // TODO: GPIO pin output code\n'
+  -- (Default values)
+  local gpio_bank = 'GPIOA'
+  local gpio_pin_num = 0
+  local gpio_pin_set = false
+  -- Set GPIO output values based on node options.
+  if node.options then
+    if node.options.gpio_bank then
+      if node.options.gpio_bank == 'GPIOA' or
+         node.options.gpio_bank == 'GPIOB' or
+         node.options.gpio_bank == 'GPIOC' or
+         node.options.gpio_bank == 'GPIOD' or
+         node.options.gpio_bank == 'GPIOE' or
+         node.options.gpio_bank == 'GPIOF' or
+         node.options.gpio_bank == 'GPIOG' then
+        gpio_bank = node.options.gpio_bank
+      end
+    end
+    if node.options.gpio_pin and tonumber(node.options.gpio_pin) then
+      gpio_pin_num = tonumber(node.options.gpio_pin)
+    end
+    if node.options.gpio_val and node.options.gpio_val ~= '0' then
+      gpio_pin_set = node.options.gpio_val
+    end
+  end
+  -- Add GPIO output code.
+  if gpio_pin_set then
+    -- Set the pin.
+    node_text = node_text .. '  ' .. gpio_bank .. '->ODR |= GPIO_ODR_' .. gpio_pin_num .. ';\n'
+  else
+    -- Reset the pin.
+    node_text = node_text .. '  ' .. gpio_bank .. '->ODR &= ~GPIO_ODR_' .. gpio_pin_num .. ';\n'
+  end
+  -- Branch to the next node.
   if node.output and node.output.single then
     node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
   else
