@@ -245,33 +245,41 @@ app:post("/precompile_project/:project_id", function(self)
   }
 end)
 
-app:match("/project/delete/:project_id", function(self)
+app:post("/save_project_file/:project_id", function(self)
   -- If there isn't a signed-in user, redirect to the landing page.
   if not self.session.current_user then
     self.session.err_msg = "You must be signed in to use this page."
-    return { redirect_to = "/" }
+    return { status = 403 }
   end
   -- If no ID is provided, return without action.
   if not self.params.project_id or self.params.project_id == "" then
-    return { redirect_to "/projects" }
+    return { status = 400 }
   end
   local proj_id = tonumber(self.params.project_id)
   -- If no project exists with the given ID, return without action.
   local proj = Project:find(proj_id)
   if not proj then
-    return { redirect_to "/projects" }
+    return { status = 404 }
   end
   -- If the current user does not own the given project,
   -- return without action.
   if proj.user_id ~= self.session.current_user.id then
-    return { redirect_to "/projects" }
+    return { status = 403 }
   end
 
-  -- Delete the project. TODO: Alert the user if deletion fails.
-  local deleted = proj:delete()
+  -- Save the provided JSON string to a file.
+  local save_file = self.params.file
+  if save_file and save_file.content then
+    -- TODO: Any more input verification and/or sanitization?
+    local o_file = io.open("project_storage/project_" .. proj_id .. ".json", "w")
+    if o_file then
+      o_file:write(save_file.content)
+      o_file:close()
+    end
+  end
 
-  -- Return to the base 'projects' page.
-  return { redirect_to = "/projects" }
+  -- Done.
+  return { json = { status = 'success' }, status = 200 }
 end)
 
 app:post("/save_project/:project_id", function(self)
@@ -296,11 +304,15 @@ app:post("/save_project/:project_id", function(self)
     return { status = 403 }
   end
 
-  -- Save the provided JSON string to a file.
+  -- Save the provided JSON string to a file, as long as it exists.
   -- TODO: Encryption?
-  local o_file = io.open("project_storage/project_" .. proj_id .. ".json", "w")
-  o_file:write(self.params.nodes_str)
-  o_file:close()
+  if self.params.nodes_str then
+    local o_file = io.open("project_storage/project_" .. proj_id .. ".json", "w")
+    if o_file then
+      o_file:write(self.params.nodes_str)
+      o_file:close()
+    end
+  end
 
   -- Done.
   return { json = { status = 'success', nodes = self.params.nodes }, status = 200 }

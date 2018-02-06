@@ -64,13 +64,24 @@
   };
 
   submit_project_save_request = function(fsm_nodes_str) {
-    $.post("/save_project/<%= proj_id %>", fsm_nodes_str)
-     .done(function(data) {
-       //alert("Saved!\n"+JSON.stringify(data));
-     })
-     .fail(function(e) {
-       alert("Error saving." + JSON.stringify(e));
-     });
+    // Submit the save request as a file.
+    var boundary = '--------------03j9grbf9Nui5Egrlj34kaGrj';
+    var body = '--' + boundary + '\r\n'
+               + 'Content-Disposition: form-data; name="file";'
+               + 'filename="project.json"\r\n'
+               + 'Content-type: plain/text\r\n\r\n'
+               + fsm_nodes_str.nodes_str + '\r\n'
+               + '--' + boundary + '--';
+    $.ajax({
+      contentType: "multipart/form-data; boundary="+boundary,
+      data: body,
+      type: 'POST',
+      url: "/save_project_file/<%= proj_id %>",
+    }).done(function(data) {
+      //alert("Saved project file:\n" + JSON.stringify(data));
+    }).fail(function(data) {
+      alert("Error saving project file:\n" + JSON.stringify(data));
+    });
   };
 </script>
 
