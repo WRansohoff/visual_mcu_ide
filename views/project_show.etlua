@@ -68,8 +68,8 @@
      .done(function(data) {
        //alert("Saved!\n"+JSON.stringify(data));
      })
-     .fail(function() {
-       alert("Error saving.");
+     .fail(function(e) {
+       alert("Error saving." + JSON.stringify(e));
      });
   };
 </script>
