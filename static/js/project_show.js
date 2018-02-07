@@ -1427,7 +1427,6 @@ var precompile_project = function() {
       grid_nodes_yx[cur_node.grid_coord_y][cur_node.grid_coord_x].pn_index = prog_node_ind;
       // Insert the node's information (minus 'output[s]') into the
       // JSON object to send to the controller action.
-      // TODO: Method to set default node options?
       program_nodes.push({
         node_ind: prog_node_ind,
         node_type: cur_node.node_type,
@@ -1573,7 +1572,6 @@ var precompile_project = function() {
         else {
           cur_grid_x = next_node.grid_coord_x;
           cur_grid_y = next_node.grid_coord_y;
-          // TODO: Process the next node.
           cur_proc_node = next_node;
           visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"] = true;
           if (next_node.connections.up == 'output') {
@@ -2028,28 +2026,34 @@ var apply_new_var_node_options_listeners = function() {
   var var_val_tag = null;
   if (var_type_tag.value == 'int') {
     var_val_cell.innerHTML = `
-      <input id="define_var_options_int_tag" class="define_var_options_int_input" type="number" value="0">
+      <input id="define_var_options_int_tag" class="define_var_options_int_input" type="number" value="` + cur_node.options.var_val + `">
     `;
     var_val_tag = document.getElementById('define_var_options_int_tag');
   }
   else if (var_type_tag.value == 'float') {
     var_val_cell.innerHTML = `
-      <input id="define_var_options_float_tag" class="define_var_options_float_input" type="number" value="0" step="0.000001">
+      <input id="define_var_options_float_tag" class="define_var_options_float_input" type="number" value="` + cur_node.options.var_val + `" step="0.000001">
     `;
     var_val_tag = document.getElementById('define_var_options_float_tag');
   }
   else if (var_type_tag.value == 'bool') {
+    var is_true_opts = 'selected="true"';
+    var is_false_opts = '';
+    if (!cur_node.options.var_val || cur_node.options.var_val == 'false') {
+      is_false_opts = 'selected="true"';
+      is_true_opts = '';
+    }
     var_val_cell.innerHTML = `
       <select id="define_var_options_bool_tag" class="define_var_options_bool_input">
-        <option selected="true" value="true">True</option>
-        <option value="false">False</option>
+        <option ` + is_true_opts + ` value="true">True</option>
+        <option ` + is_false_opts + ` value="false">False</option>
       </select>
     `;
     var_val_tag = document.getElementById('define_var_options_bool_tag');
   }
   else if (var_type_tag.value == 'char') {
     var_val_cell.innerHTML = `
-      <input id="define_var_options_char_tag" class="define_var_options_char_input" type="text" maxlength="1">
+      <input id="define_var_options_char_tag" class="define_var_options_char_input" type="text" maxlength="1" value="` + cur_node.options.var_val + `">
     `;
     var_val_tag = document.getElementById('define_var_options_char_tag');
   }
@@ -2110,10 +2114,10 @@ var apply_set_var_node_options_listeners = function() {
   var var_name_tag = document.getElementById('set_var_options_var_list_tag');
   // (Needs to be created based on var type.)
   var var_val_tag = null;
-  var var_val_cell = document.getElementById('set_var_options_var_new_value_cel');
+  var var_val_cell = document.getElementById('set_var_options_var_new_value_cell');
   // Populate the dropdown select menu with currently-defined variables.
   var sel_html_opts = `
-    <option selected="true" value="(None)" id="set_var_options_var_list_n/a" class="set_var_options_var_list_option">
+    <option value="(None)" id="set_var_options_var_list_n/a" class="set_var_options_var_list_option">
       (None defined)
     </option>
   `;
@@ -2133,14 +2137,84 @@ var apply_set_var_node_options_listeners = function() {
   }
   var_name_tag.innerHTML = sel_html_opts;
 
-  if (var_defined) {
-    // TODO: add 'input' field.
-  }
-
   var_name_tag.onchange = function() {
-    cur_node.options.var_name = var_name_tag.value;
-    // TODO: Make the 'var_val_tag'.
+    var sel_var = null;
+    // Find the corresponding 'New Variable' node.
+    for (var node_ind in fsm_nodes) {
+      var p_node = fsm_nodes[node_ind];
+      if (p_node && p_node.node_type == 'New_Variable' && p_node.options.var_name == var_name_tag.value) {
+        sel_var = p_node;
+        break;
+      }
+    }
+    if (sel_var) {
+      cur_node.options.var_name = sel_var.options.var_name;
+      if (!cur_node.options.var_val || cur_node.options.var_type != sel_var.options.var_type) {
+        // Defaults.
+        if (sel_var.options.var_type == 'int') {
+          cur_node.options.var_val = 0;
+        }
+        else if (sel_var.options.var_type == 'float') {
+          cur_node.options.var_val = 0.0;
+        }
+        else if (sel_var.options.var_type == 'bool') {
+          cur_node.options.var_val = true;
+        }
+        else if (sel_var.options.var_type == 'char') {
+          cur_node.options.var_val = 'c';
+        }
+      }
+      cur_node.options.var_type = sel_var.options.var_type;
+      var val_input_defined = false;
+      if (cur_node.options.var_type == 'int') {
+        var_val_cell.innerHTML = `
+          <input id="define_var_options_int_tag" class="define_var_options_int_input" type="number" value="` + cur_node.options.var_val + `">
+        `;
+        var var_val_in = document.getElementById('define_var_options_int_tag');
+        var_val_in.onchange = function() {
+          cur_node.options.var_val = var_val_in.value;
+        };
+      }
+      else if (cur_node.options.var_type == 'float') {
+        var_val_cell.innerHTML = `
+          <input id="define_var_options_float_tag" class="define_var_options_float_input" type="number" value="` + cur_node.options.var_val + `" step="0.000001">
+        `;
+        var var_val_in = document.getElementById('define_var_options_float_tag');
+        var_val_in.onchange = function() {
+          cur_node.options.var_val = var_val_in.value;
+        };
+      }
+      else if (cur_node.options.var_type == 'bool') {
+        var is_true_sel = 'selected="true"';
+        var is_false_sel = '';
+        if (!cur_node.options.var_val || cur_node.options.var_val == 'false') {
+          is_false_sel = 'selected="true"';
+          is_true_sel = '';
+        }
+        var_val_cell.innerHTML = `
+          <select id="define_var_options_bool_tag" class="define_var_options_bool_input">
+            <option ` + is_true_sel + ` value="true">True</option>
+            <option ` + is_false_sel + ` value="false">False</option>
+          </select>
+        `;
+        var var_val_in = document.getElementById('define_var_options_bool_tag');
+        var_val_in.onchange = function() {
+          cur_node.options.var_val = var_val_in.value;
+        };
+      }
+      else if (cur_node.options.var_type == 'char') {
+        var_val_cell.innerHTML = `
+          <input id="define_var_options_char_tag" class="define_var_options_char_input" type="text" maxlength="1" value = "` + cur_node.options.var_val + `">
+        `;
+        var var_val_in = document.getElementById('define_var_options_char_tag');
+        var_val_in.onchange = function() {
+          cur_node.options.var_val = var_val_in.value;
+        };
+      }
+    }
   };
+  // Fire the change tag off once for the initial selection.
+  var_name_tag.onchange();
 };
 
 // Common 'new node selected' call.
