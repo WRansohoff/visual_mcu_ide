@@ -1544,40 +1544,26 @@ var precompile_project = function() {
   // into multiple subprocesses at branch points, each of which must
   // complete cleanly on its own.
   if (!pre_pre_process_error) {
-    var cur_grid_x = boot_node.grid_coord_x;
-    var cur_grid_y = boot_node.grid_coord_y;
-    if (boot_node.connections.up == 'output') {
-      cur_grid_y += 1;
-    }
-    else if (boot_node.connections.down == 'output') {
-      cur_grid_y -= 1;
-    }
-    else if (boot_node.connections.left == 'output') {
-      cur_grid_x -= 1;
-    }
-    else if (boot_node.connections.right == 'output') {
-      cur_grid_x += 1;
-    }
-    else {
-      pre_pre_process_error += "Error: 'Boot' node has no 'output' connection.\n";
-    }
-
     // Now, enter the main node processing loop.
+    var cur_proc_node = boot_node;
     var visited_nodes = [];
     visited_nodes["("+boot_node.grid_coord_x+","+boot_node.grid_coord_y+")"] = true;
-    var cur_proc_node = boot_node;
     var done_processing = false;
-    var remaining_branches = [];
-    while (!done_processing) {
+    var remaining_branches = [boot_node];
+    // In-scope method for finding a 'next node' from a given
+    // 'output' connection grid coordinate.
+    // Input: (x, y) coordinates to look for an 'input' connection at.
+    // Output: 'next_node' if one was found, false-y otherwise.
+    var find_input_node = function(grid_x, grid_y) {
       // Find any nodes which have 'input' arrows originating from
       // the current grid coordinate. There should be exactly one.
       // If there are 0 or >1, error.
       var next_node = null;
       // 'Left'
       var temp_node = null;
-      var temp_grid = grid_nodes_xy[cur_grid_x-1];
+      var temp_grid = grid_nodes_xy[grid_x-1];
       if (temp_grid) {
-        temp_node = temp_grid[cur_grid_y];
+        temp_node = temp_grid[grid_y];
       }
       else { temp_node = null; }
       if (temp_node &&
@@ -1587,14 +1573,14 @@ var precompile_project = function() {
           next_node = temp_node;
         }
         else {
-          pre_pre_process_error += "Error: Grid coordinate (" + cur_grid_x + ", " + cur_grid_y + ") points to multiple 'input' arrows. Each 'output' arrow can only lead to one 'input' arrow.\n";
-          done_processing = true;
+          pre_pre_process_error += "Error: Grid coordinate (" + grid_x + ", " + grid_y + ") points to multiple 'input' arrows. Each 'output' arrow can only lead to one 'input' arrow.\n";
+          return false;
         }
       }
       // 'Right'
-      temp_grid = grid_nodes_xy[cur_grid_x+1];
+      temp_grid = grid_nodes_xy[grid_x+1];
       if (temp_grid) {
-        temp_node = temp_grid[cur_grid_y];
+        temp_node = temp_grid[grid_y];
       }
       else { temp_node = null; }
       if (temp_node &&
@@ -1604,14 +1590,14 @@ var precompile_project = function() {
           next_node = temp_node;
         }
         else {
-          pre_pre_process_error += "Error: Grid coordinate (" + cur_grid_x + ", " + cur_grid_y + ") points to multiple 'input' arrows. Each 'output' arrow can only lead to one 'input' arrow.\n";
-          done_processing = true;
+          pre_pre_process_error += "Error: Grid coordinate (" + grid_x + ", " + grid_y + ") points to multiple 'input' arrows. Each 'output' arrow can only lead to one 'input' arrow.\n";
+          return false;
         }
       }
       // 'Up'
-      temp_grid = grid_nodes_xy[cur_grid_x];
+      temp_grid = grid_nodes_xy[grid_x];
       if (temp_grid) {
-        temp_node = temp_grid[cur_grid_y+1];
+        temp_node = temp_grid[grid_y+1];
       }
       else { temp_node = null; }
       if (temp_node &&
@@ -1621,14 +1607,14 @@ var precompile_project = function() {
           next_node = temp_node;
         }
         else {
-          pre_pre_process_error += "Error: Grid coordinate (" + cur_grid_x + ", " + cur_grid_y + ") points to multiple 'input' arrows. Each 'output' arrow can only lead to one 'input' arrow.\n";
-          done_processing = true;
+          pre_pre_process_error += "Error: Grid coordinate (" + grid_x + ", " + grid_y + ") points to multiple 'input' arrows. Each 'output' arrow can only lead to one 'input' arrow.\n";
+          return false;
         }
       }
       // 'Down'
-      temp_grid = grid_nodes_xy[cur_grid_x];
+      temp_grid = grid_nodes_xy[grid_x];
       if (temp_grid) {
-        temp_node = temp_grid[cur_grid_y-1];
+        temp_node = temp_grid[grid_y-1];
       }
       else { temp_node = null; }
       if (temp_node &&
@@ -1638,43 +1624,142 @@ var precompile_project = function() {
           next_node = temp_node;
         }
         else {
-          pre_pre_process_error += "Error: Grid coordinate (" + cur_grid_x + ", " + cur_grid_y + ") points to multiple 'input' arrows. Each 'output' arrow can only lead to one 'input' arrow.\n";
-          done_processing = true;
+          pre_pre_process_error += "Error: Grid coordinate (" + grid_x + ", " + grid_y + ") points to multiple 'input' arrows. Each 'output' arrow can only lead to one 'input' arrow.\n";
+          return false;
         }
       }
       if (!next_node) {
-        pre_pre_process_error += "Error: Grid coordinate (" + cur_grid_x + ", " + cur_grid_y + ") does not point to any 'input' arrows. If an output is pointing directly at a node, move that node over and give it an 'input' arrow.\n";
-        done_processing = true;
+        return false;
       }
-      else {
-        program_nodes[cur_proc_node.pn_index].output = {
-          single: next_node.pn_index
-        };
-        if (visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"]) {
-          done_processing = true;
-        }
-        else {
-          cur_grid_x = next_node.grid_coord_x;
-          cur_grid_y = next_node.grid_coord_y;
-          cur_proc_node = next_node;
-          visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"] = true;
-          if (next_node.connections.up == 'output') {
-            cur_grid_y += 1;
+      return next_node;
+    };
+    // In-scope method for processing a single node in the chain.
+    // Input: Node to preprocess.
+    // Output: true/false-y to indicate success/failure.
+    // Writes to previously-defined node arrays.
+    var process_node_func = function(proc_node) {
+      var cur_grid_node_x = proc_node.grid_coord_x;
+      var cur_grid_node_y = proc_node.grid_coord_y;
+      // 'Branching' node.
+      if (proc_node.node_type == 'Check_Truthy') {
+        if (proc_node.connections) {
+          // 'If-True' output
+          if (proc_node.connections.up == 'output_T') {
+            cur_grid_node_y += 1;
           }
-          else if (next_node.connections.down == 'output') {
-            cur_grid_y -= 1;
+          else if (proc_node.connections.down == 'output_T') {
+            cur_grid_node_y -= 1;
           }
-          else if (next_node.connections.left == 'output') {
-            cur_grid_x -= 1;
+          else if (proc_node.connections.left == 'output_T') {
+            cur_grid_node_x -= 1;
           }
-          else if (next_node.connections.right == 'output') {
-            cur_grid_x += 1;
+          else if (proc_node.connections.right == 'output_T') {
+            cur_grid_node_x += 1;
           }
           else {
-            pre_pre_process_error += "Error: Node at coordinates (" + cur_grid_x + ", " + cur_grid_y + ") has no 'output' connection.\n";
-            done_processing = true;
+            pre_pre_process_error += "Error: Branching node at (" + cur_grid_node_x + ", " + cur_grid_node_y + ") has no 'If True' output connection.\n";
+            return false;
+          }
+          var next_node_t = find_input_node(cur_grid_node_x, cur_grid_node_y);
+          // 'Else-False' output
+          cur_grid_node_x = proc_node.grid_coord_x;
+          cur_grid_node_y = proc_node.grid_coord_y;
+          if (proc_node.connections.up == 'output_F') {
+            cur_grid_node_y += 1;
+          }
+          else if (proc_node.connections.down == 'output_F') {
+            cur_grid_node_y -= 1;
+          }
+          else if (proc_node.connections.left == 'output_F') {
+            cur_grid_node_x -= 1;
+          }
+          else if (proc_node.connections.right == 'output_F') {
+            cur_grid_node_x += 1;
+          }
+          else {
+            pre_pre_process_error += "Error: Branching node at (" + cur_grid_node_x + ", " + cur_grid_node_y + ") has no 'Else (False)' output connection.\n";
+            return false;
+          }
+          var next_node_f = find_input_node(cur_grid_node_x, cur_grid_node_y);
+          if (!next_node_t || !next_node_f) {
+            pre_pre_process_error += "Error: Branching node at (" + cur_grid_node_x + ", " + cur_grid_node_y + ") does not point to valid 'input' arrows with both of its outputs.";
+            return false;
+          }
+          else {
+            program_nodes[proc_node.pn_index].output = {
+              branch_t: next_node_t.pn_index,
+              branch_f: next_node_f.pn_index
+            };
+            // 'Enqueue' both branch nodes.
+            if (!visited_nodes["("+next_node_t.grid_coord_x+","+next_node_t.grid_coord_y+")"]) {
+              visited_nodes["("+next_node_t.grid_coord_x+","+next_node_t.grid_coord_y+")"] = true;
+              remaining_branches.push(next_node_t);
+            }
+            if (!visited_nodes["("+next_node_f.grid_coord_x+","+next_node_f.grid_coord_y+")"]) {
+              visited_nodes["("+next_node_f.grid_coord_x+","+next_node_f.grid_coord_y+")"] = true;
+              remaining_branches.push(next_node_f);
+            }
+            return true;
           }
         }
+        else {
+          pre_pre_process_error += "Unknown: Node 'connections' invalid\n";
+          return false;
+        }
+      }
+      // 'Normal' node.
+      else {
+        if (proc_node.connections) {
+          if (proc_node.connections.up == 'output') {
+            cur_grid_node_y += 1;
+          }
+          else if (proc_node.connections.down == 'output') {
+            cur_grid_node_y -= 1;
+          }
+          else if (proc_node.connections.left == 'output') {
+            cur_grid_node_x -= 1;
+          }
+          else if (proc_node.connections.right == 'output') {
+            cur_grid_node_x += 1;
+          }
+          else {
+            pre_pre_process_error += "Error: Node at (" + cur_grid_node_x + ", " + cur_grid_node_y + ") has no 'output' connection.\n";
+            return false;
+          }
+          var next_node = find_input_node(cur_grid_node_x, cur_grid_node_y);
+          if (!next_node) {
+            pre_pre_process_error += "Error: Grid coordinate (" + grid_x + ", " + grid_y + ") does not point to any 'input' arrows. If an output is pointing directly at a node, move that node over and give it an 'input' arrow.\n";
+            return false;
+          }
+          else {
+            program_nodes[proc_node.pn_index].output = {
+              single: next_node.pn_index
+            };
+            if (!visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"]) {
+              visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"] = true;
+              remaining_branches.push(next_node);
+            }
+            return true;
+          }
+        }
+        else {
+          pre_pre_process_error += "Unknown: Node 'connections' invalid\n";
+          return false;
+        }
+      }
+    };
+
+    while (!done_processing) {
+      var next_proc_node = remaining_branches.pop();
+      if (next_proc_node) {
+        var okay = process_node_func(next_proc_node);
+        if (!okay && !done_processing) {
+          pre_pre_process_error += "Unknown error in node processing function.\n";
+          done_processing = true;
+        }
+      }
+      else {
+        done_processing = true;
       }
     }
   }
