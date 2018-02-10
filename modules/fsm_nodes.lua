@@ -654,7 +654,24 @@ end
 function FSMNodes.append_set_var_node(node, node_graph, proj_state)
   local node_text = '  // ("Set Variable" node)\n';
   node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  -- TODO: The actual variable setting.
+  -- (The actual variable setting.)
+  local var_c_type = node.options.var_type
+  local var_c_val = tostring(node.options.var_val)
+  if var_c_type == 'bool' then
+    var_c_type = 'unsigned char'
+    if var_c_val == 'false' then
+      var_c_val = '0';
+    elseif var_c_val == 'true' then
+      var_c_val = '1';
+    else
+      -- uh...error? TODO
+      var_c_val = '0';
+    end
+  elseif var_c_type == 'char' then
+    var_c_val = "'" .. var_c_val .. "'"
+  end
+  node_text = node_text .. '  ' .. node.options.var_name .. ' = ' .. var_c_val .. ';\n'
+  -- (Done.)
   if node.output and node.output.single then
     node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
   else
@@ -679,9 +696,11 @@ end
 function FSMNodes.append_check_truthy_node(node, node_graph, proj_state)
   local node_text = '  // ("If variable is truth-y" branching node)\n'
   node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  -- TODO: Branching logic. For now, just goto the 'true' branch.
   if node.output and node.output.branch_t and node.output.branch_f then
-    node_text = node_text .. '  goto NODE_' .. node.output.branch_t .. ';\n'
+    -- Branching logic.
+    node_text = node_text .. '  if (' .. node.options.var_name .. ') {\n'
+    node_text = node_text .. '    goto NODE_' .. node.output.branch_t .. ';\n  }\n'
+    node_text = node_text .. '  else {\n    goto NODE_' .. node.output.branch_f .. ';\n  }\n'
   else
     return nil
   end
