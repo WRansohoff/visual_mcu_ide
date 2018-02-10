@@ -254,6 +254,7 @@ var imgs_to_load = {
   New_Variable:      '/static/fsm_assets/new_var_node.png',
   Set_Variable:      '/static/fsm_assets/set_variable_node.png',
   Set_Var_Logic_Not: '/static/fsm_assets/set_not_node.png',
+  Nop_Node:          '/static/fsm_assets/no_op_node.png',
   // Branching nodes:
   Check_Truthy:      '/static/fsm_assets/check_truthy_node.png',
   // Sooo I mixed up 'LtoR' and 'RtoL' in the png filenames. But long-term,
@@ -511,6 +512,11 @@ node_array_from_json = function(node_arr_json) {
         cur_fsm_node.tex_sampler = loaded_textures['Set_Variable'];
         cur_fsm_node.node_color = 'blue';
       }
+      else if (cur_fsm_node.node_type == 'Nop_Node' && loaded_textures['Nop_Node']) {
+        cur_fsm_node.tex_sampler = loaded_textures['Nop_Node'];
+        cur_fsm_node.node_color = 'blue';
+      }
+      // (Branching nodes)
       else if (cur_fsm_node.node_type == 'Check_Truthy' && loaded_textures['Check_Truthy']) {
         cur_fsm_node.tex_sampler = loaded_textures['Check_Truthy'];
         cur_fsm_node.node_color = 'canary';
@@ -601,6 +607,13 @@ check_selected_menu_tool = function() {
   else if (selected_menu_tool == 'Logical Not' && loaded_textures['Set_Var_Logic_Not']) {
     cur_tool_node_tex = loaded_textures['Set_Var_Logic_Not'];
     cur_tool_node_type = 'Set_Var_Logic_Not';
+    cur_tool_node_color = 'blue';
+    menu_tool_selected = true;
+  }
+  // 'No-op' node; do nothing.
+  else if (selected_menu_tool == 'No-op (Do Nothing)' && loaded_textures['Nop_Node']) {
+    cur_tool_node_tex = loaded_textures['Nop_Node'];
+    cur_tool_node_type = 'Nop_Node';
     cur_tool_node_color = 'blue';
     menu_tool_selected = true;
   }
@@ -1272,6 +1285,9 @@ project_show_onload = function() {
             else if (sel_type == 'Set_Var_Logic_Not') {
               selected_node_options_html += set_var_logic_not_node_options_html;
             }
+            else if (sel_type == 'Nop_Node') {
+              selected_node_options_html += nop_node_options_html;
+            }
             else if (sel_type == 'Check_Truthy') {
               selected_node_options_html += check_truthy_node_options_html;
             }
@@ -1555,6 +1571,40 @@ var precompile_project = function() {
     visited_nodes["("+boot_node.grid_coord_x+","+boot_node.grid_coord_y+")"] = true;
     var done_processing = false;
     var remaining_branches = [boot_node];
+    // In-scope method for finding the next node in a chain;
+    // it assumes that it will not operate on branching nodes.
+    // Currently used for cleanly removing 'no-op' nodes.
+    // Input: Current 'next node' (no-op node)
+    // Output: The next node in the chain, or false-y if failed.
+    var find_next_input_node = function(cur_input_node) {
+      var grid_x = cur_input_node.grid_coord_x;
+      var grid_y = cur_input_node.grid_coord_y;
+      if (cur_input_node.connections) {
+        if (cur_input_node.connections.up == 'output') {
+          grid_y += 1;
+        }
+        else if (cur_input_node.connections.down == 'output') {
+          grid_y -= 1;
+        }
+        else if (cur_input_node.connections.left == 'output') {
+          grid_x -= 1;
+        }
+        else if (cur_input_node.connections.right == 'output') {
+          grid_x += 1;
+        }
+        else {
+          pre_pre_process_error += "Error: Node at (" + grid_x + ", " + grid_y + ") has no 'output' connection.\n";
+          return false;
+        }
+        var next_node = find_input_node(grid_x, grid_y);
+        if (!next_node) {
+          pre_pre_process_error += "Error: Grid coordinate (" + grid_x + ", " + grid_y + ") does not point to any 'input' arrows. If an output is pointing directly at a node, move that node over and give it an 'input' arrow.\n";
+          return false;
+        }
+        return next_node;
+      }
+      else { return false; }
+    };
     // In-scope method for finding a 'next node' from a given
     // 'output' connection grid coordinate.
     // Input: (x, y) coordinates to look for an 'input' connection at.
@@ -1732,8 +1782,12 @@ var precompile_project = function() {
             return false;
           }
           var next_node = find_input_node(cur_grid_node_x, cur_grid_node_y);
+          // Skip 'No-op' nodes.
+          while (next_node && next_node.node_type == 'Nop_Node') {
+            next_node = find_next_input_node(next_node);
+          }
           if (!next_node) {
-            pre_pre_process_error += "Error: Grid coordinate (" + grid_x + ", " + grid_y + ") does not point to any 'input' arrows. If an output is pointing directly at a node, move that node over and give it an 'input' arrow.\n";
+            pre_pre_process_error += "Error: Grid coordinate (" + cur_grid_node_x + ", " + cur_grid_node_y + ") does not point to any 'input' arrows. If an output is pointing directly at a node, move that node over and give it an 'input' arrow.\n";
             return false;
           }
           else {
@@ -2622,6 +2676,11 @@ var apply_set_var_node_options_listeners = function() {
   var_name_tag.onchange();
 };
 
+// No-op node - currently no options, sort of by definition...
+var apply_nop_node_options_listeners = function() {
+  // Currently none.
+};
+
 var apply_check_truthy_options_listeners = function() {
   var cur_node = fsm_nodes[selected_node_id];
   var var_name_tag = document.getElementById('check_truthy_options_var_list_tag');
@@ -2687,6 +2746,9 @@ var apply_selected_node_option_listeners = function(node_type) {
   }
   else if (node_type == 'Set_Variable') {
     apply_set_var_node_options_listeners();
+  }
+  else if (node_type == 'Nop_Node') {
+    apply_nop_node_options_listeners();
   }
   else if (node_type == 'Check_Truthy') {
     apply_check_truthy_options_listeners();

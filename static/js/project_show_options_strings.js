@@ -510,6 +510,11 @@ var set_var_logic_not_node_options_html = `
 </table>
 `;
 
+// 'No-op' node options.
+// Currently there are none, besides the input/output connections table.
+var nop_node_options_html = `
+`;
+
 // 'Is Variable Truth-y?' branching node options.
 var check_truthy_node_options_html = `
 <table class="check_truthy_options_table" cellpadding="0" cellspacing="0" border="0">

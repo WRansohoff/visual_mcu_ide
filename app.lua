@@ -105,6 +105,7 @@ app:match("/project/:project_id", function(self)
   core_utils_list = { }
   core_utils_list["Boot"] = "Node"
   core_utils_list["Delay"] = "Node"
+  core_utils_list["No-op (Do Nothing)"] = "Node"
   tool_list["Core Utilities"] = core_utils_list
   gpio_list = { }
   gpio_list["Setup GPIO Pin"] = "Node"
@@ -197,25 +198,27 @@ app:post("/precompile_project/:project_id", function(self)
 
   -- Define initial global variables. (Code auto-gen done with 'Boot' node)
   local global_decs = {}
-  for i, val in pairs(self.params.g_vars) do
-    if val and val.var_name and val.var_type then
-      local i_val = val.var_val
-      if not i_val then
-        if val.var_type == 'int' then
-          i_val = 0
-        elseif val.var_type == 'float' then
-          i_val = 0.0
-        elseif val.var_type == 'bool' then
-          i_val = true
-        elseif val.var_type == 'char' then
-          i_val = '\0'
+  if self.params.g_vars then
+    for i, val in pairs(self.params.g_vars) do
+      if val and val.var_name and val.var_type then
+        local i_val = val.var_val
+        if not i_val then
+          if val.var_type == 'int' then
+            i_val = 0
+          elseif val.var_type == 'float' then
+            i_val = 0.0
+          elseif val.var_type == 'bool' then
+            i_val = true
+          elseif val.var_type == 'char' then
+            i_val = '\0'
+          end
         end
+        table.insert(global_decs, {
+          var_name = val.var_name,
+          var_type = val.var_type,
+          var_val = i_val
+        })
       end
-      table.insert(global_decs, {
-        var_name = val.var_name,
-        var_type = val.var_type,
-        var_val = i_val
-      })
     end
   end
 
