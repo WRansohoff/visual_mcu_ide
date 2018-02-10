@@ -137,6 +137,9 @@ app:match("/project/:project_id", function(self)
   logic_mods_list["Logical Not"] = "Node"
   vars_logic_list["Variable Modification"] = logic_mods_list
   tool_list["Variables and Logic"] = vars_logic_list
+  branch_nodes_list = { }
+  branch_nodes_list["Is Variable Truth-y?"] = "Node"
+  tool_list["If-Else Branching Nodes"] = branch_nodes_list
 
   -- Check for a previously-saved file.
   -- TODO: Decryption? (After encrypting saved files)

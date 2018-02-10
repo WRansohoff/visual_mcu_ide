@@ -80,6 +80,93 @@ var node_io_options_html = `
 </table>
 `;
 
+// Special version for 'if-else' branching nodes. They have
+// two potential outputs connections.
+var branching_node_io_options_html = `
+<table class="branching_node_io_options_table" cellpadding="0" cellspacing="0" border="0">
+  <tr class="branching_node_io_options_top_row">
+    <td class="branching_node_io_options_top_left">
+    </td>
+    <td class="branching_node_io_options_top_mid">
+      <select id="node_io_options_top_sel" class="branching_node_io_options_select">
+        <option value="None" selected="true" id="branching_node_io_options_top_mid_none" class="branching_node_io_options_opt">
+          None
+        </option>
+        <option value="Input" id="node_io_options_top_mid_input" class="branching_node_io_options_opt">
+          Input
+        </option>
+        <option value="Output_True" id="node_io_options_top_mid_output_true" class="branching_node_io_options_opt">
+          Output (If-true)
+        </option>
+        <option value="Output_False" id="node_io_options_top_mid_output_false" class="branching_node_io_options_opt">
+          Output (Else-false)
+        </option>
+      </select>
+    </td>
+    <td class="branching_node_io_options_top_right">
+    </td>
+  </tr>
+  <tr class="branching_node_io_options_mid_row">
+    <td class="branching_node_io_options_mid_left">
+      <select id="node_io_options_left_sel" class="branching_node_io_options_select">
+        <option value="None" selected="true" id="node_io_options_mid_left_none" class="branching_node_io_options_opt">
+          None
+        </option>
+        <option value="Input" id="node_io_options_mid_left_input" class="branching_node_io_options_opt">
+          Input
+        </option>
+        <option value="Output_True" id="node_io_options_mid_left_output_true" class="branching_node_io_options_opt">
+          Output (If-true)
+        </option>
+        <option value="Output_False" id="node_io_options_mid_left_output_false" class="branching_node_io_options_opt">
+          Output (Else-false)
+        </option>
+      </select>
+    </td>
+    <td class="branching_node_io_options_mid_mid">
+    </td>
+    <td class="branching_node_io_options_mid_right">
+      <select id="node_io_options_right_sel" class="branching_node_io_options_select">
+        <option value="None" selected="true" id="node_io_options_mid_right_none" class="branching_node_io_options_opt">
+          None
+        </option>
+        <option value="Input" id="node_io_options_mid_right_input" class="branching_node_io_options_opt">
+          Input
+        </option>
+        <option value="Output_True" id="node_io_options_mid_right_output_true" class="branching_node_io_options_opt">
+          Output (If-true)
+        </option>
+        <option value="Output_False" id="node_io_options_mid_right_output_false" class="branching_node_io_options_opt">
+          Output (Else-false)
+        </option>
+      </select>
+    </td>
+  </tr>
+  <tr class="branching_node_io_options_bot_row">
+    <td class="branching_node_io_options_bot_left">
+    </td>
+    <td class="branching_node_io_options_bot_mid">
+      <select id="node_io_options_bot_sel" class="branching_node_io_options_select">
+        <option value="None" selected="true" id="node_io_options_bot_mid_none" class="branching_node_io_options_opt">
+          None
+        </option>
+        <option value="Input" id="node_io_options_bot_mid_input" class="branching_node_io_options_opt">
+          Input
+        </option>
+        <option value="Output_True" id="node_io_options_bot_mid_output_true" class="branching_node_io_options_opt">
+          Output (If-true)
+        </option>
+        <option value="Output_False" id="node_io_options_bot_mid_output_false" class="branching_node_io_options_opt">
+          Output (Else-false)
+        </option>
+      </select>
+    </td>
+    <td class="branching_node_io_options_bot_right">
+    </td>
+  </tr>
+</table>
+`;
+
 /*
  * Common options values used by multiple nodes.
  */
@@ -420,5 +507,12 @@ var set_var_logic_not_node_options_html = `
 <table class="set_var_logic_not_options_table" cellpadding="0" cellspacing="0" border="0">
   ` + defined_variables_list_table_row('set_var_logic_not_options_A') + `
   ` + defined_variables_list_table_row('set_var_options_B') + `
+</table>
+`;
+
+// 'Is Variable Truth-y?' branching node options.
+var check_truthy_node_options_html = `
+<table class="check_truthy_options_table" cellpadding="0" cellspacing="0" border="0">
+  ` + defined_variables_list_table_row('check_truthy_options') + `
 </table>
 `;
