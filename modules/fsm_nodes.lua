@@ -5,12 +5,15 @@ local FSMNodes = {}
 -- Create the initial filesystem structure for the project, using
 -- information stored in the startup 'Boot' node. Store relevant
 -- information in a table for the preprocessor to keep track of.
-function FSMNodes.init_project_state(boot_node, node_graph, proj_id)
+function FSMNodes.init_project_state(boot_node, node_graph, global_decs, proj_id)
   local p_state = {}
   local proj_int = tonumber(proj_id)
   if proj_int <= 0 then
     return p_state
   end
+  -- Store global variable declarations.
+  p_state.global_decs = global_decs
+
   -- Set the base directory, and make it if it doesn't exist.
   local proj_dir = 'project_storage/precomp_' .. proj_int .. '/'
   if varm_util.ensure_dir_empty(proj_dir) then
@@ -32,7 +35,7 @@ function FSMNodes.init_project_state(boot_node, node_graph, proj_id)
       -- Copy the static GCC libs.
       p_state.with_toolchain_libs = FSMNodes.copy_static_libs(boot_node, p_state)
       -- Generate the vector table.
-      p_state.vector_table = FSMNodes.gen_vector_table(boo_node, p_state)
+      p_state.vector_table = FSMNodes.gen_vector_table(boot_node, p_state)
       -- Generate the bare-bones source files.
       p_state.src_base = FSMNodes.gen_bare_source_files(boot_node, p_state)
       -- Generate the Makefile, and add LICENSE/README.md files.
@@ -191,6 +194,36 @@ function FSMNodes.gen_bare_source_files(boot_node, cur_proj_state)
       end
     end
   end
+
+  -- One of the files copied, 'src/global.h', should also have initial
+  -- global/static variable declarations:
+  local g_vars_text = ''
+  for i, val in pairs(cur_proj_state.global_decs) do
+    if val and val.var_name and val.var_type and val.var_val then
+      local var_c_type = val.var_type
+      local var_c_val = tostring(val.var_val)
+      if var_c_type == 'bool' then
+        var_c_type = 'unsigned char'
+        if var_c_val == 'false' then
+          var_c_val = '0';
+        elseif var_c_val == 'true' then
+          var_c_val = '1';
+        else
+          -- uh...error? TODO
+          var_c_val = '0';
+        end
+      elseif var_c_type == 'char' then
+        var_c_val = "'" .. var_c_val .. "'"
+      end
+      g_vars_text = g_vars_text .. 'static ' .. var_c_type .. ' ' .. val.var_name .. ' = ' .. var_c_val .. ';\n'
+    end
+  end
+  if not varm_util.insert_into_file(cur_proj_state.base_dir .. 'src/global.h',
+                                    "/ GLOBAL_VAR_DEFINES:",
+                                    g_vars_text) then
+    copy_success = false
+  end
+
   return copy_success
 end
 
@@ -264,13 +297,17 @@ function FSMNodes.process_node(node, node_graph, proj_state)
       return true
     end
   -- (Variable Nodes)
-  elseif node.node_type == 'New_Variable' then
-    return true
   elseif node.node_type == 'Set_Variable' then
-    return true
+    if (FSMNodes.ensure_support_methods_set_var_node(node, proj_state) and
+        FSMNodes.append_set_var_node(node, node_graph, proj_state)) then
+      return true
+    end
   -- (Branching Nodes)
   elseif node.node_type == 'Check_Truthy' then
-    return true
+    if (FSMNodes.ensure_support_methods_check_truthy_node(node, proj_state) and
+        FSMNodes.append_check_truthy_node(node, node_graph, proj_state)) then
+      return true
+    end
   end
   -- (Unrecognized node type.)
   return nil
@@ -600,6 +637,55 @@ function FSMNodes.append_rcc_enable_node(node, node_graph, proj_state)
     return nil
   end
   node_text = node_text .. '  // (End "Enable Clock" (RCC) node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Ensure supporting methods for setting variables.
+function FSMNodes.ensure_support_methods_set_var_node(node, proj_state)
+  -- Only primitive types, so no required includes to check.
+  return true
+end
+
+function FSMNodes.append_set_var_node(node, node_graph, proj_state)
+  local node_text = '  // ("Set Variable" node)\n';
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- TODO: The actual variable setting.
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "Set Variable" node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Ensure supporting methods for branching 'check truth-y' statement.
+function FSMNodes.ensure_support_methods_check_truthy_node(node, proj_state)
+  -- (No required supporting code)
+  return true
+end
+
+-- Append a branching 'check truth-y' node's code.
+function FSMNodes.append_check_truthy_node(node, node_graph, proj_state)
+  local node_text = '  // ("If variable is truth-y" branching node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- TODO: Branching logic. For now, just goto the 'true' branch.
+  if node.output and node.output.branch_t and node.output.branch_f then
+    node_text = node_text .. '  goto NODE_' .. node.output.branch_t .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "If variable is truth-y" branching node)\n\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
                                     "/ MAIN_ENTRY:",
                                     node_text) then

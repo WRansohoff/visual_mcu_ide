@@ -1519,6 +1519,11 @@ var precompile_project = function() {
       });
       // Specific logic for individual node types.
       if (cur_node.node_type == 'New_Variable') {
+        global_vars.push({
+          var_name: cur_node.options.var_name,
+          var_type: cur_node.options.var_type,
+          var_val: cur_node.options.var_val,
+        });
         // Global variable definition. TODO.
       }
       else if (cur_node.node_type == 'Boot') {
@@ -1774,6 +1779,7 @@ var precompile_project = function() {
     //alert("No errors! program_nodes:\n" + JSON.stringify(program_nodes));
     return {
       nodes: program_nodes,
+      g_vars: global_vars,
     };
   }
 };

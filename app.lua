@@ -195,6 +195,30 @@ app:post("/precompile_project/:project_id", function(self)
     status_msg = 'No Boot node passed in.'
   end
 
+  -- Define initial global variables. (Code auto-gen done with 'Boot' node)
+  local global_decs = {}
+  for i, val in pairs(self.params.g_vars) do
+    if val and val.var_name and val.var_type then
+      local i_val = val.var_val
+      if not i_val then
+        if val.var_type == 'int' then
+          i_val = 0
+        elseif val.var_type == 'float' then
+          i_val = 0.0
+        elseif val.var_type == 'bool' then
+          i_val = true
+        elseif val.var_type == 'char' then
+          i_val = '\0'
+        end
+      end
+      table.insert(global_decs, {
+        var_name = val.var_name,
+        var_type = val.var_type,
+        var_val = i_val
+      })
+    end
+  end
+
   -- Create an empty 'project state'
   local proj_state = {}
   -- Starting at 'Boot', process each node in order.
@@ -204,7 +228,7 @@ app:post("/precompile_project/:project_id", function(self)
   local preprocessing = true
   if ret_status == 200 then
     cur_node = self.params.nodes[cur_ind]
-    proj_state = FSMNodes.init_project_state(cur_node, self.params.nodes, proj_id)
+    proj_state = FSMNodes.init_project_state(cur_node, self.params.nodes, global_decs, proj_id)
     local indices_to_process = {}
     table.insert(indices_to_process, cur_ind)
     while preprocessing do
