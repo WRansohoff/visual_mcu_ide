@@ -205,7 +205,21 @@ app:post("/precompile_project/:project_id", function(self)
   if ret_status == 200 then
     cur_node = self.params.nodes[cur_ind]
     proj_state = FSMNodes.init_project_state(cur_node, self.params.nodes, proj_id)
+    local indices_to_process = {}
+    table.insert(indices_to_process, cur_ind)
     while preprocessing do
+      cur_ind = table.remove(indices_to_process, 1)
+      if not cur_ind and cur_ind ~= 0 then
+        preprocessing = false
+        break
+      end
+      cur_node = self.params.nodes[cur_ind]
+      if not cur_node then
+        preprocessing = false
+        ret_status = 500
+        status_msg = 'Node does not exist: ' .. cur_ind
+        break
+      end
       if visited_nodes[cur_ind] then
         preprocessing = false
         break
@@ -217,14 +231,14 @@ app:post("/precompile_project/:project_id", function(self)
         status_msg = 'Error processing node: ' .. cur_ind
       end
       if preprocessing then
-        if cur_node.output and cur_node.output.single then
-          visited_nodes[cur_ind] = true;
-          cur_ind = cur_node.output.single
-          cur_node = self.params.nodes[cur_ind]
-          if not cur_node then
-            preprocessing = false
-            ret_status = 500
-            status_msg = 'Node does not exist: ' .. cur_ind
+        if cur_node.output then
+          if cur_node.output.single then
+            visited_nodes[cur_ind] = true
+            table.insert(indices_to_process, cur_node.output.single)
+          elseif cur_node.output.branch_t and cur_node.output.branch_f then
+            visited_nodes[cur_ind] = true
+            table.insert(indices_to_process, cur_node.output.branch_t)
+            table.insert(indices_to_process, cur_node.output.branch_f)
           end
         else
           -- TODO: Support branching.

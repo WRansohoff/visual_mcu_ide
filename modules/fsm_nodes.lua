@@ -263,6 +263,14 @@ function FSMNodes.process_node(node, node_graph, proj_state)
         FSMNodes.append_rcc_enable_node(node, node_graph, proj_state)) then
       return true
     end
+  -- (Variable Nodes)
+  elseif node.node_type == 'New_Variable' then
+    return true
+  elseif node.node_type == 'Set_Variable' then
+    return true
+  -- (Branching Nodes)
+  elseif node.node_type == 'Check_Truthy' then
+    return true
   end
   -- (Unrecognized node type.)
   return nil
