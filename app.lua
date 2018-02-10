@@ -105,6 +105,8 @@ app:match("/project/:project_id", function(self)
   core_utils_list = { }
   core_utils_list["Boot"] = "Node"
   core_utils_list["Delay"] = "Node"
+  core_utils_list["Label"] = "Node"
+  core_utils_list["Jump"] = "Node"
   core_utils_list["No-op (Do Nothing)"] = "Node"
   tool_list["Core Utilities"] = core_utils_list
   gpio_list = { }

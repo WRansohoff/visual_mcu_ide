@@ -255,6 +255,8 @@ var imgs_to_load = {
   Set_Variable:      '/static/fsm_assets/set_variable_node.png',
   Set_Var_Logic_Not: '/static/fsm_assets/set_not_node.png',
   Nop_Node:          '/static/fsm_assets/no_op_node.png',
+  Label:             '/static/fsm_assets/label_node.png',
+  Jump:              '/static/fsm_assets/jump_node.png',
   // Branching nodes:
   Check_Truthy:      '/static/fsm_assets/check_truthy_node.png',
   // Sooo I mixed up 'LtoR' and 'RtoL' in the png filenames. But long-term,
@@ -425,6 +427,30 @@ var update_var_names = function(old_name, new_name) {
   return new_name;
 };
 
+var update_label_names = function(old_name, new_name) {
+  // Check that no other 'Label' nodes have the proposed name already.
+  for (var index in fsm_nodes) {
+    var cur_node = fsm_nodes[index];
+    if (cur_node) {
+      if (cur_node.node_type == 'Label') {
+        if (cur_node.options.label_name == new_name) {
+          return old_name;
+        }
+      }
+    }
+  }
+  // If the name is about to change, rename 'Jump' nodes that point to it.
+  for (var index in fsm_nodes) {
+    var cur_node = fsm_nodes[index];
+    if (cur_node) {
+      if (cur_node.node_type == 'Jump') {
+        cur_node.options.label_name = new_name;
+      }
+    }
+  }
+  return new_name;
+};
+
 node_array_to_json = function(node_arr) {
   var nodes_json = {
     nodes: []
@@ -488,6 +514,14 @@ node_array_from_json = function(node_arr_json) {
         cur_fsm_node.tex_sampler = loaded_textures['Delay'];
         cur_fsm_node.node_color = 'blue';
       }
+      else if (cur_fsm_node.node_type == 'Label' && loaded_textures['Label']) {
+        cur_fsm_node.tex_sampler = loaded_textures['Label'];
+        cur_fsm_node.node_color = 'pink';
+      }
+      else if (cur_fsm_node.node_type == 'Jump' && loaded_textures['Jump']) {
+        cur_fsm_node.tex_sampler = loaded_textures['Jump'];
+        cur_fsm_node.node_color = 'pink';
+      }
       else if (cur_fsm_node.node_type == 'GPIO_Init' && loaded_textures['GPIO_Init']) {
         cur_fsm_node.tex_sampler = loaded_textures['GPIO_Init'];
         cur_fsm_node.node_color = 'green';
@@ -546,6 +580,20 @@ check_selected_menu_tool = function() {
     cur_tool_node_tex = loaded_textures['Boot'];
     cur_tool_node_type = 'Boot';
     cur_tool_node_color = 'green';
+    menu_tool_selected = true;
+  }
+  // 'Label' node.
+  else if (selected_menu_tool == 'Label' && loaded_textures['Label']) {
+    cur_tool_node_tex = loaded_textures['Label'];
+    cur_tool_node_type = 'Label';
+    cur_tool_node_color = 'pink';
+    menu_tool_selected = true;
+  }
+  // 'Jump' node.
+  else if (selected_menu_tool == 'Jump' && loaded_textures['Jump']) {
+    cur_tool_node_tex = loaded_textures['Jump'];
+    cur_tool_node_type = 'Jump';
+    cur_tool_node_color = 'pink';
     menu_tool_selected = true;
   }
   // 'Delay' node.
@@ -1264,6 +1312,12 @@ project_show_onload = function() {
             else if (sel_type == 'Delay') {
               selected_node_options_html += delay_node_options_html;
             }
+            else if (sel_type == 'Label') {
+              selected_node_options_html += label_node_options_html;
+            }
+            else if (sel_type == 'Jump') {
+              selected_node_options_html += jump_node_options_html;
+            }
             else if (sel_type == 'GPIO_Init') {
               selected_node_options_html += init_gpio_node_options_html;
             }
@@ -1851,6 +1905,13 @@ var apply_node_io_table_listeners = function(node_type) {
     document.getElementById('node_io_options_mid_right_input').hidden = true;
     document.getElementById('node_io_options_bot_mid_input').hidden = true;
   }
+  // The 'jump' node is a special type which has no outputs.
+  if (node_type == 'Jump') {
+    document.getElementById('node_io_options_top_mid_output').hidden = true;
+    document.getElementById('node_io_options_mid_left_output').hidden = true;
+    document.getElementById('node_io_options_mid_right_output').hidden = true;
+    document.getElementById('node_io_options_bot_mid_output').hidden = true;
+  }
   var cur_node = fsm_nodes[selected_node_id];
   var top_select_tag = document.getElementById('node_io_options_top_sel');
   var left_select_tag = document.getElementById('node_io_options_left_sel');
@@ -2321,6 +2382,59 @@ var apply_delay_node_options_listeners = function() {
   };
 };
 
+// Apply option input listeners for a 'Label' node.
+var apply_label_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var label_name_tag = document.getElementById('define_label_options_label_name_tag');
+
+  // Set to current node options.
+  if (cur_node.options.label_name) {
+    label_name_tag.value = cur_node.options.label_name;
+  }
+
+  // Set listener functions.
+  label_name_tag.oninput = function() {
+    cur_node.options.label_display_name = label_name_tag.value;
+    cur_node.options.label_name = update_label_names(cur_node.options.label_name, cur_node.options.label_display_name);
+  };
+};
+
+// Apply option input listeners for a 'Jump' node.
+var apply_jump_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var label_name_tag = document.getElementById('jump_options_label_list_tag');
+  // Populate the dropdown select menu with currently-defined label names.
+  var sel_html_opts = '';
+  for (var index in fsm_nodes) {
+    var p_node = fsm_nodes[index];
+    if (p_node && p_node.options && p_node.node_type == 'Label') {
+      var sel_text = '';
+      var any_selected = false;
+      if (cur_node.options && cur_node.options.label_name == p_node.options.label_name) {
+        sel_text = 'selected="true"';
+        any_selected = true;
+      }
+      sel_html_opts += `
+        <option ` + sel_text + ` value="` + p_node.options.label_name + `" id="jump_options_label_list_` + p_node.options.label_name + `" class="jump_options_label_list_option">
+          ` + p_node.options.label_name + `
+        </option>
+      `;
+    }
+  }
+  if (any_selected) { sel_text = ''; }
+  else { sel_text = 'selected="true"'; }
+  sel_html_opts = `
+    <option value="(None)" ` + sel_text + ` id="jump_options_label_list_n/a" class="jump_options_label_list_option">
+      (None defined)
+    </option>
+  ` + sel_html_opts;
+  label_name_tag.innerHTML = sel_html_opts;
+
+  label_name_tag.onchange = function() {
+    cur_node.options.label_name = label_name_tag.value;
+  };
+};
+
 // 'Enable RCC Peripheral Clock' node options.
 var apply_rcc_enable_node_options_listeners = function () {
   var cur_node = fsm_nodes[selected_node_id];
@@ -2522,7 +2636,7 @@ var apply_new_var_node_options_listeners = function() {
     var_val_tag.value = cur_node.options.var_val;
   }
 
-  // Set click listener functions.
+  // Set listener functions.
   var_name_tag.oninput = function() {
     cur_node.options.var_display_name = var_name_tag.value;
     cur_node.options.var_name = update_var_names(cur_node.options.var_name, cur_node.options.var_display_name);
@@ -2729,6 +2843,12 @@ var apply_selected_node_option_listeners = function(node_type) {
   else if (node_type == 'Delay') {
     apply_delay_node_options_listeners();
   }
+  else if (node_type == 'Label') {
+    apply_label_node_options_listeners();
+  }
+  else if (node_type == 'Jump') {
+    apply_jump_node_options_listeners();
+  }
   else if (node_type == 'GPIO_Init') {
     apply_gpio_init_options_listeners();
   }
@@ -2765,6 +2885,17 @@ var default_options_for_type = function(type) {
     return {
       delay_units: 'cycles',
       delay_value: 0,
+    };
+  }
+  else if (type == 'Label') {
+    return {
+      label_name: '',
+      label_display_name: '',
+    };
+  }
+  else if (type == 'Jump') {
+    return {
+      label_name: '(None)',
     };
   }
   else if (type == 'GPIO_Init') {

@@ -270,6 +270,23 @@ var defined_variables_list_table_row = function(tag_prefix) {
   `;
 };
 
+var defined_labels_list_table_row = function(tag_prefix) {
+  return `
+  <tr class="` + tag_prefix + `_label_list_row">
+    <td class="` + tag_prefix + `_label_list_text">
+      Label name:
+    </td>
+    <td class="` + tag_prefix + `_label_list_opt">
+      <select id="` + tag_prefix + `_label_list_tag" class="` + tag_prefix + `_label_list_select">
+        <option selected="true" value="(None)" id="` + tag_prefix + `_label_list_n/a" class="` + tag_prefix + `_label_list_option">
+          (None defined)
+        </option>
+      </select>
+    </td>
+  </tr>
+  `;
+};
+
 /*
  * Node-specific options.
  */
@@ -292,6 +309,27 @@ var boot_node_options_html = `
     </td>
   </tr>
 </table>
+`;
+
+// 'Label' node options.
+// TODO
+var label_node_options_html = `
+<table class="define_label_options_table" cellpadding="0" cellspacing="0" border="0">
+  <tr class="define_label_options_label_name_row">
+    <td class="define_label_options_label_name_text">
+      Label name:
+    </td>
+    <td class="define_label_options_label_name_opt">
+      <input type="text" id="define_label_options_label_name_tag" class="define_label_options_label_name_input">
+    </td>
+  </tr>
+</table>
+`;
+
+// 'Jump' node options.
+// TODO
+var jump_node_options_html = `
+  ` + defined_labels_list_table_row('jump_options') + `
 `;
 
 // 'Delay' node options.
