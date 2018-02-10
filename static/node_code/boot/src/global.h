@@ -3,6 +3,8 @@
 
 #include "stm32f0xx.h"
 
+#include "util_c.h"
+
 // Assembly methods.
 
 // ASM_METHOD_DEFINES: ^

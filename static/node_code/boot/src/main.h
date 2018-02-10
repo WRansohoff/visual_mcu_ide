@@ -4,6 +4,5 @@
 #include "stm32f0xx.h"
 
 #include "global.h"
-#include "util_c.h"
 
 #endif
