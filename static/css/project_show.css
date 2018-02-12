@@ -127,7 +127,10 @@
 
 .hobb_layout_row {
   width: 100%;
-  height: 60%;
+  height: 80%;
+  /*
+  height: 60%
+   */
   position: absolute;
   overflow: scroll;
   background-color: white;
@@ -135,8 +138,12 @@
 
 .hobb_options_row {
   width: 100%;
+  height: 20%;
+  transform: translateY(400%);
+  /*
   height: 40%;
   transform: translateY(150%);
+  */
   position: absolute;
   overflow: scroll;
   background-color: lightgrey;
