@@ -312,7 +312,6 @@ var boot_node_options_html = `
 `;
 
 // 'Label' node options.
-// TODO
 var label_node_options_html = `
 <table class="define_label_options_table" cellpadding="0" cellspacing="0" border="0">
   <tr class="define_label_options_label_name_row">
@@ -327,7 +326,6 @@ var label_node_options_html = `
 `;
 
 // 'Jump' node options.
-// TODO
 var jump_node_options_html = `
   ` + defined_labels_list_table_row('jump_options') + `
 `;
