@@ -1581,13 +1581,18 @@ var precompile_project = function() {
       cur_node.pn_index = prog_node_ind;
       // Insert the node's information (minus 'output[s]') into the
       // JSON object to send to the controller action.
-      program_nodes.push({
-        node_ind: prog_node_ind,
-        node_type: cur_node.node_type,
-        grid_coord_x: cur_node.grid_coord_x,
-        grid_coord_y: cur_node.grid_coord_y,
-        options: cur_node.options,
-      });
+      // Do not add 'No-op', 'Label', or 'Jump' nodes.
+      if (cur_node.node_type != 'Nop_Node' &&
+          cur_node.node_type != 'Label' &&
+          cur_node.node_type != 'Jump') {
+        program_nodes.push({
+          node_ind: prog_node_ind,
+          node_type: cur_node.node_type,
+          grid_coord_x: cur_node.grid_coord_x,
+          grid_coord_y: cur_node.grid_coord_y,
+          options: cur_node.options,
+        });
+      }
       // Specific logic for individual node types.
       if (cur_node.node_type == 'New_Variable') {
         global_vars.push({
@@ -2446,15 +2451,17 @@ var apply_jump_node_options_listeners = function() {
     if (p_node && p_node.options && p_node.node_type == 'Label') {
       var sel_text = '';
       var any_selected = false;
-      if (cur_node.options && cur_node.options.label_name == p_node.options.label_name) {
-        sel_text = 'selected="true"';
-        any_selected = true;
+      if (p_node.options.label_name && p_node.options.label_name != '') {
+        if (cur_node.options && cur_node.options.label_name == p_node.options.label_name) {
+          sel_text = 'selected="true"';
+          any_selected = true;
+        }
+        sel_html_opts += `
+          <option ` + sel_text + ` value="` + p_node.options.label_name + `" id="jump_options_label_list_` + p_node.options.label_name + `" class="jump_options_label_list_option">
+            ` + p_node.options.label_name + `
+          </option>
+        `;
       }
-      sel_html_opts += `
-        <option ` + sel_text + ` value="` + p_node.options.label_name + `" id="jump_options_label_list_` + p_node.options.label_name + `" class="jump_options_label_list_option">
-          ` + p_node.options.label_name + `
-        </option>
-      `;
     }
   }
   if (any_selected) { sel_text = ''; }
