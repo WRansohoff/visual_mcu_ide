@@ -1,6 +1,6 @@
-#Overview
+# Overview
 
-Using Lapis as a web framework and Postgres as a database, try some simple ideas for a visual programming IDE. Currently nothing functional, but I am hoping to make a portable way to visually program small microcontrollers. To start with, I'd settle for a visual method of producing a .elf file. So currently, flashing/debugging is out of scope.
+Using Lapis as a web framework and Postgres as a database, try some simple ideas for a visual programming IDE. Currently only extremely basic functionality, and only one type of chip is supported (a TSSOP-20 STM32F03xFx with external HSE oscillator), but it can produce working code for a 'blinking LED' program. Currently, flashing/debugging is out of scope, but I am thinking of adding an 'upload program' button if the web server is running locally on a machine which has a debugger/programmer connected.
 
 Why an IDE to program microcontrollers, instead of something like a game or website?
 
