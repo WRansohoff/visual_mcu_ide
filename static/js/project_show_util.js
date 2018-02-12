@@ -110,7 +110,7 @@ var update_label_names = function(old_name, new_name) {
   for (var index in fsm_nodes) {
     var cur_node = fsm_nodes[index];
     if (cur_node) {
-      if (cur_node.node_type == 'Jump') {
+      if (cur_node.node_type == 'Jump' && cur_node.options.label_name == old_name) {
         cur_node.options.label_name = new_name;
       }
     }
