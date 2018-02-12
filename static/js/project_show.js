@@ -1578,6 +1578,7 @@ var precompile_project = function() {
       grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y].pn_index = prog_node_ind;
       grid_nodes_yx[cur_node.grid_coord_y][cur_node.grid_coord_x] = cur_node;
       grid_nodes_yx[cur_node.grid_coord_y][cur_node.grid_coord_x].pn_index = prog_node_ind;
+      cur_node.pn_index = prog_node_ind;
       // Insert the node's information (minus 'output[s]') into the
       // JSON object to send to the controller action.
       program_nodes.push({
@@ -1585,7 +1586,7 @@ var precompile_project = function() {
         node_type: cur_node.node_type,
         grid_coord_x: cur_node.grid_coord_x,
         grid_coord_y: cur_node.grid_coord_y,
-        options: cur_node.options
+        options: cur_node.options,
       });
       // Specific logic for individual node types.
       if (cur_node.node_type == 'New_Variable') {
@@ -1657,7 +1658,10 @@ var precompile_project = function() {
         }
         return next_node;
       }
-      else { return false; }
+      else {
+        pre_pre_process_error += "Error: Grid coordinate (" + grid_x + ", " + grid_y + ") does not have a 'connections' table.\n";
+        return false;
+      }
     };
     // In-scope method for finding a 'next node' from a given
     // 'output' connection grid coordinate.
@@ -1740,6 +1744,39 @@ var precompile_project = function() {
       if (!next_node) {
         return false;
       }
+      // Skip 'No-op' nodes and follow Jump/Label nodes.
+      while (next_node &&
+             (next_node.node_type == 'Nop_Node' ||
+              next_node.node_type == 'Label' ||
+              next_node.node_type == 'Jump')) {
+        if (next_node.node_type == 'Nop_Node' ||
+            next_node.node_type == 'Label') {
+          next_node = find_next_input_node(next_node);
+        }
+        else if (next_node.node_type == 'Jump') {
+          var pot_next_node = null;
+          for (var index in fsm_nodes) {
+            var cur_node = fsm_nodes[index];
+            if (cur_node && cur_node.node_type == 'Label') {
+              if (cur_node.options && cur_node.options.label_name == next_node.options.label_name) {
+                pot_next_node = cur_node;
+                break;
+              }
+            }
+          }
+          if (pot_next_node) {
+            next_node = pot_next_node;
+          }
+          else {
+            pre_pre_process_error += "Error: cannot find 'Label' node: " + next_node.options.label_name + "\n";
+            return false;
+          }
+        }
+        else {
+          pre_pre_process_error += "Error: ??\n";
+          return false;
+        }
+      }
       return next_node;
     };
     // In-scope method for processing a single node in the chain.
@@ -1770,6 +1807,7 @@ var precompile_project = function() {
             return false;
           }
           var next_node_t = find_input_node(cur_grid_node_x, cur_grid_node_y);
+
           // 'Else-False' output
           cur_grid_node_x = proc_node.grid_coord_x;
           cur_grid_node_y = proc_node.grid_coord_y;
@@ -1790,8 +1828,10 @@ var precompile_project = function() {
             return false;
           }
           var next_node_f = find_input_node(cur_grid_node_x, cur_grid_node_y);
+
+          // Check that both 'if/else' branches exist.
           if (!next_node_t || !next_node_f) {
-            pre_pre_process_error += "Error: Branching node at (" + cur_grid_node_x + ", " + cur_grid_node_y + ") does not point to valid 'input' arrows with both of its outputs.";
+            pre_pre_process_error += "Error: Branching node at (" + cur_grid_node_x + ", " + cur_grid_node_y + ") does not point to valid 'input' arrows with both of its outputs.\n";
             return false;
           }
           else {
@@ -1836,10 +1876,6 @@ var precompile_project = function() {
             return false;
           }
           var next_node = find_input_node(cur_grid_node_x, cur_grid_node_y);
-          // Skip 'No-op' nodes.
-          while (next_node && next_node.node_type == 'Nop_Node') {
-            next_node = find_next_input_node(next_node);
-          }
           if (!next_node) {
             pre_pre_process_error += "Error: Grid coordinate (" + cur_grid_node_x + ", " + cur_grid_node_y + ") does not point to any 'input' arrows. If an output is pointing directly at a node, move that node over and give it an 'input' arrow.\n";
             return false;
