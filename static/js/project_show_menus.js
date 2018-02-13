@@ -1158,3 +1158,16 @@ var default_options_for_type = function(type) {
   }
 };
 
+var refresh_selected_menu_tool = function() {
+  var menu_tool_selected = check_selected_menu_tool();
+  // If there is a texture for the selection, find its grid coord.
+  // (So, x/y coordinates / 64. (or whatever dot distance if it changes)
+  if (menu_tool_selected) {
+    var half_grid = 32;
+    if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
+    cur_tool_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
+    if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
+    else { half_grid = 32; }
+    cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+  }
+};

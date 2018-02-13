@@ -647,6 +647,7 @@ project_show_onload = function() {
     cur_fsm_mouse_x = 0;
     cur_fsm_mouse_y = 0;
     move_grabbed_node_id = -1;
+    refresh_selected_menu_tool();
     redraw_canvas();
   });
   document.getElementById("move_tool_select").addEventListener("click", function(e) {
@@ -782,20 +783,8 @@ project_show_onload = function() {
     cur_fsm_mouse_y = parseInt(-cur_fsm_mouse_y);
 
     if (selected_tool == 'tool') {
-      var menu_tool_selected = check_selected_menu_tool();
-      // If there is a texture for the selection, find its grid coord.
-      // (So, x/y coordinates / 64. (or whatever dot distance if it changes)
-      if (menu_tool_selected) {
-        var half_grid = 32;
-        if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
-        cur_tool_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
-        if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
-        else { half_grid = 32; }
-        cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
-        //document.getElementById("list_last_fsm_tool_coords").innerHTML = ("Last FSM tool grid coordinates: (" + cur_tool_node_grid_x + ", " + cur_tool_node_grid_y + ")");
-      }
+      refresh_selected_menu_tool();
     }
-    //document.getElementById("list_last_fsm_mouse_coords").innerHTML = ("Last FSM grid mouse coordinates: (" + cur_fsm_mouse_x + ", " + cur_fsm_mouse_y + ")");
     // Redraw the canvas.
     redraw_canvas();
   };
@@ -903,7 +892,6 @@ project_show_onload = function() {
         if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
         else { half_grid = 32; }
         cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
-        //document.getElementById("list_last_fsm_tool_coords").innerHTML = ("Last FSM tool grid coordinates: (" + cur_tool_node_grid_x + ", " + cur_tool_node_grid_y + ")");
       }
       // Add the current tool node to the list, unless there is a
       // node in the proposed coordinates already.
