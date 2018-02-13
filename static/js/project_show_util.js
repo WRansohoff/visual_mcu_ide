@@ -176,56 +176,21 @@ node_array_from_json = function(node_arr_json) {
         };
       }
       cur_fsm_node.node_status = 0;
-      if (cur_fsm_node.node_type == 'Boot' && loaded_textures['Boot']) {
-        cur_fsm_node.tex_sampler = loaded_textures['Boot'];
-        cur_fsm_node.node_color = 'green';
+      // Apply texture/node color depending on selected node type.
+      var node_type_found = false;
+      for (var tn_ind in tool_node_types) {
+        var cur_type = tool_node_types[tn_ind];
+        if (cur_type) {
+          if (cur_fsm_node.node_type == cur_type.base_name &&
+              loaded_textures[cur_type.base_name]) {
+            cur_fsm_node.tex_sampler = loaded_textures[cur_type.base_name];
+            cur_fsm_node.node_color = cur_type.node_color;
+            node_type_found = true;
+            break;
+          }
+        }
       }
-      else if (cur_fsm_node.node_type == 'Delay' && loaded_textures['Delay']) {
-        cur_fsm_node.tex_sampler = loaded_textures['Delay'];
-        cur_fsm_node.node_color = 'blue';
-      }
-      else if (cur_fsm_node.node_type == 'Label' && loaded_textures['Label']) {
-        cur_fsm_node.tex_sampler = loaded_textures['Label'];
-        cur_fsm_node.node_color = 'pink';
-      }
-      else if (cur_fsm_node.node_type == 'Jump' && loaded_textures['Jump']) {
-        cur_fsm_node.tex_sampler = loaded_textures['Jump'];
-        cur_fsm_node.node_color = 'pink';
-      }
-      else if (cur_fsm_node.node_type == 'GPIO_Init' && loaded_textures['GPIO_Init']) {
-        cur_fsm_node.tex_sampler = loaded_textures['GPIO_Init'];
-        cur_fsm_node.node_color = 'green';
-      }
-      else if (cur_fsm_node.node_type == 'GPIO_Output' && loaded_textures['GPIO_Output']) {
-        cur_fsm_node.tex_sampler = loaded_textures['GPIO_Output'];
-        cur_fsm_node.node_color = 'blue';
-      }
-      else if (cur_fsm_node.node_type == 'RCC_Enable' && loaded_textures['RCC_Enable']) {
-        cur_fsm_node.tex_sampler = loaded_textures['RCC_Enable'];
-        cur_fsm_node.node_color = 'green';
-      }
-      else if (cur_fsm_node.node_type == 'RCC_Disable' && loaded_textures['RCC_Disable']) {
-        cur_fsm_node.tex_sampler = loaded_textures['RCC_Disable'];
-        cur_fsm_node.node_color = 'pink';
-      }
-      else if (cur_fsm_node.node_type == 'New_Variable' && loaded_textures['New_Variable']) {
-        cur_fsm_node.tex_sampler = loaded_textures['New_Variable'];
-        cur_fsm_node.node_color = 'green';
-      }
-      else if (cur_fsm_node.node_type == 'Set_Variable' && loaded_textures['Set_Variable']) {
-        cur_fsm_node.tex_sampler = loaded_textures['Set_Variable'];
-        cur_fsm_node.node_color = 'blue';
-      }
-      else if (cur_fsm_node.node_type == 'Nop_Node' && loaded_textures['Nop_Node']) {
-        cur_fsm_node.tex_sampler = loaded_textures['Nop_Node'];
-        cur_fsm_node.node_color = 'blue';
-      }
-      // (Branching nodes)
-      else if (cur_fsm_node.node_type == 'Check_Truthy' && loaded_textures['Check_Truthy']) {
-        cur_fsm_node.tex_sampler = loaded_textures['Check_Truthy'];
-        cur_fsm_node.node_color = 'canary';
-      }
-      else {
+      if (!node_type_found) {
         valid_node = false;
       }
       if (valid_node) {
