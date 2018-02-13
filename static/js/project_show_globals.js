@@ -192,6 +192,7 @@ const tool_node_types = [
   options_listeners: apply_set_var_node_options_listeners,
   options_html: set_var_node_options_html,
 },
+// TODO: Set_Var_Logic_Not
 {
   base_name: 'Nop_Node',
   menu_name: 'No-op (Do Nothing)',

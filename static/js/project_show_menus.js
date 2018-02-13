@@ -1,105 +1,20 @@
 check_selected_menu_tool = function() {
   var menu_tool_selected = false;
-  // 'Boot' node.
-  if (selected_menu_tool == 'Boot' && loaded_textures['Boot']) {
-    cur_tool_node_tex = loaded_textures['Boot'];
-    cur_tool_node_type = 'Boot';
-    cur_tool_node_color = 'green';
-    menu_tool_selected = true;
+  for (var tn_ind in tool_node_types) {
+    var cur_type = tool_node_types[tn_ind];
+    if (cur_type) {
+      if (selected_menu_tool == cur_type.menu_name &&
+          loaded_textures[cur_type.base_name]) {
+        cur_tool_node_tex = loaded_textures[cur_type.base_name];
+        cur_tool_node_type = cur_type.base_name;
+        cur_tool_node_color = cur_type.node_color;
+        menu_tool_selected = true;
+        break;
+      }
+    }
   }
-  // 'Label' node.
-  else if (selected_menu_tool == 'Label' && loaded_textures['Label']) {
-    cur_tool_node_tex = loaded_textures['Label'];
-    cur_tool_node_type = 'Label';
-    cur_tool_node_color = 'pink';
-    menu_tool_selected = true;
-  }
-  // 'Jump' node.
-  else if (selected_menu_tool == 'Jump' && loaded_textures['Jump']) {
-    cur_tool_node_tex = loaded_textures['Jump'];
-    cur_tool_node_type = 'Jump';
-    cur_tool_node_color = 'pink';
-    menu_tool_selected = true;
-  }
-  // 'Delay' node.
-  else if (selected_menu_tool == 'Delay' && loaded_textures['Delay']) {
-    cur_tool_node_tex = loaded_textures['Delay'];
-    cur_tool_node_type = 'Delay';
-    cur_tool_node_color = 'blue';
-    menu_tool_selected = true;
-  }
-  // 'GPIO Init' node; setup a GPIO pin.
-  else if (selected_menu_tool == 'Setup GPIO Pin' && loaded_textures['GPIO_Init']) {
-    cur_tool_node_tex = loaded_textures['GPIO_Init'];
-    cur_tool_node_type = 'GPIO_Init';
-    cur_tool_node_color = 'green';
-    menu_tool_selected = true;
-  }
-  // 'GPIO Output' node; set a previously-setup GPIO output pin to 0 or 1.
-  else if (selected_menu_tool == 'Write Output Pin' && loaded_textures['GPIO_Output']) {
-    cur_tool_node_tex = loaded_textures['GPIO_Output'];
-    cur_tool_node_type = 'GPIO_Output';
-    cur_tool_node_color = 'blue';
-    menu_tool_selected = true;
-  }
-  // 'RCC Enable' node; enable a peripheral clock.
-  else if (selected_menu_tool == 'Enable Peripheral Clock' && loaded_textures['RCC_Enable']) {
-    cur_tool_node_tex = loaded_textures['RCC_Enable'];
-    cur_tool_node_type = 'RCC_Enable';
-    cur_tool_node_color = 'green';
-    menu_tool_selected = true;
-  }
-  // 'RCC Disable' node; turn off a peripheral clock.
-  else if (selected_menu_tool == 'Disable Peripheral Clock' && loaded_textures['RCC_Disable']) {
-    cur_tool_node_tex = loaded_textures['RCC_Disable'];
-    cur_tool_node_type = 'RCC_Disable';
-    cur_tool_node_color = 'pink';
-    menu_tool_selected = true;
-  }
-  // 'New variable' node; define a variable. It's not 'new' as in
-  // 'malloc', the C equivalent is just defining a variable in a
-  // scope higher than the 'main' function. A 'global'
-  else if (selected_menu_tool == 'Define Variable' && loaded_textures['New_Variable']) {
-    cur_tool_node_tex = loaded_textures['New_Variable'];
-    cur_tool_node_type = 'New_Variable';
-    cur_tool_node_color = 'green';
-    menu_tool_selected = true;
-  }
-  // 'Set variable' node; set a variable which was previously defined
-  // with a 'Define Variable' node. TODO: support multiple variable scopes.
-  // But that's a pretty long-term goal.
-  else if (selected_menu_tool == 'Set Variable' && loaded_textures['Set_Variable']) {
-    cur_tool_node_tex = loaded_textures['Set_Variable'];
-    cur_tool_node_type = 'Set_Variable';
-    cur_tool_node_color = 'blue';
-    menu_tool_selected = true;
-  }
-  // 'Variable modification' nodes; for now, just add a 'logic not'
-  // node for testing the concept with a simple 'blink' example.
-  // TODO: others.
-  else if (selected_menu_tool == 'Logical Not' && loaded_textures['Set_Var_Logic_Not']) {
-    cur_tool_node_tex = loaded_textures['Set_Var_Logic_Not'];
-    cur_tool_node_type = 'Set_Var_Logic_Not';
-    cur_tool_node_color = 'blue';
-    menu_tool_selected = true;
-  }
-  // 'No-op' node; do nothing.
-  else if (selected_menu_tool == 'No-op (Do Nothing)' && loaded_textures['Nop_Node']) {
-    cur_tool_node_tex = loaded_textures['Nop_Node'];
-    cur_tool_node_type = 'Nop_Node';
-    cur_tool_node_color = 'blue';
-    menu_tool_selected = true;
-  }
-  // 'Branching' nodes; for now, just add an 'is truth-y?' node to check
-  // if a bool is true, an int/float is not 0, or a char is not '' or 0x00.
-  else if (selected_menu_tool == 'Is Variable Truth-y?' && loaded_textures['Check_Truthy']) {
-    cur_tool_node_tex = loaded_textures['Check_Truthy'];
-    cur_tool_node_type = 'Check_Truthy';
-    cur_tool_node_color = 'canary';
-    menu_tool_selected = true;
-  }
-  // No match.
-  else {
+  // Ensure a match; otherwise, no texture.
+  if (!menu_tool_selected) {
     cur_tool_node_tex = -1;
   }
   return menu_tool_selected;
