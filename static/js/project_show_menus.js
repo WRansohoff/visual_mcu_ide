@@ -491,7 +491,7 @@ var refresh_selected_menu_tool = function() {
 };
 
 // Common methods for 'apply node options listeners' methods.
-var populate_defined_vars_dropdown = function(sel_id, cur_node) {
+var populate_defined_vars_dropdown = function(sel_id, cur_node, set_name) {
   var var_name_tag = document.getElementById(sel_id);
   // Populate the dropdown select menu with currently-defined variables.
   var sel_html_opts = '';
@@ -499,7 +499,7 @@ var populate_defined_vars_dropdown = function(sel_id, cur_node) {
   for (var var_name in defined_vars) {
     var var_def = defined_vars[var_name];
     var selected_val = '';
-    if (cur_node.options && cur_node.options.var_name == var_name) {
+    if (set_name == var_name) {
       var_defined = true;
       selected_val = 'selected="true" ';
     }

@@ -145,6 +145,7 @@ const tool_node_types = [
     gpio_bank: 'GPIOA',
     gpio_pin:  0,
     gpio_val:  0,
+    gpio_var_name: '(None)',
   },
   options_listeners: apply_gpio_output_options_listeners,
   options_html: set_gpio_out_node_options_html,
@@ -192,7 +193,6 @@ const tool_node_types = [
   options_listeners: apply_set_var_node_options_listeners,
   options_html: set_var_node_options_html,
 },
-// TODO: Set_Var_Logic_Not
 {
   base_name: 'Set_Var_Logic_Not',
   menu_name: 'Logical Not',

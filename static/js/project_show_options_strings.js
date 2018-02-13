@@ -255,7 +255,7 @@ var rcc_clock_list_table_row = function(tag_prefix) {
 
 var defined_variables_list_table_row = function(tag_prefix, label_text) {
   return `
-  <tr class="` + tag_prefix + `_var_list_row">
+  <tr id="` + tag_prefix + `_var_list_row_tag" class="` + tag_prefix + `_var_list_row">
     <td class="` + tag_prefix + `_var_list_text">
       ` + label_text + `
     </td>
@@ -462,9 +462,13 @@ var set_gpio_out_node_options_html = `
         <option value="Off" class="set_gpio_out_options_value_option">
           Off
         </option>
+        <option value="Var" class="set_gpio_out_options_value_option">
+          Variable
+        </option>
       </select>
     </td>
   </tr>
+  ` + defined_variables_list_table_row('set_gpio_out_options', 'Variable:') + `
 </table>
 `;
 
@@ -800,6 +804,9 @@ var apply_gpio_output_options_listeners = function() {
   var gpio_bank_tag = document.getElementById('set_gpio_out_options_pin_bank_tag');
   var gpio_pin_tag = document.getElementById('set_gpio_out_options_pin_number_tag');
   var gpio_value_tag = document.getElementById('set_gpio_out_options_value_tag');
+  var gpio_var_row_tag = document.getElementById('set_gpio_out_options_var_list_row_tag');
+  gpio_var_row_tag.hidden = true;
+  var gpio_var_name_tag = document.getElementById('set_gpio_out_options_var_list_tag');
 
   // Set values according to node options.
   if (cur_node.options.gpio_bank) {
@@ -808,8 +815,13 @@ var apply_gpio_output_options_listeners = function() {
   if (cur_node.options.gpio_pin) {
     gpio_pin_tag.value = cur_node.options.gpio_pin;
   }
-  if (cur_node.options.gpio_val) {
+  if (cur_node.options.gpio_val == 1 || cur_node.options.gpio_val == '1') {
     gpio_value_tag.value = 'On';
+  }
+  else if (cur_node.options.gpio_val == 'variable') {
+    gpio_value_tag.value = 'Var';
+    gpio_var_row_tag.hidden = false;
+    populate_defined_vars_dropdown('set_gpio_out_options_var_list_tag', cur_node, cur_node.options.gpio_var_name);
   }
   else {
     gpio_value_tag.value = 'Off';
@@ -825,11 +837,21 @@ var apply_gpio_output_options_listeners = function() {
   gpio_value_tag.onchange = function() {
     if (gpio_value_tag.value == 'On') {
       cur_node.options.gpio_val = 1;
+      gpio_var_row_tag.hidden = true;
+    }
+    else if (gpio_value_tag.value == 'Var') {
+      cur_node.options.gpio_val = 'variable';
+      gpio_var_row_tag.hidden = false;
+      populate_defined_vars_dropdown('set_gpio_out_options_var_list_tag', cur_node, cur_node.options.gpio_var_name);
+      gpio_var_name_tag.onchange = function() {
+        cur_node.options.gpio_var_name = gpio_var_name_tag.value;
+      };
     }
     else {
       cur_node.options.gpio_val = 0;
+      gpio_var_row_tag.hidden = true;
     }
-  }
+  };
 };
 
 // 'Define New Variable' Global node.
@@ -940,7 +962,7 @@ var apply_set_var_node_options_listeners = function() {
   // (Needs to be created based on var type.)
   var var_val_tag = null;
   var var_val_cell = document.getElementById('set_var_options_var_new_value_cell');
-  populate_defined_vars_dropdown('set_var_options_var_list_tag', cur_node);
+  populate_defined_vars_dropdown('set_var_options_var_list_tag', cur_node, cur_node.options.var_name);
 
   var_name_tag.onchange = function() {
     var sel_var = null;
@@ -1030,8 +1052,8 @@ var apply_set_var_logic_not_node_options_listeners = function() {
   var cur_node = fsm_nodes[selected_node_id];
   var var_a_name_tag = document.getElementById('set_var_logic_not_options_A_var_list_tag');
   var var_b_name_tag = document.getElementById('set_var_logic_not_options_B_var_list_tag');
-  populate_defined_vars_dropdown('set_var_logic_not_options_A_var_list_tag', cur_node);
-  populate_defined_vars_dropdown('set_var_logic_not_options_B_var_list_tag', cur_node);
+  populate_defined_vars_dropdown('set_var_logic_not_options_A_var_list_tag', cur_node, cur_node.options.var_a_name);
+  populate_defined_vars_dropdown('set_var_logic_not_options_B_var_list_tag', cur_node, cur_node.options.var_b_name);
   var_a_name_tag.onchange = function() {
     cur_node.options.var_a_name = var_a_name_tag.value;
   };

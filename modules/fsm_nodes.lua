@@ -569,12 +569,19 @@ function FSMNodes.append_gpio_output_node(node, node_graph, proj_state)
     end
   end
   -- Add GPIO output code.
-  if gpio_pin_set then
-    -- Set the pin.
-    node_text = node_text .. '  ' .. gpio_bank .. '->ODR |= GPIO_ODR_' .. gpio_pin_num .. ';\n'
+  if node.options.gpio_val and node.options.gpio_val == 'variable' and node.options.gpio_var_name and node.options.gpio_var_name ~= '(None)' then
+    node_text = node_text .. '  if (' .. node.options.gpio_var_name ..
+                ') {\n    ' .. gpio_bank .. '->ODR |= GPIO_ODR_' ..
+                gpio_pin_num .. ';\n  }\n  else {\n    ' .. gpio_bank ..
+                '->ODR &= ~GPIO_ODR_' .. gpio_pin_num .. ';\n  }\n'
   else
-    -- Reset the pin.
-    node_text = node_text .. '  ' .. gpio_bank .. '->ODR &= ~GPIO_ODR_' .. gpio_pin_num .. ';\n'
+    if gpio_pin_set then
+      -- Set the pin.
+      node_text = node_text .. '  ' .. gpio_bank .. '->ODR |= GPIO_ODR_' .. gpio_pin_num .. ';\n'
+    else
+      -- Reset the pin.
+      node_text = node_text .. '  ' .. gpio_bank .. '->ODR &= ~GPIO_ODR_' .. gpio_pin_num .. ';\n'
+    end
   end
   -- Branch to the next node.
   if node.output and node.output.single then
