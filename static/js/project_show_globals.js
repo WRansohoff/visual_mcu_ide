@@ -44,6 +44,8 @@ var json_fsm_nodes = null;
 var imgs_to_load = {
   Boot:              '/static/fsm_assets/boot_node.png',
   Delay:             '/static/fsm_assets/delay_node.png',
+  Label:             '/static/fsm_assets/label_node.png',
+  Jump:              '/static/fsm_assets/jump_node.png',
   GPIO_Init:         '/static/fsm_assets/init_gpio_node.png',
   GPIO_Output:       '/static/fsm_assets/set_output_pin_node.png',
   RCC_Enable:        '/static/fsm_assets/enable_clock_node.png',
@@ -52,8 +54,6 @@ var imgs_to_load = {
   Set_Variable:      '/static/fsm_assets/set_variable_node.png',
   Set_Var_Logic_Not: '/static/fsm_assets/set_not_node.png',
   Nop_Node:          '/static/fsm_assets/no_op_node.png',
-  Label:             '/static/fsm_assets/label_node.png',
-  Jump:              '/static/fsm_assets/jump_node.png',
   // Branching nodes:
   Check_Truthy:      '/static/fsm_assets/check_truthy_node.png',
   // Sooo I mixed up 'LtoR' and 'RtoL' in the png filenames. But long-term,
@@ -78,6 +78,153 @@ var imgs_to_load = {
 var num_imgs = 0;
 
 // Global FSM program constants.
+// (Available 'tool' nodes. These are the FSM building blocks.)
+const tool_node_types = [
+{
+  base_name: 'Boot',
+  menu_name: 'Boot',
+  node_color: 'green',
+  default_options: {
+    chip_type: 'STM32F030F4',
+  },
+  options_listeners: apply_boot_node_options_listeners,
+  options_html: boot_node_options_html,
+},
+{
+  base_name: 'Delay',
+  menu_name: 'Delay',
+  node_color: 'blue',
+  default_options: {
+    delay_unit: 'cycles',
+    delay_value: 0,
+  },
+  options_listeners: apply_delay_node_options_listeners,
+  options_html: delay_node_options_html,
+},
+{
+  base_name: 'Label',
+  menu_name: 'Label',
+  node_color: 'pink',
+  default_options: {
+    label_name: '',
+    label_display_name: '',
+  },
+  options_listeners: apply_label_node_options_listeners,
+  options_html: label_node_options_html,
+},
+{
+  base_name: 'Jump',
+  menu_name: 'Jump',
+  node_color: 'pink',
+  default_options: {
+    label_name: '(None)',
+  },
+  options_listeners: apply_jump_node_options_listeners,
+  options_html: jump_node_options_html,
+},
+{
+  base_name: 'GPIO_Init',
+  menu_name: 'Setup GPIO Pin',
+  node_color: 'green',
+  default_options: {
+    gpio_bank:   'GPIOA',
+    gpio_pin:    0,
+    gpio_func:   'Output',
+    gpio_otype:  'Push-Pull',
+    gpio_ospeed: 'H',
+    gpio_pupdr:  'PU',
+  },
+  options_listeners: apply_gpio_init_options_listeners,
+  options_html: init_gpio_node_options_html,
+},
+{
+  base_name: 'GPIO_Output',
+  menu_name: 'Write Output Pin',
+  node_color: 'blue',
+  default_options: {
+    gpio_bank: 'GPIOA',
+    gpio_pin:  0,
+    gpio_val:  0,
+  },
+  options_listeners: apply_gpio_output_options_listeners,
+  options_html: set_gpio_out_node_options_html,
+},
+{
+  base_name: 'RCC_Enable',
+  menu_name: 'Enable Peripheral Clock',
+  node_color: 'green',
+  default_options: {
+    periph_clock: 'GPIOA',
+  },
+  options_listeners: apply_rcc_enable_node_options_listeners,
+  options_html: rcc_enable_node_options_html,
+},
+{
+  base_name: 'RCC_Disable',
+  menu_name: 'Disable Peripheral Clock',
+  node_color: 'pink',
+  default_options: {
+    periph_clock: 'GPIOA',
+  },
+  options_listeners: apply_rcc_disable_node_options_listeners,
+  options_html: rcc_disable_node_options_html,
+},
+{
+  base_name: 'New_Variable',
+  menu_name: 'Define Variable',
+  node_color: 'green',
+  default_options: {
+    var_name: '',
+    var_display_name: '',
+    var_type: 'int',
+    var_val: 0,
+  },
+  options_listeners: apply_new_var_node_options_listeners,
+  options_html: define_var_node_options_html,
+},
+{
+  base_name: 'Set_Variable',
+  menu_name: 'Set Variable',
+  node_color: 'blue',
+  default_options: {
+    var_name: '(None)',
+  },
+  options_listeners: apply_set_var_node_options_listeners,
+  options_html: set_var_node_options_html,
+},
+{
+  base_name: 'Nop_Node',
+  menu_name: 'No-op (Do Nothing)',
+  node_color: 'blue',
+  default_options: {
+  },
+  options_listeners: apply_nop_node_options_listeners,
+  options_html: nop_node_options_html,
+},
+{
+  base_name: 'Check_Truthy',
+  menu_name: 'Is Variable Truth-y?',
+  node_color: 'canary',
+  default_options: {
+    var_name: '(None)',
+  },
+  options_listeners: apply_check_truthy_options_listeners,
+  options_html: check_truthy_node_options_html,
+},
+/*
+{
+  base_name: 'Delay',
+  menu_name: 'Delay',
+  node_color: 'blue',
+  default_options: {
+  },
+  options_listeners: null,
+  options_html: null,
+},
+*/
+];
+
+// (Available RCC peripheral clocks.)
 const rcc_opts = {
   STM32F03xFx: {
     GPIOA:   'GPIO Bank A',

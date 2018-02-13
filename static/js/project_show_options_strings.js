@@ -557,3 +557,519 @@ var check_truthy_node_options_html = `
   ` + defined_variables_list_table_row('check_truthy_options') + `
 </table>
 `;
+
+/*
+ * Node listener functions.
+ */
+var apply_boot_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var chip_sel_tag = document.getElementById("boot_options_mcu_chip_tag");
+  if (cur_node.options && cur_node.options.chip_type == 'STM32F030F4') {
+    chip_sel_tag.value = 'STM32F030F4';
+    cur_node.options.chip_type = 'STM32F030F4';
+  }
+  else if (cur_node.options && cur_node.options.chip_type == 'STM32F031F6') {
+    chip_sel_tag.value = 'STM32F031F6';
+    cur_node.options.chip_type = 'STM32F031F6';
+  }
+  else {
+    // Set a default value.
+    chip_sel_tag.value = 'STM32F030F4';
+    cur_node.options.chip_type = 'STM32F030F4';
+  }
+  // 'MCU Chip Type' selection listener.
+  chip_sel_tag.onchange = function() {
+    mcu_chip = chip_sel_tag.value;
+    cur_node.options.chip_type = chip_sel_tag.value;
+  };
+};
+
+var apply_delay_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var delay_units_tag = document.getElementById('delay_options_unit_tag');
+  var delay_value_tag = document.getElementById('delay_options_value_tag');
+  if (cur_node.options) {
+    // Set values according to previously-selected options.
+    if (cur_node.options.delay_units && cur_node.options.delay_units != '') {
+      if (cur_node.options.delay_units == 'cycles') {
+        delay_units_tag.value = 'Cycles';
+      }
+      else if (cur_node.options.delay_units == 'us') {
+        delay_units_tag.value = 'Microseconds';
+      }
+      else if (cur_node.options.delay_units == 'ms') {
+        delay_units_tag.value = 'Milliseconds';
+      }
+      else if (cur_node.options.delay_units == 's') {
+        delay_units_tag.value = 'Seconds';
+      }
+    }
+    if (cur_node.options.delay_value) {
+      delay_value_tag.value = parseInt(cur_node.options.delay_value);
+    }
+  }
+  // Listeners to set option values.
+  delay_units_tag.onchange = function() {
+    var new_delay_type = delay_units_tag.value;
+    if (new_delay_type == 'Cycles') {
+      cur_node.options.delay_units = 'cycles';
+    }
+    else if (new_delay_type == 'Microseconds') {
+      cur_node.options.delay_units = 'us';
+    }
+    else if (new_delay_type == 'Milliseconds') {
+      cur_node.options.delay_units = 'ms';
+    }
+    else if (new_delay_type == 'Seconds') {
+      cur_node.options.delay_units = 's';
+    }
+  };
+  delay_value_tag.onchange = function() {
+    var new_delay_value = parseInt(delay_value_tag.value);
+    if (new_delay_value >= 0) {
+      cur_node.options.delay_value = new_delay_value;
+    }
+  };
+};
+
+// Apply option input listeners for a 'Label' node.
+var apply_label_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var label_name_tag = document.getElementById('define_label_options_label_name_tag');
+
+  // Set to current node options.
+  if (cur_node.options.label_name) {
+    label_name_tag.value = cur_node.options.label_name;
+  }
+
+  // Set listener functions.
+  label_name_tag.oninput = function() {
+    cur_node.options.label_display_name = label_name_tag.value;
+    cur_node.options.label_name = update_label_names(cur_node.options.label_name, cur_node.options.label_display_name);
+  };
+};
+
+// Apply option input listeners for a 'Jump' node.
+var apply_jump_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var label_name_tag = document.getElementById('jump_options_label_list_tag');
+  // Populate the dropdown select menu with currently-defined label names.
+  var sel_html_opts = '';
+  for (var index in fsm_nodes) {
+    var p_node = fsm_nodes[index];
+    if (p_node && p_node.options && p_node.node_type == 'Label') {
+      var sel_text = '';
+      var any_selected = false;
+      if (p_node.options.label_name && p_node.options.label_name != '') {
+        if (cur_node.options && cur_node.options.label_name == p_node.options.label_name) {
+          sel_text = 'selected="true"';
+          any_selected = true;
+        }
+        sel_html_opts += `
+          <option ` + sel_text + ` value="` + p_node.options.label_name + `" id="jump_options_label_list_` + p_node.options.label_name + `" class="jump_options_label_list_option">
+            ` + p_node.options.label_name + `
+          </option>
+        `;
+      }
+    }
+  }
+  if (any_selected) { sel_text = ''; }
+  else { sel_text = 'selected="true"'; }
+  sel_html_opts = `
+    <option value="(None)" ` + sel_text + ` id="jump_options_label_list_n/a" class="jump_options_label_list_option">
+      (None defined)
+    </option>
+  ` + sel_html_opts;
+  label_name_tag.innerHTML = sel_html_opts;
+
+  label_name_tag.onchange = function() {
+    cur_node.options.label_name = label_name_tag.value;
+  };
+};
+
+// 'Enable RCC Peripheral Clock' node options.
+var apply_rcc_enable_node_options_listeners = function () {
+  var cur_node = fsm_nodes[selected_node_id];
+  // Here, we need to set the options based on what is available in the
+  // target MCU chip. From an RCC perspective, the 'F03xFx' chips look identical.
+  var rcc_en_dropdown_tag = document.getElementById('rcc_enable_options_periph_clocks_tag');
+  var periph_clocks = {};
+  if (mcu_chip == 'STM32F030F4' || mcu_chip == 'STM32F031F6') {
+    periph_clocks = rcc_opts.STM32F03xFx;
+    var select_tag_html = '';
+    for (var periph_val in periph_clocks) {
+      select_tag_html += `
+        <option value="` + periph_val + `" class="rcc_enable_options_periph_clocks_option">` + periph_clocks[periph_val] + `</option>
+      `;
+    }
+    rcc_en_dropdown_tag.innerHTML = select_tag_html;
+  }
+
+  // Set selected value based on options, if applicable.
+  if (cur_node.options.periph_clock && cur_node.options.periph_clock != '') {
+    rcc_en_dropdown_tag.value = cur_node.options.periph_clock;
+  }
+
+  // Set click listener functions for each available clock.
+  rcc_en_dropdown_tag.onchange = function() {
+    cur_node.options.periph_clock = rcc_en_dropdown_tag.value;
+  };
+};
+
+// 'Disable RCC Peripheral Clock' node options. Similar to 'Enable'
+var apply_rcc_disable_node_options_listeners = function () {
+  var cur_node = fsm_nodes[selected_node_id];
+  // Here, we need to set the options based on what is available in the
+  // target MCU chip. From an RCC perspective, the 'F03xFx' chips look identical.
+  var rcc_dis_dropdown_tag = document.getElementById('rcc_disable_options_periph_clocks_tag');
+  var periph_clocks = {};
+  if (mcu_chip == 'STM32F030F4' || mcu_chip == 'STM32F031F6') {
+    periph_clocks = rcc_opts.STM32F03xFx;
+    var select_tag_html = '';
+    for (var periph_val in periph_clocks) {
+      select_tag_html += `
+        <option value="` + periph_val + `" class="rcc_disable_options_periph_clocks_option">` + periph_clocks[periph_val] + `</option>
+      `;
+    }
+    rcc_dis_dropdown_tag.innerHTML = select_tag_html;
+  }
+
+  // Set selected value based on options, if applicable.
+  if (cur_node.options.periph_clock && cur_node.options.periph_clock != '') {
+    rcc_dis_dropdown_tag.value = cur_node.options.periph_clock;
+  }
+
+  // Set click listener functions for each available clock.
+  rcc_dis_dropdown_tag.onchange = function() {
+    cur_node.options.periph_clock = rcc_dis_dropdown_tag.value;
+  };
+};
+
+var apply_gpio_init_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var gpio_bank_tag = document.getElementById('init_gpio_options_pin_bank_tag');
+  var gpio_pin_tag = document.getElementById('init_gpio_options_pin_number_tag');
+  var gpio_func_tag = document.getElementById('init_gpio_options_pin_func_tag');
+  var gpio_otype_tag = document.getElementById('init_gpio_options_otype_tag');
+  var gpio_ospeed_tag = document.getElementById('init_gpio_options_ospeed_tag');
+  var gpio_pupdr_tag = document.getElementById('init_gpio_options_pupdr_tag');
+
+  // Set values according to node options.
+  if (cur_node.options.gpio_bank) {
+    gpio_bank_tag.value = cur_node.options.gpio_bank;
+  }
+  if (cur_node.options.gpio_pin) {
+    gpio_pin_tag.value = cur_node.options.gpio_pin;
+  }
+  if (cur_node.options.gpio_func) {
+    gpio_func_tag.value = cur_node.options.gpio_func;
+  }
+  if (cur_node.options.gpio_otype) {
+    gpio_otype_tag.value = cur_node.options.gpio_otype;
+  }
+  if (cur_node.options.gpio_ospeed) {
+    gpio_ospeed_tag.value = cur_node.options.gpio_ospeed;
+  }
+  if (cur_node.options.gpio_pupdr) {
+    gpio_pupdr_tag.value = cur_node.options.gpio_pupdr;
+  }
+
+  // Set click listener functions.
+  gpio_bank_tag.onchange = function() {
+    cur_node.options.gpio_bank = gpio_bank_tag.value;
+  };
+  gpio_pin_tag.onchange = function() {
+    cur_node.options.gpio_pin = gpio_pin_tag.value;
+  };
+  gpio_func_tag.onchange = function() {
+    cur_node.options.gpio_func = gpio_func_tag.value;
+  };
+  gpio_otype_tag.onchange = function() {
+    cur_node.options.gpio_otype = gpio_otype_tag.value;
+  };
+  gpio_ospeed_tag.onchange = function() {
+    cur_node.options.gpio_ospeed = gpio_ospeed_tag.value;
+  };
+  gpio_pupdr_tag.onchange = function() {
+    cur_node.options.gpio_pupdr = gpio_pupdr_tag.value;
+  };
+};
+
+var apply_gpio_output_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var gpio_bank_tag = document.getElementById('set_gpio_out_options_pin_bank_tag');
+  var gpio_pin_tag = document.getElementById('set_gpio_out_options_pin_number_tag');
+  var gpio_value_tag = document.getElementById('set_gpio_out_options_value_tag');
+
+  // Set values according to node options.
+  if (cur_node.options.gpio_bank) {
+    gpio_bank_tag.value = cur_node.options.gpio_bank;
+  }
+  if (cur_node.options.gpio_pin) {
+    gpio_pin_tag.value = cur_node.options.gpio_pin;
+  }
+  if (cur_node.options.gpio_val) {
+    gpio_value_tag.value = 'On';
+  }
+  else {
+    gpio_value_tag.value = 'Off';
+  }
+
+  // Set click listener functions.
+  gpio_bank_tag.onchange = function() {
+    cur_node.options.gpio_bank = gpio_bank_tag.value;
+  };
+  gpio_pin_tag.onchange = function() {
+    cur_node.options.gpio_pin = gpio_pin_tag.value;
+  };
+  gpio_value_tag.onchange = function() {
+    if (gpio_value_tag.value == 'On') {
+      cur_node.options.gpio_val = 1;
+    }
+    else {
+      cur_node.options.gpio_val = 0;
+    }
+  }
+};
+
+// 'Define New Variable' Global node.
+var apply_new_var_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var var_name_tag = document.getElementById('define_var_options_var_name_tag');
+  var var_type_tag = document.getElementById('define_var_options_var_type_tag');
+  var var_val_cell = document.getElementById('define_var_options_var_val_cell');
+
+  // Set values according to node options.
+  if (cur_node.options.var_name) {
+    var_name_tag.value = cur_node.options.var_name;
+  }
+  if (cur_node.options.var_type) {
+    var_type_tag.value = cur_node.options.var_type;
+  }
+
+  // Fill 'var value' cell based on current type.
+  var var_val_tag = null;
+  if (var_type_tag.value == 'int') {
+    var_val_cell.innerHTML = `
+      <input id="define_var_options_int_tag" class="define_var_options_int_input" type="number" value="` + cur_node.options.var_val + `">
+    `;
+    var_val_tag = document.getElementById('define_var_options_int_tag');
+  }
+  else if (var_type_tag.value == 'float') {
+    var_val_cell.innerHTML = `
+      <input id="define_var_options_float_tag" class="define_var_options_float_input" type="number" value="` + cur_node.options.var_val + `" step="0.000001">
+    `;
+    var_val_tag = document.getElementById('define_var_options_float_tag');
+  }
+  else if (var_type_tag.value == 'bool') {
+    var is_true_opts = 'selected="true"';
+    var is_false_opts = '';
+    if (!cur_node.options.var_val || cur_node.options.var_val == 'false') {
+      is_false_opts = 'selected="true"';
+      is_true_opts = '';
+    }
+    var_val_cell.innerHTML = `
+      <select id="define_var_options_bool_tag" class="define_var_options_bool_input">
+        <option ` + is_true_opts + ` value="true">True</option>
+        <option ` + is_false_opts + ` value="false">False</option>
+      </select>
+    `;
+    var_val_tag = document.getElementById('define_var_options_bool_tag');
+  }
+  else if (var_type_tag.value == 'char') {
+    var_val_cell.innerHTML = `
+      <input id="define_var_options_char_tag" class="define_var_options_char_input" type="text" maxlength="1" value="` + cur_node.options.var_val + `">
+    `;
+    var_val_tag = document.getElementById('define_var_options_char_tag');
+  }
+
+  // Set 'var value' type according to node option.
+  if (cur_node.options.var_val && var_val_tag) {
+    var_val_tag.value = cur_node.options.var_val;
+  }
+
+  // Set listener functions.
+  var_name_tag.oninput = function() {
+    cur_node.options.var_display_name = var_name_tag.value;
+    cur_node.options.var_name = update_var_names(cur_node.options.var_name, cur_node.options.var_display_name);
+    refresh_defined_vars();
+  };
+  var_type_tag.onchange = function() {
+    cur_node.options.var_type = var_type_tag.value;
+    var var_val_tag = null;
+    if (var_type_tag.value == 'int') {
+      var_val_cell.innerHTML = `
+        <input id="define_var_options_int_tag" class="define_var_options_int_input" type="number" value="0">
+      `;
+      var_val_tag = document.getElementById('define_var_options_int_tag');
+      var_val_tag.value = 0;
+    }
+    else if (var_type_tag.value == 'float') {
+      var_val_cell.innerHTML = `
+        <input id="define_var_options_float_tag" class="define_var_options_float_input" type="number" value="0" step="0.000001">
+      `;
+      var_val_tag = document.getElementById('define_var_options_float_tag');
+      var_val_tag.value = 0.0;
+    }
+    else if (var_type_tag.value == 'bool') {
+      var_val_cell.innerHTML = `
+        <select id="define_var_options_bool_tag" class="define_var_options_bool_input">
+          <option selected="true" value="true">True</option>
+          <option value="false">False</option>
+        </select>
+      `;
+      var_val_tag = document.getElementById('define_var_options_bool_tag');
+    }
+    else if (var_type_tag.value == 'char') {
+      var_val_cell.innerHTML = `
+        <input id="define_var_options_char_tag" class="define_var_options_char_input" type="text" maxlength="1">
+      `;
+      var_val_tag = document.getElementById('define_var_options_char_tag');
+      var_val_tag.value = 'c';
+    }
+  };
+  var_val_tag.onchange = function() {
+    cur_node.options.var_val = var_val_tag.value;
+  };
+};
+
+// 'Set Variable' node.
+var apply_set_var_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var var_name_tag = document.getElementById('set_var_options_var_list_tag');
+  // (Needs to be created based on var type.)
+  var var_val_tag = null;
+  var var_val_cell = document.getElementById('set_var_options_var_new_value_cell');
+  // Populate the dropdown select menu with currently-defined variables.
+  var sel_html_opts = `
+    <option value="(None)" id="set_var_options_var_list_n/a" class="set_var_options_var_list_option">
+      (None defined)
+    </option>
+  `;
+  var var_defined = false;
+  for (var var_name in defined_vars) {
+    var var_def = defined_vars[var_name];
+    var selected_val = '';
+    if (cur_node.options && cur_node.options.var_name == var_name) {
+      var_defined = true;
+      selected_val = 'selected="true" ';
+    }
+    sel_html_opts += `
+      <option ` + selected_val + `value="` + var_def.name + `" id="set_var_options_var_list_` + var_def.name + `" class="set_var_options_var_list_option">
+        ` + var_def.name + `
+      </option>
+    `;
+  }
+  var_name_tag.innerHTML = sel_html_opts;
+
+  var_name_tag.onchange = function() {
+    var sel_var = null;
+    // Find the corresponding 'New Variable' node.
+    for (var node_ind in fsm_nodes) {
+      var p_node = fsm_nodes[node_ind];
+      if (p_node && p_node.node_type == 'New_Variable' && p_node.options.var_name == var_name_tag.value) {
+        sel_var = p_node;
+        break;
+      }
+    }
+    if (sel_var) {
+      cur_node.options.var_name = sel_var.options.var_name;
+      if (!cur_node.options.var_val || cur_node.options.var_type != sel_var.options.var_type) {
+        // Defaults.
+        if (sel_var.options.var_type == 'int') {
+          cur_node.options.var_val = 0;
+        }
+        else if (sel_var.options.var_type == 'float') {
+          cur_node.options.var_val = 0.0;
+        }
+        else if (sel_var.options.var_type == 'bool') {
+          cur_node.options.var_val = true;
+        }
+        else if (sel_var.options.var_type == 'char') {
+          cur_node.options.var_val = 'c';
+        }
+      }
+      cur_node.options.var_type = sel_var.options.var_type;
+      var val_input_defined = false;
+      if (cur_node.options.var_type == 'int') {
+        var_val_cell.innerHTML = `
+          <input id="define_var_options_int_tag" class="define_var_options_int_input" type="number" value="` + cur_node.options.var_val + `">
+        `;
+        var var_val_in = document.getElementById('define_var_options_int_tag');
+        var_val_in.onchange = function() {
+          cur_node.options.var_val = var_val_in.value;
+        };
+      }
+      else if (cur_node.options.var_type == 'float') {
+        var_val_cell.innerHTML = `
+          <input id="define_var_options_float_tag" class="define_var_options_float_input" type="number" value="` + cur_node.options.var_val + `" step="0.000001">
+        `;
+        var var_val_in = document.getElementById('define_var_options_float_tag');
+        var_val_in.onchange = function() {
+          cur_node.options.var_val = var_val_in.value;
+        };
+      }
+      else if (cur_node.options.var_type == 'bool') {
+        var is_true_sel = 'selected="true"';
+        var is_false_sel = '';
+        if (!cur_node.options.var_val || cur_node.options.var_val == 'false') {
+          is_false_sel = 'selected="true"';
+          is_true_sel = '';
+        }
+        var_val_cell.innerHTML = `
+          <select id="define_var_options_bool_tag" class="define_var_options_bool_input">
+            <option ` + is_true_sel + ` value="true">True</option>
+            <option ` + is_false_sel + ` value="false">False</option>
+          </select>
+        `;
+        var var_val_in = document.getElementById('define_var_options_bool_tag');
+        var_val_in.onchange = function() {
+          cur_node.options.var_val = var_val_in.value;
+        };
+      }
+      else if (cur_node.options.var_type == 'char') {
+        var_val_cell.innerHTML = `
+          <input id="define_var_options_char_tag" class="define_var_options_char_input" type="text" maxlength="1" value = "` + cur_node.options.var_val + `">
+        `;
+        var var_val_in = document.getElementById('define_var_options_char_tag');
+        var_val_in.onchange = function() {
+          cur_node.options.var_val = var_val_in.value;
+        };
+      }
+    }
+  };
+  // Fire the change tag off once for the initial selection.
+  var_name_tag.onchange();
+};
+
+// No-op node - currently no options, sort of by definition...
+var apply_nop_node_options_listeners = function() {
+  // Currently none.
+};
+
+var apply_check_truthy_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var var_name_tag = document.getElementById('check_truthy_options_var_list_tag');
+  var sel_html_opts = `
+    <option value="(None)" id="check_truthy_options_var_list_n/a" class="check_truthy_options_var_list_option">
+      (None defined)
+    </option>
+  `;
+  var var_defined = false;
+  for (var var_name in defined_vars) {
+    var var_def = defined_vars[var_name];
+    var selected_val = '';
+    if (cur_node.options && cur_node.options.var_name == var_name) {
+      selected_val = 'selected="true" ';
+    }
+    sel_html_opts += `
+      <option ` + selected_val + `value="` + var_def.name + `" id="check_truthy_options_var_list_` + var_def.name + `" class="set_truthy_options_var_list_option">
+        ` + var_def.name + `
+      </option>
+    `;
+  }
+  var_name_tag.innerHTML = sel_html_opts;
+  var_name_tag.onchange = function() {
+    cur_node.options.var_name = var_name_tag.value;
+  }
+};
