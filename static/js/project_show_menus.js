@@ -465,71 +465,15 @@ var apply_selected_node_option_listeners = function(node_type) {
 };
 
 var default_options_for_type = function(type) {
-  if (type == 'Boot') {
-    return {
-      chip_type: 'STM32F030F4',
-    };
+  for (var tn_ind in tool_node_types) {
+    var cur_type = tool_node_types[tn_ind];
+    if (cur_type) {
+      if (type == cur_type.base_name) {
+        return cur_type.default_options;
+      }
+    }
   }
-  else if (type == 'Delay') {
-    return {
-      delay_units: 'cycles',
-      delay_value: 0,
-    };
-  }
-  else if (type == 'Label') {
-    return {
-      label_name: '',
-      label_display_name: '',
-    };
-  }
-  else if (type == 'Jump') {
-    return {
-      label_name: '(None)',
-    };
-  }
-  else if (type == 'GPIO_Init') {
-    return {
-      gpio_bank: 'GPIOA',
-      gpio_pin: 0,
-      gpio_func: 'Output',
-      gpio_otype: 'Push-Pull',
-      gpio_ospeed: 'H',
-      gpio_pupdr: 'PU',
-    };
-  }
-  else if (type == 'GPIO_Output') {
-    return {
-      gpio_bank: 'GPIOA',
-      gpio_pin: 0,
-      gpio_val: 0,
-    };
-  }
-  else if (type == 'RCC_Enable' || type == 'RCC_Disable') {
-    return {
-      periph_clock: 'GPIOA',
-    };
-  }
-  else if (type == 'New_Variable') {
-    return {
-      var_name: '',
-      var_display_name: '',
-      var_type: 'int',
-      var_val: 0,
-    };
-  }
-  else if (type == 'Set_Variable') {
-    return {
-      var_name: '(None)',
-    };
-  }
-  else if (type == 'Check_Truthy') {
-    return {
-      var_name: '(None)',
-    };
-  }
-  else {
-    return {};
-  }
+  return {};
 };
 
 var refresh_selected_menu_tool = function() {
