@@ -453,42 +453,14 @@ var apply_selected_node_option_listeners = function(node_type) {
     }
   }
 
-  // 'Boot' node.
-  if (node_type == 'Boot') {
-    apply_boot_node_options_listeners();
-  }
-  else if (node_type == 'Delay') {
-    apply_delay_node_options_listeners();
-  }
-  else if (node_type == 'Label') {
-    apply_label_node_options_listeners();
-  }
-  else if (node_type == 'Jump') {
-    apply_jump_node_options_listeners();
-  }
-  else if (node_type == 'GPIO_Init') {
-    apply_gpio_init_options_listeners();
-  }
-  else if (node_type == 'GPIO_Output') {
-    apply_gpio_output_options_listeners();
-  }
-  else if (node_type == 'RCC_Enable') {
-    apply_rcc_enable_node_options_listeners();
-  }
-  else if (node_type == 'RCC_Disable') {
-    apply_rcc_disable_node_options_listeners();
-  }
-  else if (node_type == 'New_Variable') {
-    apply_new_var_node_options_listeners();
-  }
-  else if (node_type == 'Set_Variable') {
-    apply_set_var_node_options_listeners();
-  }
-  else if (node_type == 'Nop_Node') {
-    apply_nop_node_options_listeners();
-  }
-  else if (node_type == 'Check_Truthy') {
-    apply_check_truthy_options_listeners();
+  for (var tn_ind in tool_node_types) {
+    var cur_type = tool_node_types[tn_ind];
+    if (cur_type) {
+      if (node_type == cur_type.base_name) {
+        cur_type.options_listeners();
+        break;
+      }
+    }
   }
 };
 
