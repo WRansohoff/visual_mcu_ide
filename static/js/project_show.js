@@ -828,44 +828,14 @@ project_show_onload = function() {
               }
             }
             // Type-specific options:
-            if (sel_type == 'Boot') {
-              selected_node_options_html += boot_node_options_html;
-            }
-            else if (sel_type == 'Delay') {
-              selected_node_options_html += delay_node_options_html;
-            }
-            else if (sel_type == 'Label') {
-              selected_node_options_html += label_node_options_html;
-            }
-            else if (sel_type == 'Jump') {
-              selected_node_options_html += jump_node_options_html;
-            }
-            else if (sel_type == 'GPIO_Init') {
-              selected_node_options_html += init_gpio_node_options_html;
-            }
-            else if (sel_type == 'GPIO_Output') {
-              selected_node_options_html += set_gpio_out_node_options_html;
-            }
-            else if (sel_type == 'RCC_Enable') {
-              selected_node_options_html += rcc_enable_node_options_html;
-            }
-            else if (sel_type == 'RCC_Disable') {
-              selected_node_options_html += rcc_disable_node_options_html;
-            }
-            else if (sel_type == 'New_Variable') {
-              selected_node_options_html += define_var_node_options_html;
-            }
-            else if (sel_type == 'Set_Variable') {
-              selected_node_options_html += set_var_node_options_html;
-            }
-            else if (sel_type == 'Set_Var_Logic_Not') {
-              selected_node_options_html += set_var_logic_not_node_options_html;
-            }
-            else if (sel_type == 'Nop_Node') {
-              selected_node_options_html += nop_node_options_html;
-            }
-            else if (sel_type == 'Check_Truthy') {
-              selected_node_options_html += check_truthy_node_options_html;
+            for (var tn_ind in tool_node_types) {
+              var cur_type = tool_node_types[tn_ind];
+              if (cur_type) {
+                if (sel_type == cur_type.base_name) {
+                  selected_node_options_html += cur_type.options_html;
+                  break;
+                }
+              }
             }
             document.getElementById("hobb_options_content").innerHTML = selected_node_options_html;
             // Apply click listeners.
