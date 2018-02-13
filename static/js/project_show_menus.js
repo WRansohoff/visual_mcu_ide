@@ -443,7 +443,7 @@ var apply_branching_node_io_table_listeners = function(node_type) {
 var apply_selected_node_option_listeners = function(node_type) {
   // 'Global' nodes have no I/O connections table.
   if (node_type != 'New_Variable') {
-    // A 'branching' node has 1-many inputs and 1-2 outputs.
+    // A 'branching' node has 1-many inputs and 2 outputs.
     if (node_type == 'Check_Truthy') {
       apply_branching_node_io_table_listeners(node_type);
     }
@@ -488,4 +488,33 @@ var refresh_selected_menu_tool = function() {
     else { half_grid = 32; }
     cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
   }
+};
+
+// Common methods for 'apply node options listeners' methods.
+var populate_defined_vars_dropdown = function(sel_id, cur_node) {
+  var var_name_tag = document.getElementById(sel_id);
+  // Populate the dropdown select menu with currently-defined variables.
+  var sel_html_opts = '';
+  var var_defined = false;
+  for (var var_name in defined_vars) {
+    var var_def = defined_vars[var_name];
+    var selected_val = '';
+    if (cur_node.options && cur_node.options.var_name == var_name) {
+      var_defined = true;
+      selected_val = 'selected="true" ';
+    }
+    sel_html_opts += `
+      <option ` + selected_val + `value="` + var_def.name + `" id="set_var_options_var_list_` + var_def.name + `" class="set_var_options_var_list_option">
+        ` + var_def.name + `
+      </option>
+    `;
+  }
+  if (var_defined) { sel_text = ''; }
+  else { sel_text = 'selected="true"'; }
+  sel_html_opts = `
+    <option value="(None)" ` + sel_text + ` id="set_var_options_var_list_n/a" class="set_var_options_var_list_option">
+      (None defined)
+    </option>
+  ` + sel_html_opts;
+  var_name_tag.innerHTML = sel_html_opts;
 };

@@ -253,11 +253,11 @@ var rcc_clock_list_table_row = function(tag_prefix) {
   `;
 };
 
-var defined_variables_list_table_row = function(tag_prefix) {
+var defined_variables_list_table_row = function(tag_prefix, label_text) {
   return `
   <tr class="` + tag_prefix + `_var_list_row">
     <td class="` + tag_prefix + `_var_list_text">
-      Variable:
+      ` + label_text + `
     </td>
     <td class="` + tag_prefix + `_var_list_opt">
       <select id="` + tag_prefix + `_var_list_tag" class="` + tag_prefix + `_var_list_select">
@@ -527,7 +527,7 @@ var define_var_node_options_html = `
 // 'Set variable' node options.
 var set_var_node_options_html = `
 <table class="set_var_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + defined_variables_list_table_row('set_var_options') + `
+  ` + defined_variables_list_table_row('set_var_options', 'Variable:') + `
   <tr class="set_var_options_var_new_value_row">
     <td class="set_var_options_var_new_value_text">
       New value:
@@ -541,8 +541,8 @@ var set_var_node_options_html = `
 // 'Modify Variable: Logic Not' node options.
 var set_var_logic_not_node_options_html = `
 <table class="set_var_logic_not_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + defined_variables_list_table_row('set_var_logic_not_options_A') + `
-  ` + defined_variables_list_table_row('set_var_options_B') + `
+  ` + defined_variables_list_table_row('set_var_logic_not_options_A', 'Variable A:') + `
+  ` + defined_variables_list_table_row('set_var_logic_not_options_B', 'Variable B:') + `
 </table>
 `;
 
@@ -554,7 +554,7 @@ var nop_node_options_html = `
 // 'Is Variable Truth-y?' branching node options.
 var check_truthy_node_options_html = `
 <table class="check_truthy_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + defined_variables_list_table_row('check_truthy_options') + `
+  ` + defined_variables_list_table_row('check_truthy_options', 'Variable to check:') + `
 </table>
 `;
 
@@ -940,27 +940,7 @@ var apply_set_var_node_options_listeners = function() {
   // (Needs to be created based on var type.)
   var var_val_tag = null;
   var var_val_cell = document.getElementById('set_var_options_var_new_value_cell');
-  // Populate the dropdown select menu with currently-defined variables.
-  var sel_html_opts = `
-    <option value="(None)" id="set_var_options_var_list_n/a" class="set_var_options_var_list_option">
-      (None defined)
-    </option>
-  `;
-  var var_defined = false;
-  for (var var_name in defined_vars) {
-    var var_def = defined_vars[var_name];
-    var selected_val = '';
-    if (cur_node.options && cur_node.options.var_name == var_name) {
-      var_defined = true;
-      selected_val = 'selected="true" ';
-    }
-    sel_html_opts += `
-      <option ` + selected_val + `value="` + var_def.name + `" id="set_var_options_var_list_` + var_def.name + `" class="set_var_options_var_list_option">
-        ` + var_def.name + `
-      </option>
-    `;
-  }
-  var_name_tag.innerHTML = sel_html_opts;
+  populate_defined_vars_dropdown('set_var_options_var_list_tag', cur_node);
 
   var_name_tag.onchange = function() {
     var sel_var = null;
@@ -1037,9 +1017,21 @@ var apply_set_var_node_options_listeners = function() {
         };
       }
     }
+    else if (var_name_tag.value == '(None)') {
+      cur_node.options.var_name = '(None)';
+      var_val_cell.innerHTML = '';
+    }
   };
   // Fire the change tag off once for the initial selection.
   var_name_tag.onchange();
+};
+
+var apply_set_var_logic_not_node_options_listeners = function() {
+  var cur_node = fsm_nodes[selected_node_id];
+  var var_a_name_tag = document.getElementById('set_var_logic_not_options_A_var_list_tag');
+  var var_b_name_tag = document.getElementById('set_var_logic_not_options_B_var_list_tag');
+  populate_defined_vars_dropdown('set_var_logic_not_options_A_var_list_tag', cur_node);
+  populate_defined_vars_dropdown('set_var_logic_not_options_B_var_list_tag', cur_node);
 };
 
 // No-op node - currently no options, sort of by definition...
