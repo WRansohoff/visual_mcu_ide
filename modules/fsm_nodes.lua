@@ -302,6 +302,11 @@ function FSMNodes.process_node(node, node_graph, proj_state)
         FSMNodes.append_set_var_node(node, node_graph, proj_state)) then
       return true
     end
+  elseif node.node_type == 'Set_Var_Logic_Not' then
+    if (FSMNodes.ensure_support_methods_set_var_logic_not_node(node, proj_state) and
+        FSMNodes.append_set_var_logic_not_node(node, node_graph, proj_state)) then
+      return true
+    end
   -- (Branching Nodes)
   elseif node.node_type == 'Check_Truthy' then
     if (FSMNodes.ensure_support_methods_check_truthy_node(node, proj_state) and
@@ -651,8 +656,9 @@ function FSMNodes.ensure_support_methods_set_var_node(node, proj_state)
   return true
 end
 
+-- Add a 'Set Variable' node to the program.
 function FSMNodes.append_set_var_node(node, node_graph, proj_state)
-  local node_text = '  // ("Set Variable" node)\n';
+  local node_text = '  // ("Set Variable" node)\n'
   node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
   -- (The actual variable setting.)
   local var_c_type = node.options.var_type
@@ -678,6 +684,37 @@ function FSMNodes.append_set_var_node(node, node_graph, proj_state)
     return nil
   end
   node_text = node_text .. '  // (End "Set Variable" node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Ensure supporting methods for setting variables: 'A = !B'.
+function FSMNodes.ensure_support_methods_set_var_logic_not_node(node, proj_state)
+  -- Only primitive types, so no required includes to check.
+  return true
+end
+
+-- Append a 'set var logic not' (A = !B) node.
+function FSMNodes.append_set_var_logic_not_node(node, node_graph, proj_state)
+  local node_text = '  // ("Set Variable logical-not" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- (The actual variable setting.)
+  if node.options.var_a_name ~= '(None)' and node.options.var_b_name ~= '(None)' then
+    node_text = node_text .. '  ' .. node.options.var_a_name .. ' = !' .. node.options.var_b_name .. ';\n'
+  else
+    return nil
+  end
+  -- (Done.)
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "Set Variable logical-not" node)\n\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
                                     "/ MAIN_ENTRY:",
                                     node_text) then

@@ -1032,6 +1032,12 @@ var apply_set_var_logic_not_node_options_listeners = function() {
   var var_b_name_tag = document.getElementById('set_var_logic_not_options_B_var_list_tag');
   populate_defined_vars_dropdown('set_var_logic_not_options_A_var_list_tag', cur_node);
   populate_defined_vars_dropdown('set_var_logic_not_options_B_var_list_tag', cur_node);
+  var_a_name_tag.onchange = function() {
+    cur_node.options.var_a_name = var_a_name_tag.value;
+  };
+  var_b_name_tag.onchange = function() {
+    cur_node.options.var_b_name = var_b_name_tag.value;
+  };
 };
 
 // No-op node - currently no options, sort of by definition...
