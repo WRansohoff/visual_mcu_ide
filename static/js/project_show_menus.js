@@ -440,24 +440,25 @@ var apply_branching_node_io_table_listeners = function(node_type) {
 };
 
 // Common 'new node selected' call.
-var apply_selected_node_option_listeners = function(node_type) {
+var apply_selected_node_option_listeners = function(type_node) {
+  var type = type_node.node_type; // hehe
   // 'Global' nodes have no I/O connections table.
-  if (node_type != 'New_Variable') {
+  if (type != 'New_Variable') {
     // A 'branching' node has 1-many inputs and 2 outputs.
-    if (node_type == 'Check_Truthy') {
-      apply_branching_node_io_table_listeners(node_type);
+    if (type == 'Check_Truthy') {
+      apply_branching_node_io_table_listeners(type);
     }
     // A 'standard' node has 1-many inputs and 1 output.
     else {
-      apply_node_io_table_listeners(node_type);
+      apply_node_io_table_listeners(type);
     }
   }
 
   for (var tn_ind in tool_node_types) {
     var cur_type = tool_node_types[tn_ind];
     if (cur_type) {
-      if (node_type == cur_type.base_name) {
-        cur_type.options_listeners();
+      if (type_node.node_type == cur_type.base_name) {
+        cur_type.options_listeners(type_node);
         break;
       }
     }
@@ -469,7 +470,7 @@ var default_options_for_type = function(type) {
     var cur_type = tool_node_types[tn_ind];
     if (cur_type) {
       if (type == cur_type.base_name) {
-        return cur_type.default_options;
+        return JSON.parse(JSON.stringify(cur_type.default_options));
       }
     }
   }

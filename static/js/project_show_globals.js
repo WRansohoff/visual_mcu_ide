@@ -95,7 +95,7 @@ const tool_node_types = [
   menu_name: 'Delay',
   node_color: 'blue',
   default_options: {
-    delay_unit: 'cycles',
+    delay_units: 'cycles',
     delay_value: 0,
   },
   options_listeners: apply_delay_node_options_listeners,

@@ -808,7 +808,8 @@ project_show_onload = function() {
             node_selected = true;
             selected_node_id = node_ind;
             var sel_type = fsm_nodes[selected_node_id].node_type;
-            document.getElementById("hobb_options_header").innerHTML = ("Options: (" + sel_type + ")");
+            document.getElementById("hobb_options_header").innerHTML = ("Options: (" + sel_type + ", " + fsm_nodes[node_ind].pn_index + ")");
+            $("hobb_options_content").empty();
             // In/Out connections table. The only case where this
             // won't be added is a 'global' node that affects
             // the entire program. Currently, that is only the
@@ -839,7 +840,7 @@ project_show_onload = function() {
             }
             document.getElementById("hobb_options_content").innerHTML = selected_node_options_html;
             // Apply click listeners.
-            apply_selected_node_option_listeners(sel_type);
+            apply_selected_node_option_listeners(fsm_nodes[node_ind]);
             break;
           }
         }
@@ -848,7 +849,7 @@ project_show_onload = function() {
       if (!node_selected) {
         selected_node_id = -1;
         document.getElementById("hobb_options_header").innerHTML = ("Options: (None)");
-        document.getElementById("hobb_options_content").innerHTML = "";
+        $("#hobb_options_content").empty();
       }
     }
     else if (selected_tool == 'tool') {
@@ -923,7 +924,7 @@ project_show_onload = function() {
             if (selected_node_id == node_ind) {
               selected_node_id = -1;
               document.getElementById("hobb_options_header").innerHTML = ("Options: (None)");
-              document.getElementById("hobb_options_content").innerHTML = "";
+              $("#hobb_options_content").empty();
             }
             fsm_nodes[node_ind] = null;
             // Squash the array of nodes.
@@ -1380,6 +1381,7 @@ var precompile_project = function() {
             program_nodes[proc_node.pn_index].output = {
               single: next_node.pn_index
             };
+            alert("Proc: " + proc_node.pn_index);
             if (!visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"]) {
               visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"] = true;
               remaining_branches.push(next_node);

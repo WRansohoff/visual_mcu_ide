@@ -2,9 +2,9 @@
 <link rel="stylesheet" type="text/css" href="/static/css/project_show_options_strings.css">
 
 <script type="text/javascript" src="/static/js/project_show_options_strings.js"></script>
-<script type="text/javascript" src="/static/js/project_show_globals.js"></script>
 <script type="text/javascript" src="/static/js/project_show_util.js"></script>
 <script type="text/javascript" src="/static/js/project_show_menus.js"></script>
+<script type="text/javascript" src="/static/js/project_show_globals.js"></script>
 <script type="text/javascript" src="/static/js/project_show.js"></script>
 
 <script type="text/javascript">
@@ -63,6 +63,7 @@
       })
       .fail(function(data) {
         alert("Error precompiling.\n"+JSON.stringify(data));
+        console.log("Error precompiling.\n"+JSON.stringify(data));
       });
   };
 

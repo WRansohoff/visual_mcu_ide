@@ -565,8 +565,7 @@ var check_truthy_node_options_html = `
 /*
  * Node listener functions.
  */
-var apply_boot_node_options_listeners = function() {
-  var cur_node = fsm_nodes[selected_node_id];
+var apply_boot_node_options_listeners = function(cur_node) {
   var chip_sel_tag = document.getElementById("boot_options_mcu_chip_tag");
   if (cur_node.options && cur_node.options.chip_type == 'STM32F030F4') {
     chip_sel_tag.value = 'STM32F030F4';
@@ -588,8 +587,7 @@ var apply_boot_node_options_listeners = function() {
   };
 };
 
-var apply_delay_node_options_listeners = function() {
-  var cur_node = fsm_nodes[selected_node_id];
+var apply_delay_node_options_listeners = function(cur_node) {
   var delay_units_tag = document.getElementById('delay_options_unit_tag');
   var delay_value_tag = document.getElementById('delay_options_value_tag');
   if (cur_node.options) {
@@ -637,8 +635,7 @@ var apply_delay_node_options_listeners = function() {
 };
 
 // Apply option input listeners for a 'Label' node.
-var apply_label_node_options_listeners = function() {
-  var cur_node = fsm_nodes[selected_node_id];
+var apply_label_node_options_listeners = function(cur_node) {
   var label_name_tag = document.getElementById('define_label_options_label_name_tag');
 
   // Set to current node options.
@@ -654,8 +651,7 @@ var apply_label_node_options_listeners = function() {
 };
 
 // Apply option input listeners for a 'Jump' node.
-var apply_jump_node_options_listeners = function() {
-  var cur_node = fsm_nodes[selected_node_id];
+var apply_jump_node_options_listeners = function(cur_node) {
   var label_name_tag = document.getElementById('jump_options_label_list_tag');
   // Populate the dropdown select menu with currently-defined label names.
   var sel_html_opts = '';
@@ -692,8 +688,7 @@ var apply_jump_node_options_listeners = function() {
 };
 
 // 'Enable RCC Peripheral Clock' node options.
-var apply_rcc_enable_node_options_listeners = function () {
-  var cur_node = fsm_nodes[selected_node_id];
+var apply_rcc_enable_node_options_listeners = function (cur_node) {
   // Here, we need to set the options based on what is available in the
   // target MCU chip. From an RCC perspective, the 'F03xFx' chips look identical.
   var rcc_en_dropdown_tag = document.getElementById('rcc_enable_options_periph_clocks_tag');
@@ -721,8 +716,7 @@ var apply_rcc_enable_node_options_listeners = function () {
 };
 
 // 'Disable RCC Peripheral Clock' node options. Similar to 'Enable'
-var apply_rcc_disable_node_options_listeners = function () {
-  var cur_node = fsm_nodes[selected_node_id];
+var apply_rcc_disable_node_options_listeners = function (cur_node) {
   // Here, we need to set the options based on what is available in the
   // target MCU chip. From an RCC perspective, the 'F03xFx' chips look identical.
   var rcc_dis_dropdown_tag = document.getElementById('rcc_disable_options_periph_clocks_tag');
@@ -749,8 +743,7 @@ var apply_rcc_disable_node_options_listeners = function () {
   };
 };
 
-var apply_gpio_init_options_listeners = function() {
-  var cur_node = fsm_nodes[selected_node_id];
+var apply_gpio_init_options_listeners = function(cur_node) {
   var gpio_bank_tag = document.getElementById('init_gpio_options_pin_bank_tag');
   var gpio_pin_tag = document.getElementById('init_gpio_options_pin_number_tag');
   var gpio_func_tag = document.getElementById('init_gpio_options_pin_func_tag');
@@ -799,8 +792,7 @@ var apply_gpio_init_options_listeners = function() {
   };
 };
 
-var apply_gpio_output_options_listeners = function() {
-  var cur_node = fsm_nodes[selected_node_id];
+var apply_gpio_output_options_listeners = function(cur_node) {
   var gpio_bank_tag = document.getElementById('set_gpio_out_options_pin_bank_tag');
   var gpio_pin_tag = document.getElementById('set_gpio_out_options_pin_number_tag');
   var gpio_value_tag = document.getElementById('set_gpio_out_options_value_tag');
@@ -855,8 +847,7 @@ var apply_gpio_output_options_listeners = function() {
 };
 
 // 'Define New Variable' Global node.
-var apply_new_var_node_options_listeners = function() {
-  var cur_node = fsm_nodes[selected_node_id];
+var apply_new_var_node_options_listeners = function(cur_node) {
   var var_name_tag = document.getElementById('define_var_options_var_name_tag');
   var var_type_tag = document.getElementById('define_var_options_var_type_tag');
   var var_val_cell = document.getElementById('define_var_options_var_val_cell');
@@ -956,8 +947,7 @@ var apply_new_var_node_options_listeners = function() {
 };
 
 // 'Set Variable' node.
-var apply_set_var_node_options_listeners = function() {
-  var cur_node = fsm_nodes[selected_node_id];
+var apply_set_var_node_options_listeners = function(cur_node) {
   var var_name_tag = document.getElementById('set_var_options_var_list_tag');
   // (Needs to be created based on var type.)
   var var_val_tag = null;
@@ -1048,8 +1038,7 @@ var apply_set_var_node_options_listeners = function() {
   var_name_tag.onchange();
 };
 
-var apply_set_var_logic_not_node_options_listeners = function() {
-  var cur_node = fsm_nodes[selected_node_id];
+var apply_set_var_logic_not_node_options_listeners = function(cur_node) {
   var var_a_name_tag = document.getElementById('set_var_logic_not_options_A_var_list_tag');
   var var_b_name_tag = document.getElementById('set_var_logic_not_options_B_var_list_tag');
   populate_defined_vars_dropdown('set_var_logic_not_options_A_var_list_tag', cur_node, cur_node.options.var_a_name);
@@ -1063,12 +1052,11 @@ var apply_set_var_logic_not_node_options_listeners = function() {
 };
 
 // No-op node - currently no options, sort of by definition...
-var apply_nop_node_options_listeners = function() {
+var apply_nop_node_options_listeners = function(cur_node) {
   // Currently none.
 };
 
-var apply_check_truthy_options_listeners = function() {
-  var cur_node = fsm_nodes[selected_node_id];
+var apply_check_truthy_options_listeners = function(cur_node) {
   var var_name_tag = document.getElementById('check_truthy_options_var_list_tag');
   var sel_html_opts = `
     <option value="(None)" id="check_truthy_options_var_list_n/a" class="check_truthy_options_var_list_option">
