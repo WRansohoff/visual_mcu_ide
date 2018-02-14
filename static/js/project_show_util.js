@@ -208,3 +208,18 @@ node_array_from_json = function(node_arr_json) {
   return nodes_map;
 };
 
+submit_post_as_file = function(req_url, req_body, on_done, on_fail) {
+    var boundary = '--------------03j9grbf9Nui5Egrlj34kaGrj';
+    var body = '--' + boundary + '\r\n'
+               + 'Content-Disposition: form-data; name="file";'
+               + 'filename="project.json"\r\n'
+               + 'Content-type: plain/text\r\n\r\n'
+               + req_body + '\r\n'
+               + '--' + boundary + '--';
+    $.ajax({
+      contentType: "multipart/form-data; boundary="+boundary,
+      data: body,
+      type: 'POST',
+      url: req_url,
+    }).done(on_done).fail(on_fail);
+};

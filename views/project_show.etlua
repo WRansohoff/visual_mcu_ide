@@ -55,7 +55,8 @@
   };
 
   submit_precompile_request = function(nodes_json) {
-    //alert("Precompilation requested:\n" + nodes_json.toString());
+    // Submit the precompile request as a file to allow for a large size.
+    // (TODO)
     $.post("/precompile_project/<%= proj_id %>", nodes_json)
       .done(function(data) {
         //alert("Precompiled!\n"+JSON.stringify(data));
@@ -69,23 +70,12 @@
 
   submit_project_save_request = function(fsm_nodes_str) {
     // Submit the save request as a file.
-    var boundary = '--------------03j9grbf9Nui5Egrlj34kaGrj';
-    var body = '--' + boundary + '\r\n'
-               + 'Content-Disposition: form-data; name="file";'
-               + 'filename="project.json"\r\n'
-               + 'Content-type: plain/text\r\n\r\n'
-               + fsm_nodes_str.nodes_str + '\r\n'
-               + '--' + boundary + '--';
-    $.ajax({
-      contentType: "multipart/form-data; boundary="+boundary,
-      data: body,
-      type: 'POST',
-      url: "/save_project_file/<%= proj_id %>",
-    }).done(function(data) {
-      //alert("Saved project file:\n" + JSON.stringify(data));
-    }).fail(function(data) {
-      alert("Error saving project file:\n" + JSON.stringify(data));
-    });
+    submit_post_as_file("/save_project_file/<%= proj_id %>",
+                        fsm_nodes_str.nodes_str,
+                        function(data) {},
+                        function(data) {
+                          alert("Error saving project file:\n" + JSON.stringify(data));
+                        });
   };
 </script>
 
