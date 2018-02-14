@@ -457,7 +457,7 @@ var apply_selected_node_option_listeners = function(type_node) {
   for (var tn_ind in tool_node_types) {
     var cur_type = tool_node_types[tn_ind];
     if (cur_type) {
-      if (type_node.node_type == cur_type.base_name) {
+      if (type == cur_type.base_name) {
         cur_type.options_listeners(type_node);
         break;
       }

@@ -1381,7 +1381,6 @@ var precompile_project = function() {
             program_nodes[proc_node.pn_index].output = {
               single: next_node.pn_index
             };
-            alert("Proc: " + proc_node.pn_index);
             if (!visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"]) {
               visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"] = true;
               remaining_branches.push(next_node);
