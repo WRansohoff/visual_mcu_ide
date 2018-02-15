@@ -1,5 +1,5 @@
 # Makefile for compiling ARM Cortex-M assembly projects.
-TARGET = asm-firmware
+TARGET = main
 
 # Default to M0 TSSOP20 4KB SRAM, 32KB Flash.
 MCU ?= STM32F031F6
