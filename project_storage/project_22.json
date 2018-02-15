@@ -1,0 +1,299 @@
+[
+  {
+    "node_type": "Boot",
+    "grid_coord_x": 1,
+    "grid_coord_y": 6,
+    "connections": {
+      "left": "none",
+      "right": "output",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "chip_type": "STM32F030F4"
+    }
+  },
+  {
+    "node_type": "RCC_Enable",
+    "grid_coord_x": 3,
+    "grid_coord_y": 6,
+    "connections": {
+      "left": "input",
+      "right": "output",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "periph_clock": "GPIOB"
+    }
+  },
+  {
+    "node_type": "RCC_Enable",
+    "grid_coord_x": 5,
+    "grid_coord_y": 6,
+    "connections": {
+      "left": "input",
+      "right": "output",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "periph_clock": "GPIOA"
+    }
+  },
+  {
+    "node_type": "GPIO_Init",
+    "grid_coord_x": 7,
+    "grid_coord_y": 6,
+    "connections": {
+      "left": "input",
+      "right": "output",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "gpio_bank": "GPIOA",
+      "gpio_pin": "1",
+      "gpio_func": "Input",
+      "gpio_otype": "Push-Pull",
+      "gpio_ospeed": "H",
+      "gpio_pupdr": "PU"
+    }
+  },
+  {
+    "node_type": "GPIO_Init",
+    "grid_coord_x": 9,
+    "grid_coord_y": 6,
+    "connections": {
+      "left": "input",
+      "right": "none",
+      "up": "none",
+      "down": "output"
+    },
+    "options": {
+      "gpio_bank": "GPIOB",
+      "gpio_pin": "1",
+      "gpio_func": "Output",
+      "gpio_otype": "Push-Pull",
+      "gpio_ospeed": "M",
+      "gpio_pupdr": "None"
+    }
+  },
+  {
+    "node_type": "New_Variable",
+    "grid_coord_x": 2,
+    "grid_coord_y": 5,
+    "connections": {
+      "left": "none",
+      "right": "none",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "var_name": "led_on",
+      "var_display_name": "led_on",
+      "var_type": "bool",
+      "var_val": 0
+    }
+  },
+  {
+    "node_type": "New_Variable",
+    "grid_coord_x": 1,
+    "grid_coord_y": 4,
+    "connections": {
+      "left": "none",
+      "right": "none",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "var_name": "button_down",
+      "var_display_name": "button_down",
+      "var_type": "bool",
+      "var_val": 0
+    }
+  },
+  {
+    "node_type": "New_Variable",
+    "grid_coord_x": 1,
+    "grid_coord_y": 5,
+    "connections": {
+      "left": "none",
+      "right": "none",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "var_name": "button_value",
+      "var_display_name": "button_value",
+      "var_type": "bool",
+      "var_val": 0
+    }
+  },
+  {
+    "node_type": "Label",
+    "grid_coord_x": 8,
+    "grid_coord_y": 5,
+    "connections": {
+      "left": "output",
+      "right": "input",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "label_name": "main",
+      "label_display_name": "main"
+    }
+  },
+  {
+    "node_type": "GPIO_Output",
+    "grid_coord_x": 6,
+    "grid_coord_y": 5,
+    "connections": {
+      "left": "output",
+      "right": "input",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "gpio_bank": "GPIOB",
+      "gpio_pin": "1",
+      "gpio_val": "variable",
+      "gpio_var_name": "led_on"
+    }
+  },
+  {
+    "node_type": "GPIO_Input",
+    "grid_coord_x": 4,
+    "grid_coord_y": 5,
+    "connections": {
+      "left": "output",
+      "right": "input",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "gpio_bank": "GPIOA",
+      "gpio_pin": "1",
+      "gpio_var_name": "button_value"
+    }
+  },
+  {
+    "node_type": "Check_Truthy",
+    "grid_coord_x": 2,
+    "grid_coord_y": 3,
+    "connections": {
+      "left": "output_T",
+      "right": "output_F",
+      "up": "input",
+      "down": "none"
+    },
+    "options": {
+      "var_name": "button_value"
+    }
+  },
+  {
+    "node_type": "Set_Variable",
+    "grid_coord_x": 1,
+    "grid_coord_y": 2,
+    "connections": {
+      "left": "none",
+      "right": "none",
+      "up": "input",
+      "down": "output"
+    },
+    "options": {
+      "var_name": "button_down",
+      "var_val": "false",
+      "var_type": "bool"
+    }
+  },
+  {
+    "node_type": "Jump",
+    "grid_coord_x": 2,
+    "grid_coord_y": 1,
+    "connections": {
+      "left": "input",
+      "right": "input",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "label_name": "main"
+    }
+  },
+  {
+    "node_type": "Check_Truthy",
+    "grid_coord_x": 3,
+    "grid_coord_y": 2,
+    "connections": {
+      "left": "none",
+      "right": "output_F",
+      "up": "input",
+      "down": "output_T"
+    },
+    "options": {
+      "var_name": "button_down"
+    }
+  },
+  {
+    "node_type": "Set_Var_Logic_Not",
+    "grid_coord_x": 7,
+    "grid_coord_y": 2,
+    "connections": {
+      "left": "input",
+      "right": "output",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "var_a_name": "led_on",
+      "var_b_name": "led_on"
+    }
+  },
+  {
+    "node_type": "Set_Variable",
+    "grid_coord_x": 5,
+    "grid_coord_y": 2,
+    "connections": {
+      "left": "input",
+      "right": "output",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "var_name": "button_down",
+      "var_val": true,
+      "var_type": "bool"
+    }
+  },
+  {
+    "node_type": "Delay",
+    "grid_coord_x": 3,
+    "grid_coord_y": 4,
+    "connections": {
+      "left": "output",
+      "right": "none",
+      "up": "input",
+      "down": "none"
+    },
+    "options": {
+      "delay_units": "ms",
+      "delay_value": 20
+    }
+  },
+  {
+    "node_type": "Jump",
+    "grid_coord_x": 9,
+    "grid_coord_y": 2,
+    "connections": {
+      "left": "input",
+      "right": "none",
+      "up": "none",
+      "down": "none"
+    },
+    "options": {
+      "label_name": "main"
+    }
+  }
+]
