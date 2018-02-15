@@ -261,7 +261,7 @@ app:post("/precompile_project_file/:project_id", function(self)
     local indices_to_process = {}
     table.insert(indices_to_process, cur_ind)
     while preprocessing do
-      cur_ind = table.remove(indices_to_process, 1)
+      cur_ind = table.remove(indices_to_process)
       if (not cur_ind) and cur_ind ~= 0 then
         preprocessing = false
         break
@@ -273,31 +273,33 @@ app:post("/precompile_project_file/:project_id", function(self)
         status_msg = 'Node does not exist: ' .. cur_ind
         break
       end
-      if visited_nodes[cur_ind] then
-        preprocessing = false
-        break
-      end
-      local node_processed = FSMNodes.process_node(cur_node, nodes, proj_state)
-      if not node_processed then
-        preprocessing = false
-        ret_status = 500
-        status_msg = 'Error processing node: ' .. cur_ind
-      end
-      if preprocessing then
-        if cur_node.output then
-          if cur_node.output.single then
-            visited_nodes[cur_ind] = true
-            table.insert(indices_to_process, cur_node.output.single)
-          elseif cur_node.output.branch_t and cur_node.output.branch_f then
-            visited_nodes[cur_ind] = true
-            table.insert(indices_to_process, cur_node.output.branch_t)
-            table.insert(indices_to_process, cur_node.output.branch_f)
-          end
-        else
-          -- TODO: Support branching.
+      if not visited_nodes[cur_ind] then
+        -- Only process each node once.
+        local node_processed = FSMNodes.process_node(cur_node, nodes, proj_state)
+        if not node_processed then
           preprocessing = false
           ret_status = 500
-          status_msg = 'Invalid output options passed in node ' .. cur_ind
+          status_msg = 'Error processing node: ' .. cur_ind
+        end
+        if preprocessing then
+          if cur_node.output then
+            if cur_node.output.single then
+              visited_nodes[cur_ind] = true
+              table.insert(indices_to_process, cur_node.output.single)
+            elseif cur_node.output.branch_t and cur_node.output.branch_f then
+              visited_nodes[cur_ind] = true
+              table.insert(indices_to_process, cur_node.output.branch_t)
+              table.insert(indices_to_process, cur_node.output.branch_f)
+            else
+              preprocessing = false
+              ret_status = 500
+              status_msg = 'Invalid output options passed in node ' .. cur_ind
+            end
+          else
+            preprocessing = false
+            ret_status = 500
+            status_msg = 'Invalid output options passed in node ' .. cur_ind
+          end
         end
       end
     end
