@@ -57,22 +57,18 @@
   submit_precompile_request = function(nodes_json) {
     // Submit the precompile request as a file to allow for a large size.
     // (TODO)
-    $.post("/precompile_project/<%= proj_id %>", nodes_json)
-      .done(function(data) {
-        //alert("Precompiled!\n"+JSON.stringify(data));
-        alert("Precompiled!");
-      })
-      .fail(function(data) {
-        alert("Error precompiling.\n"+JSON.stringify(data));
-        console.log("Error precompiling.\n"+JSON.stringify(data));
-      });
+    submit_post_as_file("/precompile_project_file/<%= proj_id %>",
+                        JSON.stringify(nodes_json),
+                        //function(data) {console.log('Success:\n' + JSON.stringify(data));},
+                        function(data) {console.log('Precompile success')},
+                        function(data) {console.log('Error:\n' + JSON.stringify(data));});
   };
 
   submit_project_save_request = function(fsm_nodes_str) {
     // Submit the save request as a file.
     submit_post_as_file("/save_project_file/<%= proj_id %>",
                         fsm_nodes_str.nodes_str,
-                        function(data) {},
+                        function(data) {console.log('Save success')},
                         function(data) {
                           alert("Error saving project file:\n" + JSON.stringify(data));
                         });

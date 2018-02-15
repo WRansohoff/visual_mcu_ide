@@ -3,6 +3,9 @@ local bcrypt = require("bcrypt")
 local lapis = require("lapis")
 local config = require("lapis.config").get()
 
+-- 3rd-party libraries.
+local json = require("modules/3p_libs/json/json")
+
 -- Local modules
 local FSMNodes = require("modules/fsm_nodes")
 local varm_util = require("modules/varm_util")
@@ -154,6 +157,161 @@ app:match("/project/:project_id", function(self)
   end
 
   return { render = "project_show" }
+end)
+
+app:post("/precompile_project_file/:project_id", function(self)
+  -- If there isn't a signed-in user, return without action.
+  if not self.session.current_user then
+    self.session.err_msg = "You must be signed in to use this page."
+    return { status = 403 }
+  end
+  -- If no ID is provided, return without action.
+  if not self.params.project_id or self.params.project_id == "" then
+    return { status = 400 }
+  end
+  local proj_id = tonumber(self.params.project_id)
+  -- If no project exists with the given ID, return without action.
+  local proj = Project:find(proj_id)
+  if not proj then
+    return { status = 404 }
+  end
+  -- If the current user does not own the given project,
+  -- return without action.
+  if proj.user_id ~= self.session.current_user.id then
+    return { status = 403 }
+  end
+
+  -- Save the provided JSON string to a file.
+  -- (TODO: Actually precompile instead of this test)
+  local up_file = self.params.file
+  local boot_index = -1
+  local ret_status = 200
+  local status_msg = 'success'
+  if not up_file then
+    ret_status = 500
+    status_msg = 'invalid file upload'
+  end
+  local uploaded_obj = json.decode(up_file.content)
+  --local up_nodes = uploaded_obj.nodes
+  local up_nodes = {}
+  local globals = uploaded_obj.g_vars
+  -- Find the 'Boot' node.
+  for i, val in pairs(uploaded_obj.nodes) do
+    if val then
+      -- Account for lua's 1-indexing of tables.
+      up_nodes[val.node_ind] = val
+      if val.node_type == 'Boot' then
+        if boot_index == -1 then
+          boot_index = val.node_ind
+        else
+          ret_status = 500
+          status_msg = 'More than one Boot node passed in.'
+        end
+      end
+    end
+  end
+  local nodes = up_nodes
+  if boot_index == -1 then
+    ret_status = 500
+    status_msg = 'No Boot node passed in.'
+  end
+
+  -- Define initial global variables. (Code auto-gen done with 'Boot' node)
+  local global_decs = {}
+  if globals then
+    for i, val in pairs(globals) do
+      if val and val.var_name and val.var_type then
+        local i_val = val.var_val
+        if not i_val then
+          if val.var_type == 'int' then
+            i_val = 0
+          elseif val.var_type == 'float' then
+            i_val = 0.0
+          elseif val.var_type == 'bool' then
+            i_val = true
+          elseif val.var_type == 'char' then
+            i_val = '\0'
+          end
+        end
+        table.insert(global_decs, {
+          var_name = val.var_name,
+          var_type = val.var_type,
+          var_val = i_val
+        })
+      end
+    end
+  end
+
+  -- Create an empty 'project state'
+  local proj_state = {}
+  -- Starting at 'Boot', process each node in order.
+  local cur_ind = boot_index
+  local cur_node = nil
+  local visited_nodes = {}
+  local preprocessing = true
+  if ret_status == 200 then
+    -- Lua arrays are 1-indexed :/
+    cur_node = nodes[cur_ind]
+    if not (cur_node and cur_node.node_ind == cur_ind) then
+      ret_status = 500
+      status_msg = 'Could not find node ' .. cur_ind
+    end
+    proj_state = FSMNodes.init_project_state(cur_node, nodes, global_decs, proj_id)
+    local indices_to_process = {}
+    table.insert(indices_to_process, cur_ind)
+    while preprocessing do
+      cur_ind = table.remove(indices_to_process, 1)
+      if (not cur_ind) and cur_ind ~= 0 then
+        preprocessing = false
+        break
+      end
+      cur_node = nodes[cur_ind]
+      if not (cur_node and cur_node.node_ind == cur_ind) then
+        preprocessing = false
+        ret_status = 500
+        status_msg = 'Node does not exist: ' .. cur_ind
+        break
+      end
+      if visited_nodes[cur_ind] then
+        preprocessing = false
+        break
+      end
+      local node_processed = FSMNodes.process_node(cur_node, nodes, proj_state)
+      if not node_processed then
+        preprocessing = false
+        ret_status = 500
+        status_msg = 'Error processing node: ' .. cur_ind
+      end
+      if preprocessing then
+        if cur_node.output then
+          if cur_node.output.single then
+            visited_nodes[cur_ind] = true
+            table.insert(indices_to_process, cur_node.output.single)
+          elseif cur_node.output.branch_t and cur_node.output.branch_f then
+            visited_nodes[cur_ind] = true
+            table.insert(indices_to_process, cur_node.output.branch_t)
+            table.insert(indices_to_process, cur_node.output.branch_f)
+          end
+        else
+          -- TODO: Support branching.
+          preprocessing = false
+          ret_status = 500
+          status_msg = 'Invalid output options passed in node ' .. cur_ind
+        end
+      end
+    end
+  end
+  -- Done; return information about the precompilation.
+  return {
+    json = {
+      precompile_status = status_msg,
+      boot_index = boot_index,
+      nodes = nodes,
+      last_index = cur_ind,
+      visited_nodes = visited_nodes
+    },
+    status = ret_status
+  }
 end)
 
 app:post("/precompile_project/:project_id", function(self)
