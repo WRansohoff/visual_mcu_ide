@@ -48,6 +48,7 @@ var imgs_to_load = {
   Jump:              '/static/fsm_assets/jump_node.png',
   GPIO_Init:         '/static/fsm_assets/init_gpio_node.png',
   GPIO_Output:       '/static/fsm_assets/set_output_pin_node.png',
+  GPIO_Input:        '/static/fsm_assets/read_input_pin_node.png',
   RCC_Enable:        '/static/fsm_assets/enable_clock_node.png',
   RCC_Disable:       '/static/fsm_assets/disable_clock_node.png',
   New_Variable:      '/static/fsm_assets/new_var_node.png',
@@ -149,6 +150,18 @@ const tool_node_types = [
   },
   options_listeners: apply_gpio_output_options_listeners,
   options_html: set_gpio_out_node_options_html,
+},
+{
+  base_name: 'GPIO_Input',
+  menu_name: 'Read Input Pin',
+  node_color: 'blue',
+  default_options: {
+    gpio_bank: 'GPIOA',
+    gpio_pin:  0,
+    gpio_var_name: '(None)',
+  },
+  options_listeners: apply_gpio_input_options_listeners,
+  options_html: read_gpio_in_node_options_html,
 },
 {
   base_name: 'RCC_Enable',

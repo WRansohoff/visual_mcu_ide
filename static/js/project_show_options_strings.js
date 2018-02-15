@@ -472,6 +472,15 @@ var set_gpio_out_node_options_html = `
 </table>
 `;
 
+// 'Read GPIO_Input' node options.
+var read_gpio_in_node_options_html = `
+<table class="read_gpio_in_options_table" cellpadding="0" cellspacing="0" border="0">
+  ` + select_gpio_bank_table_row('read_gpio_in_options')
+    + select_gpio_pin_table_row('read_gpio_in_options')
+    + defined_variables_list_table_row('read_gpio_in_options', 'Store in Variable:') + `
+</table>
+`;
+
 // 'Enable peripheral clock' node options.
 var rcc_enable_node_options_html = `
 <table class="rcc_enable_options_table" cellpadding="0" cellspacing="0" border="0">
@@ -792,6 +801,7 @@ var apply_gpio_init_options_listeners = function(cur_node) {
   };
 };
 
+// 'GPIO_Output' node listeners.
 var apply_gpio_output_options_listeners = function(cur_node) {
   var gpio_bank_tag = document.getElementById('set_gpio_out_options_pin_bank_tag');
   var gpio_pin_tag = document.getElementById('set_gpio_out_options_pin_number_tag');
@@ -845,6 +855,34 @@ var apply_gpio_output_options_listeners = function(cur_node) {
     }
   };
 };
+
+// 'GPIO_Input' node listeners.
+// TODO
+var apply_gpio_input_options_listeners = function(cur_node) {
+  var gpio_bank_tag = document.getElementById('read_gpio_in_options_pin_bank_tag');
+  var gpio_pin_tag = document.getElementById('read_gpio_in_options_pin_number_tag');
+  var gpio_var_name_tag = document.getElementById('read_gpio_in_options_var_list_tag');
+
+  // Set values according to node options.
+  if (cur_node.options.gpio_bank) {
+    gpio_bank_tag.value = cur_node.options.gpio_bank;
+  }
+  if (cur_node.options.gpio_pin) {
+    gpio_pin_tag.value = cur_node.options.gpio_pin;
+  }
+  populate_defined_vars_dropdown('read_gpio_in_options_var_list_tag', cur_node, cur_node.options.gpio_var_name);
+
+  // Set click listener functions.
+  gpio_bank_tag.onchange = function() {
+    cur_node.options.gpio_bank = gpio_bank_tag.value;
+  };
+  gpio_pin_tag.onchange = function() {
+    cur_node.options.gpio_pin = gpio_pin_tag.value;
+  };
+  gpio_var_name_tag.onchange = function() {
+    cur_node.options.gpio_var_name = gpio_var_name_tag.value;
+  };
+}
 
 // 'Define New Variable' Global node.
 var apply_new_var_node_options_listeners = function(cur_node) {
