@@ -175,7 +175,6 @@ app:post("/precompile_project_file/:project_id", function(self)
   end
 
   -- Save the provided JSON string to a file.
-  -- (TODO: Actually precompile instead of this test)
   local up_file = self.params.file
   local boot_index = -1
   local ret_status = 200
@@ -311,9 +310,44 @@ end)
 
 -- Compile an existing project which has already been pre-compiled.
 app:match("/compile_project/:project_id", function(self)
-  -- TODO
-  ret_status = 404
-  compile_status = 'Error: method not written yet.'
+  -- If there isn't a signed-in user, return without action.
+  if not self.session.current_user then
+    self.session.err_msg = "You must be signed in to use this page."
+    return { status = 403 }
+  end
+  -- If no ID is provided, return without action.
+  if not self.params.project_id or self.params.project_id == "" then
+    return { status = 400 }
+  end
+  local proj_id = tonumber(self.params.project_id)
+  -- If no project exists with the given ID, return without action.
+  local proj = Project:find(proj_id)
+  if not proj then
+    return { status = 404 }
+  end
+  -- If the current user does not own the given project,
+  -- return without action.
+  if proj.user_id ~= self.session.current_user.id then
+    return { status = 403 }
+  end
+
+  -- Attempt to compile the project.
+  local ret_status = 200
+  local compile_status = 'Success.'
+  local base_proj_path = 'project_storage/precomp_' .. tostring(proj_id) .. '/'
+  if varm_util.path_exists(base_proj_path) and 
+     varm_util.path_exists(base_proj_path .. 'Makefile') then
+     -- Execute 'make', and check the result for success.
+     -- ('path_exists' should check that 'base_proj_path' is sanitized)
+     local made = os.execute('cd ' .. base_proj_path .. '; make clean && make')
+     if not made then
+       ret_status = 500
+       status_msg = 'Error running GNU Make command.'
+     end
+  else
+    ret_status = 404
+    status_msg = 'Error: Could not find a precompiled project for Project ' .. tostring(proj_id)
+  end
   return {
     json = {
       compile_status = status_msg
