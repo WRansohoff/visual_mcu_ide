@@ -1002,6 +1002,12 @@ project_show_onload = function() {
     }
   };
 
+  // Add a click listener for the 'save' button/link.
+  document.getElementById('save_fsm_project_link').onclick = function() {
+    var nodes_string = node_array_to_json(fsm_nodes);
+    submit_project_save_request(nodes_string);
+  };
+
   // Add a click listener for the 'precompile' button/link.
   document.getElementById('precompile_button').onclick = function(e) {
     json_fsm_nodes = precompile_project();
@@ -1010,10 +1016,16 @@ project_show_onload = function() {
     }
   };
 
-  document.getElementById('save_fsm_project_link').onclick = function() {
-    var nodes_string = node_array_to_json(fsm_nodes);
-    submit_project_save_request(nodes_string);
+  // Add a click listener for the 'compile' button/link.
+  document.getElementById('compile_button').onclick = function(e) {
+    submit_compile_request();
   };
+
+  // Add a click listener for the 'flash/upload' button/link.
+  document.getElementById('flash_button').onclick = function(e) {
+    submit_flash_request();
+  };
+
 };
 
 // 'Precompile' the project, and save a .zip file with code and a

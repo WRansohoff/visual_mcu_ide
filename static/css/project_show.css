@@ -44,6 +44,14 @@
   padding-left: 40px;
 }
 
+.compile_link {
+  padding-left: 20px;
+}
+
+.flash_link {
+  padding-left: 20px;
+}
+
 .main_table {
   width: 97.5%;
   height: 90%;

@@ -309,6 +309,34 @@ app:post("/precompile_project_file/:project_id", function(self)
   }
 end)
 
+-- Compile an existing project which has already been pre-compiled.
+app:match("/compile_project/:project_id", function(self)
+  -- TODO
+  ret_status = 404
+  compile_status = 'Error: method not written yet.'
+  return {
+    json = {
+      compile_status = status_msg
+    },
+    status = ret_status
+  }
+end)
+
+-- Upload a compiled project to a chip plugged into the host machine.
+-- Currently, just use texane's 'st-util' to connect and don't check
+-- that the correct type of MCU core is being targeted - TODO.
+app:match("/upload_project/:project_id", function(self)
+  -- TODO
+  ret_status = 404
+  compile_status = 'Error: method not written yet.'
+  return {
+    json = {
+      compile_status = status_msg
+    },
+    status = ret_status
+  }
+end)
+
 app:match("/project/delete/:project_id", function(self)
   -- If there isn't a signed-in user, redirect to the landing page.
   if not self.session.current_user then
