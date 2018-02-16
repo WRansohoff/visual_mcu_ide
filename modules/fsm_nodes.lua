@@ -38,7 +38,7 @@ function FSMNodes.init_project_state(boot_node, node_graph, global_decs, proj_id
       p_state.vector_table = FSMNodes.gen_vector_table(boot_node, p_state)
       -- Generate the bare-bones source files.
       p_state.src_base = FSMNodes.gen_bare_source_files(boot_node, p_state)
-      -- Generate a Makefile, a 'flash' script, and LICENSE/README.md files.
+      -- Generate a Makefile and LICENSE/README.md files.
       p_state.build_files_generated = FSMNodes.gen_build_files(boot_node, p_state)
      else
        return p_state
@@ -240,11 +240,9 @@ function FSMNodes.gen_build_files(boot_node, cur_proj_state)
   local makefile_source_path = makefile_source_dir .. makefile_source_fn
   local license_source_path = 'static/node_code/boot/LICENSE'
   local readme_source_path = 'static/node_code/boot/README.md'
-  local flash_source_path = 'static/node_code/boot/flash.sh'
   local makefile_dest_path = cur_proj_state.base_dir .. 'Makefile'
   local license_dest_path = cur_proj_state.base_dir .. 'LICENSE'
   local readme_dest_path = cur_proj_state.base_dir .. 'README.md'
-  local flash_dest_path = cur_proj_state.base_dir .. 'flash.sh'
   -- Copy files.
   if not varm_util.copy_text_file(makefile_source_path, makefile_dest_path) then
     return nil
@@ -253,9 +251,6 @@ function FSMNodes.gen_build_files(boot_node, cur_proj_state)
     return nil
   end
   if not varm_util.copy_text_file(readme_source_path, readme_dest_path) then
-    return nil
-  end
-  if not varm_util.copy_text_file(flash_source_path, flash_dest_path) then
     return nil
   end
   -- This method just returns a 'build files generated/not generated' flag.
