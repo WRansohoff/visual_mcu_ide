@@ -357,7 +357,7 @@ app:match("/compile_project/:project_id", function(self)
 end)
 
 -- Upload a compiled project to a chip plugged into the host machine.
--- Currently, just use texane's 'st-util' to connect and don't check
+-- Currently, just use GDB to connect to local port 4242 and don't check
 -- that the correct type of MCU core is being targeted - TODO.
 app:match("/upload_project/:project_id", function(self)
   -- TODO
