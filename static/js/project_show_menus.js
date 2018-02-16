@@ -445,7 +445,8 @@ var apply_selected_node_option_listeners = function(type_node) {
   // 'Global' nodes have no I/O connections table.
   if (type != 'New_Variable') {
     // A 'branching' node has 1-many inputs and 2 outputs.
-    if (type == 'Check_Truthy') {
+    if (type == 'Check_Truthy' ||
+        type == 'Check_Equals') {
       apply_branching_node_io_table_listeners(type);
     }
     // A 'standard' node has 1-many inputs and 1 output.

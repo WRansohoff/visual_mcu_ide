@@ -124,17 +124,8 @@ app:match("/project/:project_id", function(self)
   vars_logic_list = { }
   vars_logic_list["Define Variable"] = "Node"
   vars_logic_list["Set Variable"] = "Node"
-  logic_conditions_list = { }
-  logic_conditions_list["Equals"] = "Node"
-  logic_conditions_list["Not Equals"] = "Node"
-  logic_conditions_list["Greater than or Equals"] = "Node"
-  logic_conditions_list["Less than or Equals"] = "Node"
-  logic_conditions_list["Greater than"] = "Node"
-  logic_conditions_list["Less than"] = "Node"
-  vars_logic_list["Conditional Checks"] = logic_conditions_list
   logic_mods_list = { }
-  logic_mods_list["Add"] = "Node"
-  logic_mods_list["Subtract"] = "Node"
+  logic_mods_list["Add or Subtract"] = "Node"
   logic_mods_list["Multiply"] = "Node"
   logic_mods_list["Divide"] = "Node"
   logic_mods_list["Orr-Equals"] = "Node"
@@ -145,6 +136,7 @@ app:match("/project/:project_id", function(self)
   tool_list["Variables and Logic"] = vars_logic_list
   branch_nodes_list = { }
   branch_nodes_list["Is Variable Truth-y?"] = "Node"
+  branch_nodes_list["Are Variables Equal?"] = "Node"
   tool_list["If-Else Branching Nodes"] = branch_nodes_list
 
   -- Check for a previously-saved file.

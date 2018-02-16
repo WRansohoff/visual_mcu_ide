@@ -312,10 +312,20 @@ function FSMNodes.process_node(node, node_graph, proj_state)
         FSMNodes.append_set_var_logic_not_node(node, node_graph, proj_state)) then
       return true
     end
+  elseif node.node_type == 'Set_Var_Addition' then
+    if (FSMNodes.ensure_support_methods_set_var_addition_node(node, proj_state) and
+        FSMNodes.append_set_var_addition_node(node, node_graph, proj_state)) then
+      return true
+    end
   -- (Branching Nodes)
   elseif node.node_type == 'Check_Truthy' then
     if (FSMNodes.ensure_support_methods_check_truthy_node(node, proj_state) and
         FSMNodes.append_check_truthy_node(node, node_graph, proj_state)) then
+      return true
+    end
+  elseif node.node_type == 'Check_Equals' then
+    if (FSMNodes.ensure_support_methods_check_equals_node(node, proj_state) and
+        FSMNodes.append_check_equals_node(node, node_graph, proj_state)) then
       return true
     end
   end
@@ -818,6 +828,38 @@ function FSMNodes.append_set_var_logic_not_node(node, node_graph, proj_state)
   return true
 end
 
+-- Ensure supporting methods for setting variables: 'A = B + C'.
+function FSMNodes.ensure_support_methods_set_var_addition_node(node, proj_state)
+  -- Only primitive types, so no required includes to check.
+  return true
+end
+
+-- Append a 'set var addition' (A = B + C) node.
+function FSMNodes.append_set_var_addition_node(node, node_graph, proj_state)
+  local node_text = '  // ("Set Variable by addition" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- (The actual variable setting.)
+  -- TODO - for now, just A = B + 1.
+  -- TODO: type checking/verification? Or do that JS-side?
+  if node.options.var_a_name and node.options.var_b_name then
+    node_text = node_text .. '  ' .. node.options.var_a_name .. ' = ' ..
+                node.options.var_b_name .. ' + 1;\n'
+  end
+  -- (Done.)
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "Set Variable by addition" node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
 -- Ensure supporting methods for branching 'check truth-y' statement.
 function FSMNodes.ensure_support_methods_check_truthy_node(node, proj_state)
   -- (No required supporting code)
@@ -837,6 +879,35 @@ function FSMNodes.append_check_truthy_node(node, node_graph, proj_state)
     return nil
   end
   node_text = node_text .. '  // (End "If variable is truth-y" branching node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Ensure supporting methods for branching 'are variables equal?' statement.
+function FSMNodes.ensure_support_methods_check_equals_node(node, proj_state)
+  -- (No required supporting code)
+  return true
+end
+
+-- Append a branching 'are variables equal?' node's code.
+function FSMNodes.append_check_equals_node(node, node_graph, proj_state)
+  local node_text = '  // ("If variables are equal" branching node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  if node.output and node.output.branch_t and node.output.branch_f and
+     node.options.var_a_name and node.options.var_b_name then
+    -- Branching logic. TODO: Type checking?
+    node_text = node_text .. '  if (' .. node.options.var_a_name ..
+                             ' == ' .. node.options.var_b_name .. ') {\n'
+    node_text = node_text .. '    goto NODE_' .. node.output.branch_t .. ';\n  }\n'
+    node_text = node_text .. '  else {\n    goto NODE_' .. node.output.branch_f .. ';\n  }\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "If variables are equal" branching node)\n\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
                                     "/ MAIN_ENTRY:",
                                     node_text) then

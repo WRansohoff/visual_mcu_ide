@@ -54,9 +54,11 @@ var imgs_to_load = {
   New_Variable:      '/static/fsm_assets/new_var_node.png',
   Set_Variable:      '/static/fsm_assets/set_variable_node.png',
   Set_Var_Logic_Not: '/static/fsm_assets/set_not_node.png',
+  Set_Var_Addition:  '/static/fsm_assets/set_addition_node.png',
   Nop_Node:          '/static/fsm_assets/no_op_node.png',
   // Branching nodes:
   Check_Truthy:      '/static/fsm_assets/check_truthy_node.png',
+  Check_Equals:      '/static/fsm_assets/check_equals_node.png',
   // Sooo I mixed up 'LtoR' and 'RtoL' in the png filenames. But long-term,
   // these should be svg files anyways so just...ugh, TODO
   left_arrow_blue:   '/static/fsm_assets/conn_LtoR_blue.png',
@@ -218,6 +220,19 @@ const tool_node_types = [
   options_html: set_var_logic_not_node_options_html,
 },
 {
+  base_name: 'Set_Var_Addition',
+  menu_name: 'Add or Subtract',
+  node_color: 'blue',
+  default_options: {
+    var_a_name: '(None)',
+    var_b_name: '(None)',
+    add_val_type: 'val',
+    add_val_val: '0',
+  },
+  options_listeners: apply_set_var_addition_node_options_listeners,
+  options_html: set_var_addition_node_options_html,
+},
+{
   base_name: 'Nop_Node',
   menu_name: 'No-op (Do Nothing)',
   node_color: 'blue',
@@ -236,7 +251,18 @@ const tool_node_types = [
   options_listeners: apply_check_truthy_options_listeners,
   options_html: check_truthy_node_options_html,
 },
-/*
+{
+  base_name: 'Check_Equals',
+  menu_name: 'Are Variables Equal?',
+  node_color: 'canary',
+  default_options: {
+    var_a_name: '(None)',
+    var_b_name: '(None)',
+  },
+  options_listeners: apply_check_equals_options_listeners,
+  options_html: check_equals_node_options_html,
+},
+/* 9
 {
   base_name: 'Delay',
   menu_name: 'Delay',

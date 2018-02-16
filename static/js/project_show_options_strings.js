@@ -559,6 +559,33 @@ var set_var_logic_not_node_options_html = `
 </table>
 `;
 
+// 'Modify Variable: Addition or Subtraction' node options.
+// TODO: The 'C' in 'A = B + C'
+var set_var_addition_node_options_html = `
+<table class="set_var_addition_options_table" cellpadding="0" cellspacing="0" border="0">
+  ` + defined_variables_list_table_row('set_var_addition_options_A', 'Variable A:') + `
+  ` + defined_variables_list_table_row('set_var_addition_options_B', 'Variable B:') + `
+  <tr class="set_var_addition_options_C_type_row">
+    <td class="set_var_addition_options_C_type_text">
+      'C' Variable Type:
+    </td>
+    <td id="set_var_addition_options_C_type_cell" class="set_var_addition_options_C_type_opt">
+      <select id="set_var_addition_options_C_type_tag" class="set_var_addition_options_C_type_opt">
+        <option selected="true" value="val">Constant Value</option>
+        <option value="var">Defined Variable</option>
+      </select>
+    </td>
+  </tr>
+  <tr class="set_var_addition_options_C_val_row">
+    <td class="set_var_addition_options_C_val_text">
+      'C' Variable Value:
+    </td>
+    <td id="set_var_addition_options_C_val_cell" class="set_var_addition_options_C_val_opt">
+    </td>
+  </tr>
+</table>
+`;
+
 // 'No-op' node options.
 // Currently there are none, besides the input/output connections table.
 var nop_node_options_html = `
@@ -568,6 +595,14 @@ var nop_node_options_html = `
 var check_truthy_node_options_html = `
 <table class="check_truthy_options_table" cellpadding="0" cellspacing="0" border="0">
   ` + defined_variables_list_table_row('check_truthy_options', 'Variable to check:') + `
+</table>
+`;
+
+// 'Are variables Equal?' branching node options.
+var check_equals_node_options_html = `
+<table class="check_equals_options_table" cellpadding="0" cellspacing="0" border="0">
+  ` + defined_variables_list_table_row('check_equals_options_A', 'Variable A:') + `
+  ` + defined_variables_list_table_row('check_equals_options_B', 'Variable B:') + `
 </table>
 `;
 
@@ -1089,6 +1124,21 @@ var apply_set_var_logic_not_node_options_listeners = function(cur_node) {
   };
 };
 
+// Set options tag listeners for an 'addition' node.
+// TODO: The 'C' in 'A = B + C'
+var apply_set_var_addition_node_options_listeners = function(cur_node) {
+  var var_a_name_tag = document.getElementById('set_var_addition_options_A_var_list_tag');
+  var var_b_name_tag = document.getElementById('set_var_addition_options_B_var_list_tag');
+  populate_defined_vars_dropdown('set_var_addition_options_A_var_list_tag', cur_node, cur_node.options.var_a_name);
+  populate_defined_vars_dropdown('set_var_addition_options_B_var_list_tag', cur_node, cur_node.options.var_b_name);
+  var_a_name_tag.onchange = function() {
+    cur_node.options.var_a_name = var_a_name_tag.value;
+  };
+  var_b_name_tag.onchange = function() {
+    cur_node.options.var_b_name = var_b_name_tag.value;
+  };
+};
+
 // No-op node - currently no options, sort of by definition...
 var apply_nop_node_options_listeners = function(cur_node) {
   // Currently none.
@@ -1096,26 +1146,21 @@ var apply_nop_node_options_listeners = function(cur_node) {
 
 var apply_check_truthy_options_listeners = function(cur_node) {
   var var_name_tag = document.getElementById('check_truthy_options_var_list_tag');
-  var sel_html_opts = `
-    <option value="(None)" id="check_truthy_options_var_list_n/a" class="check_truthy_options_var_list_option">
-      (None defined)
-    </option>
-  `;
-  var var_defined = false;
-  for (var var_name in defined_vars) {
-    var var_def = defined_vars[var_name];
-    var selected_val = '';
-    if (cur_node.options && cur_node.options.var_name == var_name) {
-      selected_val = 'selected="true" ';
-    }
-    sel_html_opts += `
-      <option ` + selected_val + `value="` + var_def.name + `" id="check_truthy_options_var_list_` + var_def.name + `" class="set_truthy_options_var_list_option">
-        ` + var_def.name + `
-      </option>
-    `;
-  }
-  var_name_tag.innerHTML = sel_html_opts;
+  populate_defined_vars_dropdown('check_truthy_options_var_list_tag', cur_node, cur_node.options.var_name);
   var_name_tag.onchange = function() {
     cur_node.options.var_name = var_name_tag.value;
+  }
+};
+
+var apply_check_equals_options_listeners = function(cur_node) {
+  var var_a_name_tag = document.getElementById('check_equals_options_A_var_list_tag');
+  var var_b_name_tag = document.getElementById('check_equals_options_B_var_list_tag');
+  populate_defined_vars_dropdown('check_equals_options_A_var_list_tag', cur_node, cur_node.options.var_a_name);
+  populate_defined_vars_dropdown('check_equals_options_B_var_list_tag', cur_node, cur_node.options.var_b_name);
+  var_a_name_tag.onchange = function() {
+    cur_node.options.var_a_name = var_a_name_tag.value;
+  }
+  var_b_name_tag.onchange = function() {
+    cur_node.options.var_b_name = var_b_name_tag.value;
   }
 };

@@ -820,7 +820,8 @@ project_show_onload = function() {
             // of the program flow.
             if (sel_type != 'New_Variable') {
               // A 'branching' node has 1-many inputs and 1-2 outputs.
-              if (sel_type == 'Check_Truthy') {
+              if (sel_type == 'Check_Truthy' ||
+                  sel_type == 'Check_Equals') {
                 selected_node_options_html += branching_node_io_options_html;
               }
               // A 'standard' node has 1-many inputs and 1 output.
@@ -1284,7 +1285,8 @@ var precompile_project = function() {
       var cur_grid_node_x = proc_node.grid_coord_x;
       var cur_grid_node_y = proc_node.grid_coord_y;
       // 'Branching' node.
-      if (proc_node.node_type == 'Check_Truthy') {
+      if (proc_node.node_type == 'Check_Truthy' ||
+          proc_node.node_type == 'Check_Equals') {
         if (proc_node.connections) {
           // 'If-True' output
           if (proc_node.connections.up == 'output_T') {
