@@ -40,6 +40,8 @@ var mcu_chip = 'STM32F030F4';
 var defined_vars = [];
 // JSON struct representing a precompiled program.
 var json_fsm_nodes = null;
+// Value to track build status.
+var build_flow_status = 'None';
 // TODO: Shouldn't this be an array of strings, and a .length()?
 var imgs_to_load = {
   Boot:              '/static/fsm_assets/boot_node.png',

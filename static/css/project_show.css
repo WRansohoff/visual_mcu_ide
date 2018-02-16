@@ -32,16 +32,16 @@
   margin-bottom: 10px;
 }
 
-.save_project_link {
-  padding-left: 40px;
+.back_link {
+  padding-left: 10px;
 }
 
-.back_link {
-  padding-left: 20px;
+.save_project_link {
+  padding-left: 30px;
 }
 
 .precompile_link {
-  padding-left: 40px;
+  padding-left: 20px;
 }
 
 .compile_link {
@@ -50,6 +50,11 @@
 
 .flash_link {
   padding-left: 20px;
+}
+
+.build_link {
+  padding-left: 20px;
+  font-weight: bold;
 }
 
 .main_table {
