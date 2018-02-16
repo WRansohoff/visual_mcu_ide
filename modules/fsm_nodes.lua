@@ -839,11 +839,22 @@ function FSMNodes.append_set_var_addition_node(node, node_graph, proj_state)
   local node_text = '  // ("Set Variable by addition" node)\n'
   node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
   -- (The actual variable setting.)
-  -- TODO - for now, just A = B + 1.
   -- TODO: type checking/verification? Or do that JS-side?
   if node.options.var_a_name and node.options.var_b_name then
     node_text = node_text .. '  ' .. node.options.var_a_name .. ' = ' ..
-                node.options.var_b_name .. ' + 1;\n'
+                node.options.var_b_name .. ' + '
+    if node.options.add_val_type == 'val' and 
+       (node.options.add_val_val or node.options.add_val_val == 0) then
+      node_text = node_text .. tostring(node.options.add_val_val) .. ';\n'
+    elseif node.options.add_val_type == 'var' then
+      if node.options.add_val_val and node.options.add_val_val ~= '(None)' then
+        node_text = node_text .. node.options.add_val_val .. ';\n'
+      else
+        return nil
+      end
+    else
+      return nil
+    end
   end
   -- (Done.)
   if node.output and node.output.single then

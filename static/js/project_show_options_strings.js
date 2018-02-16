@@ -1129,14 +1129,52 @@ var apply_set_var_logic_not_node_options_listeners = function(cur_node) {
 var apply_set_var_addition_node_options_listeners = function(cur_node) {
   var var_a_name_tag = document.getElementById('set_var_addition_options_A_var_list_tag');
   var var_b_name_tag = document.getElementById('set_var_addition_options_B_var_list_tag');
+  var var_c_type_tag = document.getElementById('set_var_addition_options_C_type_tag');
+  var var_c_val_cell_tag = document.getElementById('set_var_addition_options_C_val_cell');
+  var var_c_val_tag = null;
   populate_defined_vars_dropdown('set_var_addition_options_A_var_list_tag', cur_node, cur_node.options.var_a_name);
   populate_defined_vars_dropdown('set_var_addition_options_B_var_list_tag', cur_node, cur_node.options.var_b_name);
+  // Populate the 'C' variable's type.
+  var_c_type_tag.value = cur_node.options.add_val_type;
   var_a_name_tag.onchange = function() {
     cur_node.options.var_a_name = var_a_name_tag.value;
   };
   var_b_name_tag.onchange = function() {
     cur_node.options.var_b_name = var_b_name_tag.value;
   };
+  var_c_type_tag.onchange = function() {
+    var type_changed = false;
+    var old_type = cur_node.options.add_val_type;
+    cur_node.options.add_val_type = var_c_type_tag.value;
+    if (cur_node.options.add_val_type != old_type) {
+      type_changed = true;
+    }
+    // TODO: Type checking/matching.
+    if (cur_node.options.add_val_type == 'val') {
+      // Constant value; set/populate an input tag.
+      if (type_changed) { cur_node.options.add_val_val = '0'; }
+      var_c_val_cell_tag.innerHTML = `
+        <input id="set_var_addition_options_C_val_tag" class="define_var_options_int_input" type="number" value="` + cur_node.options.add_val_val + `">
+      `;
+      var_c_val_tag = document.getElementById('set_var_addition_options_C_val_tag');
+    }
+    else if (cur_node.options.add_val_type == 'var') {
+      if (type_changed) { cur_node.options.add_val_val = '(None)'; }
+      // Variable value; set/populate a variable selection tag.
+      var_c_val_cell_tag.innerHTML = `
+        <select id="set_var_addition_options_C_var_list_tag" class="set_var_addition_options_C_var_list_select">
+        </select>
+      `;
+      populate_defined_vars_dropdown('set_var_addition_options_C_var_list_tag', cur_node, cur_node.options.add_val_val);
+      var_c_val_tag = document.getElementById('set_var_addition_options_C_var_list_tag');
+    }
+    // Set the new tag's listener.
+    var_c_val_tag.onchange = function() {
+      cur_node.options.add_val_val = var_c_val_tag.value;
+    };
+  };
+  // Fire the change tag off once to apply initial changes.
+  var_c_type_tag.onchange();
 };
 
 // No-op node - currently no options, sort of by definition...
