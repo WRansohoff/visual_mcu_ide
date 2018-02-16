@@ -52,6 +52,11 @@
   padding-left: 20px;
 }
 
+.verify_link {
+  padding-left: 20px;
+  font-weight: bold;
+}
+
 .build_link {
   padding-left: 20px;
   font-weight: bold;

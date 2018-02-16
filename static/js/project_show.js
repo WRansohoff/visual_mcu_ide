@@ -1026,6 +1026,61 @@ project_show_onload = function() {
     submit_flash_request();
   };
 
+  // TODO: Combine common verify/build code.
+  document.getElementById('verify_button').onclick = function(e) {
+    build_flow_status = 'None';
+    console.log('--- Begin Verify ---');
+    var save_check_interval = null;
+    var precompile_check_interval = null;
+    var compile_check_interval = null;
+    // Compile step.
+    var compile_check_func = function() {
+      if (build_flow_status == 'Compiled') {
+        clearInterval(compile_check_interval);
+        // Done!
+        console.log('--- Project Built! ---');
+      }
+      else if (build_flow_status == 'Error') {
+        clearInterval(compile_check_interval);
+        console.log('--- Build Failed :( ---');
+      }
+    };
+    // Precompile step.
+    var precomp_check_func = function() {
+      if (build_flow_status == 'Precompiled') {
+        clearInterval(precompile_check_interval);
+        // Start the next step - compilation.
+        compile_check_interval = setInterval(compile_check_func, 50);
+        submit_compile_request();
+      }
+      else if (build_flow_status == 'Error') {
+        clearInterval(precompile_check_interval);
+        console.log('--- Build Failed :( ---');
+      }
+    };
+    // Save step.
+    var save_check_func = function() {
+      if (build_flow_status == 'Saved') {
+        clearInterval(save_check_interval);
+        // Start the next step - precompilation.
+        precompile_check_interval = setInterval(precomp_check_func, 50);
+        var json_fsm_nodes = precompile_project();
+        if (json_fsm_nodes) {
+          submit_precompile_request(json_fsm_nodes);
+        }
+        else { build_flow_status = 'Error'; }
+      }
+      else if (build_flow_status == 'Error') {
+        clearInterval(save_check_interval);
+        console.log('--- Build Failed :( ---');
+      }
+    };
+    // Kick everything off by saving the project.
+    var nodes_string = node_array_to_json(fsm_nodes);
+    save_check_interval = setInterval(save_check_func, 50);
+    submit_project_save_request(nodes_string);
+  };
+
   document.getElementById('build_button').onclick = function(e) {
     build_flow_status = 'None';
     console.log('--- Start Build ---');

@@ -233,7 +233,8 @@
     <a href="#" id="save_fsm_project_link" class="save_project_link">Save</a>
     <a href="#" id="precompile_button" class="precompile_link">Precompile</a>
     <a href="#" id="compile_button" class="compile_link">Compile</a>
-    <a href="#" id="flash_button" class="flash_link">Upload to Chip</a>
+    <a href="#" id="flash_button" class="flash_link">Upload</a>
+    <a href="#" id="verify_button" class="verify_link">Verify</a>
     <a href="#" id="build_button" class="build_link">Build</a>
   </div>
 </div>
