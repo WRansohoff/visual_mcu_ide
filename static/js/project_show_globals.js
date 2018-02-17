@@ -64,7 +64,10 @@ var imgs_to_load = {
   // External device communications:
   SSD1306_Init:      '/static/fsm_assets/init_oled_screen_node.png',
   SSD1306_Draw_Px:   '/static/fsm_assets/oled_draw_pixel_node.png',
+  SSD1306_Draw_HL:   '/static/fsm_assets/oled_draw_horiz_line_node.png',
+  SSD1306_Draw_VL:   '/static/fsm_assets/oled_draw_vert_line_node.png',
   SSD1306_Draw_Rect: '/static/fsm_assets/oled_draw_rect_node.png',
+  SSD1306_Draw_Text: '/static/fsm_assets/oled_draw_text_node.png',
   SSD1306_Refresh:   '/static/fsm_assets/oled_refresh_display_node.png',
   // Branching nodes:
   Check_Truthy:      '/static/fsm_assets/check_truthy_node.png',
@@ -301,6 +304,34 @@ const tool_node_types = [
   options_html: ssd1306_draw_pixel_node_options_html,
 },
 {
+  base_name: 'SSD1306_Draw_HL',
+  menu_name: 'Draw Horizontal Line',
+  node_color: 'blue',
+  default_options: {
+    i2c_periph_num: '1',
+    line_x: '0',
+    line_y: '0',
+    line_length: '0',
+    line_color: 'On',
+  },
+  options_listeners: apply_ssd1306_draw_horiz_line_node_options_listeners,
+  options_html: ssd1306_draw_horiz_line_options_html,
+},
+{
+  base_name: 'SSD1306_Draw_VL',
+  menu_name: 'Draw Vertical Line',
+  node_color: 'blue',
+  default_options: {
+    i2c_periph_num: '1',
+    line_x: '0',
+    line_y: '0',
+    line_length: '0',
+    line_color: 'On',
+  },
+  options_listeners: apply_ssd1306_draw_vert_line_node_options_listeners,
+  options_html: ssd1306_draw_vert_line_options_html,
+},
+{
   base_name: 'SSD1306_Draw_Rect',
   menu_name: 'Draw Rectangle',
   node_color: 'blue',
@@ -316,6 +347,20 @@ const tool_node_types = [
   },
   options_listeners: apply_ssd1306_draw_rect_node_options_listeners,
   options_html: ssd1306_draw_rect_node_options_html,
+},
+{
+  base_name: 'SSD1306_Draw_Text',
+  menu_name: 'Draw Text',
+  node_color: 'blue',
+  default_options: {
+    i2c_periph_num: '1',
+    text_x: '0',
+    text_y: '0',
+    text_line: '',
+    text_size: 'S',
+  },
+  options_listeners: apply_ssd1306_draw_text_node_options_listeners,
+  options_html: ssd1306_draw_text_options_html,
 },
 {
   base_name: 'SSD1306_Refresh',

@@ -590,6 +590,18 @@ var ssd1306_draw_pixel_node_options_html = std_opts_table_tag('ssd1306_draw_px_o
   `</select></td></tr></table>
 `;
 
+// 'SSD1306 Screen Draw Horizontal Line' options.
+// TODO
+var ssd1306_draw_horiz_line_options_html = std_opts_table_tag('ssd1306_draw_horiz_line_options') +
+  `</table>
+`;
+
+// 'SSD1306 Screen Draw Vertical Line' options.
+// TODO
+var ssd1306_draw_vert_line_options_html = std_opts_table_tag('ssd1306_draw_vert_line_options') +
+  `</table>
+`;
+
 // 'SSD1306 Screen Draw Rectangle' options.
 var ssd1306_draw_rect_node_options_html = std_opts_table_tag('ssd1306_draw_rect_options') +
   i2c_channel_select_table_row('ssd1306_draw_rect_options') +
@@ -641,6 +653,12 @@ var ssd1306_draw_rect_node_options_html = std_opts_table_tag('ssd1306_draw_rect_
     std_opts_td_tag('ssd1306_draw_rect_options_outline_opt') +
       std_opts_input_number_tag('ssd1306_draw_rect_options_outline') +
   `</td></tr></table>
+`;
+
+// 'SSD1306 Screen Draw Text' options.
+// TODO
+var ssd1306_draw_text_options_html = std_opts_table_tag('ssd1306_draw_text_options') +
+  `</table>
 `;
 
 // SSD1306 OLED 'refresh display' node.
@@ -1329,6 +1347,16 @@ var apply_ssd1306_draw_pixel_node_options_listeners = function(cur_node) {
   };
 };
 
+// 'SSD1306 Screen Draw Horizontal Line' options listeners.
+// TODO
+var apply_ssd1306_draw_horiz_line_node_options_listeners = function(cur_node) {
+};
+
+// 'SSD1306 Screen Draw Vertical Line' options listeners.
+// TODO
+var apply_ssd1306_draw_vert_line_node_options_listeners = function(cur_node) {
+};
+
 // 'SSD1306 Screen Draw Rect' options listeners.
 var apply_ssd1306_draw_rect_node_options_listeners = function(cur_node) {
   var i2c_channel_tag = document.getElementById('ssd1306_draw_rect_options_i2c_channel_select_tag');
@@ -1403,6 +1431,12 @@ var apply_ssd1306_draw_rect_node_options_listeners = function(cur_node) {
   outline_tag.onchange = function() {
     cur_node.options.outline = outline_tag.value;
   };
+};
+
+
+// 'SSD1306 Screen Draw Text' options listeners.
+// TODO
+var apply_ssd1306_draw_text_node_options_listeners = function(cur_node) {
 };
 
 // 'Refresh SSD1306 OLED Screen' options listeners.
