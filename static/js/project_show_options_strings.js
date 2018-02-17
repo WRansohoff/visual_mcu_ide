@@ -637,7 +637,7 @@ var ssd1306_draw_rect_node_options_html = std_opts_table_tag('ssd1306_draw_rect_
   `</select></td></tr>` +
   std_opts_tr_tag('ssd1306_draw_rect_options_outline_row') +
     std_opts_td_full_tag('ssd1306_draw_rect_options_outline_text',
-                         'Rect Width:') +
+                         'Outline Pixels:') +
     std_opts_td_tag('ssd1306_draw_rect_options_outline_opt') +
       std_opts_input_number_tag('ssd1306_draw_rect_options_outline') +
   `</td></tr></table>
