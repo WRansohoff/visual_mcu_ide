@@ -1,0 +1,3 @@
+GLOBAL_EXTERN_SSD1306_DRAW_FB_START:
+extern void i2c_display_framebuffer(unsigned int i2c_addr, void* fb_addr);
+GLOBAL_EXTERN_SSD1306_DRAW_FB_DONE:
