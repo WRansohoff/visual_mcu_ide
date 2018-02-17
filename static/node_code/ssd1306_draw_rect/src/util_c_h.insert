@@ -1,0 +1,6 @@
+UTIL_C_H_SSD1306_DRAW_RECT_START:
+void oled_draw_h_line(int x, int y, int w, unsigned char color);
+void oled_draw_v_line(int x, int y, int h, unsigned char color);
+void oled_draw_rect(int x, int y, int w, int h,
+                    int outline, unsigned char color);
+UTIL_C_H_SSD1306_DRAW_RECT_DONE:
