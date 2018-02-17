@@ -601,6 +601,21 @@ var i2c_init_node_options_html = `
 var i2c_deinit_node_options_html = `
 `;
 
+// 'Initialize SSD1306 OLED Screen' options.
+// TODO
+var ssd1306_init_node_options_html = `
+`;
+
+// 'SSD1306 Screen Draw Pixel' options.
+// TODO
+var ssd1306_draw_pixel_node_options_html = `
+`;
+
+// 'SSD1306 Screen Draw Rectangle' options.
+// TODO
+var ssd1306_draw_rect_node_options_html = `
+`;
+
 // 'Is Variable Truth-y?' branching node options.
 var check_truthy_node_options_html = `
 <table class="check_truthy_options_table" cellpadding="0" cellspacing="0" border="0">
@@ -1200,6 +1215,21 @@ var apply_i2c_init_node_options_listeners = function(cur_node) {
 // 'Deinitialize I2C Peripheral' options listeners.
 // TODO
 var apply_i2c_deinit_node_options_listeners = function(cur_node) {
+};
+
+// 'Initialize SSD1306 OLED Screen' options listeners.
+// TODO
+var apply_ssd1306_init_node_options_listeners = function(cur_node) {
+};
+
+// 'SSD1306 Screen Draw Pixel' options listeners.
+// TODO
+var apply_ssd1306_draw_pixel_node_options_listeners = function(cur_node) {
+};
+
+// 'SSD1306 Screen Draw Rect' options listeners.
+// TODO
+var apply_ssd1306_draw_rect_node_options_listeners = function(cur_node) {
 };
 
 var apply_check_truthy_options_listeners = function(cur_node) {

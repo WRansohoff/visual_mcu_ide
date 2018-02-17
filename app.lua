@@ -140,6 +140,17 @@ app:match("/project/:project_id", function(self)
   periphs_i2c_list["Deinitialize I2C"] = "Node"
   periphs_list["I2C"] = periphs_i2c_list
   tool_list["Hardware Peripherals"] = periphs_list
+  external_devices_list = { }
+  external_devices_ssd1306_list = { }
+  external_devices_ssd1306_list["Initialize Screen"] = "Node"
+  external_devices_ssd1306_list["Deinitialize Screen"] = "Node"
+  external_devices_ssd1306_list["Draw Pixel"] = "Node"
+  external_devices_ssd1306_list["Draw Horizontal Line"] = "Node"
+  external_devices_ssd1306_list["Draw Vertical Line"] = "Node"
+  external_devices_ssd1306_list["Draw Rectangle"] = "Node"
+  external_devices_ssd1306_list["Draw Text"] = "Node"
+  external_devices_list["SSD1306 OLED Screen"] = external_devices_ssd1306_list
+  tool_list["External Devices"] = external_devices_list
   branch_nodes_list = { }
   branch_nodes_list["Is Variable Truth-y?"] = "Node"
   branch_nodes_list["Are Variables Equal?"] = "Node"

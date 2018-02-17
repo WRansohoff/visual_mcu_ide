@@ -61,6 +61,10 @@ var imgs_to_load = {
   // Peripherals:
   I2C_Init:          '/static/fsm_assets/init_i2c_node.png',
   I2C_Deinit:        '/static/fsm_assets/deinit_i2c_node.png',
+  // External device communications:
+  SSD1306_Init:      '/static/fsm_assets/init_oled_screen_node.png',
+  SSD1306_Draw_Px:   '/static/fsm_assets/oled_draw_pixel_node.png',
+  SSD1306_Draw_Rect: '/static/fsm_assets/oled_draw_rect_node.png',
   // Branching nodes:
   Check_Truthy:      '/static/fsm_assets/check_truthy_node.png',
   Check_Equals:      '/static/fsm_assets/check_equals_node.png',
@@ -87,6 +91,7 @@ var num_imgs = 0;
 
 // Global FSM program constants.
 // (Available 'tool' nodes. These are the FSM building blocks.)
+// TODO: Namespace menu names so that different menus can re-use names.
 const tool_node_types = [
 {
   base_name: 'Boot',
@@ -251,7 +256,7 @@ const tool_node_types = [
   menu_name: 'Initialize I2C',
   node_color: 'green',
   default_options: {
-    i2c_periph_num: 1,
+    i2c_periph_num: '1',
     i2c_periph_speed: '100KHz',
     // TODO: More I2C options.
   },
@@ -263,10 +268,49 @@ const tool_node_types = [
   menu_name: 'Deinitialize I2C',
   node_color: 'pink',
   default_options: {
-    i2c_periph_num: 1,
+    i2c_periph_num: '1',
   },
   options_listeners: apply_i2c_deinit_node_options_listeners,
   options_html: i2c_deinit_node_options_html,
+},
+{
+  base_name: 'SSD1306_Init',
+  menu_name: 'Initialize Screen',
+  node_color: 'green',
+  default_options: {
+    i2c_periph_num: '1',
+  },
+  options_listeners: apply_ssd1306_init_node_options_listeners,
+  options_html: ssd1306_init_node_options_html,
+},
+{
+  base_name: 'SSD1306_Draw_Px',
+  menu_name: 'Draw Pixel',
+  node_color: 'blue',
+  default_options: {
+    i2c_periph_num: '1',
+    px_x: '0',
+    px_y: '0',
+    px_color: 'On',
+  },
+  options_listeners: apply_ssd1306_draw_pixel_node_options_listeners,
+  options_html: ssd1306_draw_pixel_node_options_html,
+},
+{
+  base_name: 'SSD1306_Draw_Rect',
+  menu_name: 'Draw Rectangle',
+  node_color: 'blue',
+  default_options: {
+    i2c_periph_num: '1',
+    rect_x: '0',
+    rect_y: '0',
+    rect_w: '1',
+    rect_h: '1',
+    rect_color: 'On',
+    rect_style: 'Fill',
+  },
+  options_listeners: apply_ssd1306_draw_rect_node_options_listeners,
+  options_html: ssd1306_draw_rect_node_options_html,
 },
 {
   base_name: 'Check_Truthy',
