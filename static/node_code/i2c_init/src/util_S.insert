@@ -1,0 +1,59 @@
+UTIL_S_I2C_INIT_DEC_START:
+.i2c_periph_init
+UTIL_S_I2C_INIT_DEC_DONE:
+
+UTIL_S_I2C_INIT_DEF_START:
+/*
+ * Initialize an I2C peripheral with some fairly typical settings.
+ * (STM32F0 series, tested with F03xFx chips)
+ * Expects:
+ *   r0: I2Cx_CR1 (base) address.
+ *   r1: I2C speed peripheral value.
+ *       At 48MHz, here are some common values:
+ *         - 0x50100103: 1MHz   'fast mode+'
+ *         - 0x50330309: 400KHz 'fast mode'
+ *         - 0xB0420F13: 100KHz
+ *         - 0xB042C3C7: 10KHz
+ */
+.type i2c_periph_init,%function
+.section .text.i2c_periph_init,"ax",%progbits
+i2c_periph_init:
+    PUSH { r0, r1, r2, r3, r4, lr }
+    // First, disable I2Cx by resetting PE in I2Cx_CR1.
+    LDR  r2, [r0]
+    LDR  r3, =0xFFFFFFFE
+    ANDS r2, r2, r3
+    STR  r2, [r0]
+    // With the periph off, clear a few other bits in CR1 to reset state:
+    LDR  r2, [r0]
+    LDR  r3, =0x00CFE0FF
+    ANDS r2, r2, r3
+    STR  r2, [r0]
+    // Configure I2C timing. Clear all but the reserved TIMINGR[27:24] bits
+    LDR  r4, =0x00000010
+    ADDS r0, r0, r4
+    LDR  r2, [r0]
+    LDR  r3, =0x0F000000
+    ANDS r2, r2, r3
+    ORRS r2, r2, r1
+    STR  r2, [r0]
+    // Clear I2C1_CR2 with a reset mask, and then set ACK config.
+    // 0x07FF7FFF is recommended in the std periph lib.
+    // But I'll use 0x04... to also clear AUTOEND/RELOAD.
+    LDR  r3, =0x0000000C
+    SUBS r0, r0, r3
+    LDR  r2, [r0]
+    LDR  r3, =0x04FF7FFF
+    ANDS r2, r2, r3
+    // ('Ack_Enable' is 0, so no bit sets are needed.)
+    STR  r2, [r0]
+    // Set EN bit in CR1 to enable the I2Cx peripheral.
+    SUBS r0, r0, #4
+    LDR  r2, [r0]
+    LDR  r3, =0x00000001
+    ORRS r2, r2, r3
+    STR  r2, [r0]
+    POP  { r0, r1, r2, r3, r4, pc }
+.size i2c_periph_init, .-i2c_periph_init
+
+UTIL_S_I2C_INIT_DEF_DONE:
