@@ -1324,7 +1324,6 @@ var apply_ssd1306_draw_pixel_node_options_listeners = function(cur_node) {
 };
 
 // 'SSD1306 Screen Draw Rect' options listeners.
-// TODO
 var apply_ssd1306_draw_rect_node_options_listeners = function(cur_node) {
   var i2c_channel_tag = document.getElementById('ssd1306_draw_rect_options_i2c_channel_select_tag');
   var x_coord_tag = document.getElementById('ssd1306_draw_rect_options_xc_tag');

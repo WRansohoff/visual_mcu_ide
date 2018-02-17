@@ -326,7 +326,22 @@ function FSMNodes.process_node(node, node_graph, proj_state)
   elseif node.node_type == 'I2C_Deinit' then
     -- TODO: I2C De-initialization.
     return false
-  -- (External Device Nodes (TODO))
+  -- (External Device Nodes)
+  elseif node.node_type == 'SSD1306_Init' then
+    if (FSMNodes.ensure_support_methods_ssd1306_init_node(node, proj_state) and
+        FSMNodes.append_ssd1306_init_node(node, node_graph, proj_state)) then
+      return true
+    end
+  elseif node.node_type == 'SSD1306_Draw_Px' then
+    if (FSMNodes.ensure_support_methods_ssd1306_draw_px_node(node, proj_state) and
+        FSMNodes.append_ssd1306_draw_px_node(node, node_graph, proj_state)) then
+      return true
+    end
+  elseif node.node_type == 'SSD1306_Draw_Rect' then
+    if (FSMNodes.ensure_support_methods_ssd1306_draw_rect_node(node, proj_state) and
+        FSMNodes.append_ssd1306_draw_rect_node(node, node_graph, proj_state)) then
+      return true
+    end
   -- (Branching Nodes)
   elseif node.node_type == 'Check_Truthy' then
     if (FSMNodes.ensure_support_methods_check_truthy_node(node, proj_state) and
@@ -980,6 +995,84 @@ function FSMNodes.append_i2c_init_node(node, node_graph, proj_state)
     return nil
   end
   node_text = node_text .. '  // (End "I2C Initialization" node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Ensure supporting functionality for SSD1306 OLED screen initialization.
+function FSMNodes.ensure_support_methods_ssd1306_init_node(node, proj_state)
+  -- TODO
+  return true
+end
+
+-- Ensure supporting functionality for SSD1306 pixel-drawing.
+function FSMNodes.ensure_support_methods_ssd1306_draw_px_node(node, proj_state)
+  -- TODO
+  return true
+end
+
+-- Ensure supporting functionality for SSD1306 rect-drawing.
+function FSMNodes.ensure_support_methods_ssd1306_draw_rect_node(node, proj_state)
+  -- TODO
+  return true
+end
+
+-- Append an 'SSD1306 Initialization' node to the current program.
+function FSMNodes.append_ssd1306_init_node(node, node_graph, proj_state)
+  local node_text = '  // ("SSD1306 Monochrome OLED Screen Initialization" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- TODO: Perform screen initialization.
+  -- (Done)
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "SSD1306 Screen Initialization" node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Append an 'SSD1306 draw pixel' node to the current program.
+function FSMNodes.append_ssd1306_draw_px_node(node, node_graph, proj_state)
+  local node_text = '  // ("SSD1306 Draw Pixel" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- TODO: Draw pixel.
+  -- (Done)
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "SSD1306 Draw Pixel" node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Append an 'SSD1306 draw rect' node to the current program.
+function FSMNodes.append_ssd1306_draw_rect_node(node, node_graph, proj_state)
+  local node_text = '  // ("SSD1306 Draw Rect" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- TODO: Draw rect.
+  -- (Done)
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "SSD1306 Draw Rect" node)\n\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
                                     "/ MAIN_ENTRY:",
                                     node_text) then
