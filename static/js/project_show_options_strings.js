@@ -19,6 +19,10 @@ var std_opts_td_tag = function(tag_class) {
   return `<td class="` + tag_class + `">`;
 };
 
+var std_opts_td_id_tag = function(tag_prefix) {
+  return `<td id="` + tag_prefix + `_cell" class="` + tag_prefix + `_opt">`;
+};
+
 var std_opts_td_full_tag = function(tag_class, tag_contents) {
   return `<td class="` + tag_class + `">` + tag_contents + `</td>`;
 };
@@ -469,10 +473,8 @@ var define_var_node_options_html = std_opts_table_tag('define_var_options') +
   std_opts_tr_tag('define_var_options_var_val_row') +
     std_opts_td_full_tag('define_var_options_var_val_text',
                          'Starting Value:') +
-    `<td id="define_var_options_var_val_cell" class="define_var_options_var_val_opt">
-    </td>
-  </tr>
-</table>
+    std_opts_td_id_tag('define_var_options_var_val') +
+  `</td></tr></table>
 `;
 
 // 'Set variable' node options.
@@ -481,10 +483,8 @@ var set_var_node_options_html = std_opts_table_tag('set_var_options') +
   std_opts_tr_tag('set_var_options_var_new_value_row') +
     std_opts_td_full_tag('set_var_options_var_new_value_text',
                          'New Value:') +
-    `<td id="set_var_options_var_new_value_cell" class="set_var_options_var_new_value_opt">
-    </td>
-  </tr>
-</table>
+    std_opts_td_id_tag('set_var_options_var_new_value') +
+  `</td></tr></table>
 `;
 
 // 'Modify Variable: Logic Not' node options.
@@ -504,7 +504,7 @@ var set_var_addition_node_options_html = std_opts_table_tag('set_var_addition_op
   std_opts_tr_tag('set_var_addition_options_C_type_row') +
     std_opts_td_full_tag('set_var_addition_options_C_type_text',
                          "'C' Variable Type:") +
-    `<td id="set_var_addition_options_C_type_cell" class="set_var_addition_options_C_type_opt">` +
+    std_opts_td_id_tag('set_var_addition_options_C_type') +
       std_opts_select_tag('set_var_addition_options_C_type') +
         std_opts_option_tag('set_var_addition_options_C_type',
                             'val', 'Constant Value') +
@@ -514,10 +514,8 @@ var set_var_addition_node_options_html = std_opts_table_tag('set_var_addition_op
   std_opts_tr_tag('set_var_addition_options_C_val_row') +
     std_opts_td_full_tag('set_var_addition_options_C_val_text',
                          "'C' Variable Value:") +
-    `<td id="set_var_addition_options_C_val_cell" class="set_var_addition_options_C_val_opt">
-    </td>
-  </tr>
-</table>
+    std_opts_td_id_tag('set_var_addition_options_C_val') +
+  `</td></tr></table>
 `;
 
 // 'No-op' node options.
