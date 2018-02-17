@@ -311,6 +311,7 @@ const tool_node_types = [
     rect_h: '1',
     rect_color: 'On',
     rect_style: 'Fill',
+    outline: '1',
   },
   options_listeners: apply_ssd1306_draw_rect_node_options_listeners,
   options_html: ssd1306_draw_rect_node_options_html,
