@@ -257,6 +257,8 @@ const tool_node_types = [
   node_color: 'green',
   default_options: {
     i2c_periph_num: '1',
+    scl_pin: 'A9',
+    sda_pin: 'A10',
     i2c_periph_speed: '100KHz',
     // TODO: More I2C options.
   },

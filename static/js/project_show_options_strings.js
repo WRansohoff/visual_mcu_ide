@@ -5,6 +5,43 @@
 // It sort of feels that way, but this is all dynamically-rendered...
 
 /*
+ * Some very basic 'tag population' methods.
+ */
+var std_opts_table_tag = function(tag_prefix) {
+  return `<table class="` + tag_prefix + `_table" cellpadding="0" cellspacing="0" border="0">`;
+};
+
+var std_opts_tr_tag = function(tag_class) {
+  return `<tr class="` + tag_class + `">`;
+};
+
+var std_opts_td_tag = function(tag_class) {
+  return `<td class="` + tag_class + `">`;
+};
+
+var std_opts_td_full_tag = function(tag_class, tag_contents) {
+  return `<td class="` + tag_class + `">` + tag_contents + `</td>`;
+};
+
+var std_opts_select_tag = function(tag_prefix) {
+  return `<select id="` + tag_prefix + `_tag" class="` + tag_prefix + `_select">`;
+};
+
+var std_opts_option_tag = function(tag_prefix, tag_value, tag_label) {
+  return `<option value="` + tag_value + `" class="` + tag_prefix + `_option">
+  ` + tag_label + `
+</option>`;
+};
+
+var std_opts_input_text_tag = function(tag_prefix) {
+  return `<input type="text" id="` + tag_prefix + `_tag" class="` + tag_prefix + `_input">`;
+};
+
+var std_opts_input_number_tag = function(tag_prefix) {
+  return `<input type="number" value="0" id="` + tag_prefix + `_tag" class="` + tag_prefix + `_input">`;
+};
+
+/*
  * Common 'connection selection' options. (input/output arrow[s])
  */
 var node_io_options_html = `
@@ -171,34 +208,17 @@ var branching_node_io_options_html = `
  * Common options values used by multiple nodes.
  */
 var select_gpio_bank_table_row = function(tag_prefix) {
-  return `
-  <tr class="` + tag_prefix + `_pin_bank_row">
-    <td class="` + tag_prefix + `_pin_bank_text">
-      GPIO Pin Bank
-    </td>
-    <td class="` + tag_prefix + `_pin_bank_opt">
-      <select id="` + tag_prefix + `_pin_bank_tag" class="` + tag_prefix + `_pin_bank_select">
-        <option selected="true" value="GPIOA" class="` + tag_prefix + `_pin_bank_option">
-          GPIOA
-        </option>
-        <option value="GPIOB" class="` + tag_prefix + `_pin_bank_option">
-          GPIOB
-        </option>
-        <option value="GPIOC" class="` + tag_prefix + `_pin_bank_option">
-          GPIOC
-        </option>
-        <option value="GPIOD" class="` + tag_prefix + `_pin_bank_option">
-          GPIOD
-        </option>
-        <option value="GPIOE" class="` + tag_prefix + `_pin_bank_option">
-          GPIOE
-        </option>
-        <option value="GPIOF" class="` + tag_prefix + `_pin_bank_option">
-          GPIOF
-        </option>
-        <option value="GPIOG" class="` + tag_prefix + `_pin_bank_option">
-          GPIOG
-        </option>
+  return std_opts_tr_tag(tag_prefix + '_pin_bank_row') +
+    std_opts_td_full_tag(tag_prefix + '_pin_bank_text', 'GPIO Pin Bank') +
+    std_opts_td_tag(tag_prefix + '_pin_bank_opt') +
+    std_opts_select_tag(tag_prefix + '_pin_bank') +
+    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOA', 'GPIOA') +
+    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOB', 'GPIOB') +
+    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOC', 'GPIOC') +
+    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOD', 'GPIOD') +
+    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOE', 'GPIOE') +
+    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOF', 'GPIOF') +
+    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOG', 'GPIOG') + `
       </select>
     </td>
   </tr>
@@ -206,29 +226,26 @@ var select_gpio_bank_table_row = function(tag_prefix) {
 };
 
 var select_gpio_pin_table_row = function(tag_prefix) {
-  return `
-  <tr class="` + tag_prefix + `_pin_number_row">
-    <td class="` + tag_prefix + `_pin_number_text">
-      GPIO Pin Number
-    </td>
-    <td class="` + tag_prefix + `_pin_number_opt">
-      <select id="` + tag_prefix + `_pin_number_tag" class="` + tag_prefix + `_pin_number_select">
-        <option selected="true" value="0" class="` + tag_prefix + `_pin_number_option">0</option>
-        <option value="1" class="` + tag_prefix + `_pin_number_option">1</option>
-        <option value="2" class="` + tag_prefix + `_pin_number_option">2</option>
-        <option value="3" class="` + tag_prefix + `_pin_number_option">3</option>
-        <option value="4" class="` + tag_prefix + `_pin_number_option">4</option>
-        <option value="5" class="` + tag_prefix + `_pin_number_option">5</option>
-        <option value="6" class="` + tag_prefix + `_pin_number_option">6</option>
-        <option value="7" class="` + tag_prefix + `_pin_number_option">7</option>
-        <option value="8" class="` + tag_prefix + `_pin_number_option">8</option>
-        <option value="9" class="` + tag_prefix + `_pin_number_option">9</option>
-        <option value="10" class="` + tag_prefix + `_pin_number_option">10</option>
-        <option value="11" class="` + tag_prefix + `_pin_number_option">11</option>
-        <option value="12" class="` + tag_prefix + `_pin_number_option">12</option>
-        <option value="13" class="` + tag_prefix + `_pin_number_option">13</option>
-        <option value="14" class="` + tag_prefix + `_pin_number_option">14</option>
-        <option value="15" class="` + tag_prefix + `_pin_number_option">15</option>
+  return std_opts_tr_tag(tag_prefix + '_pin_number_row') +
+    std_opts_td_full_tag(tag_prefix + '_pin_number_text', 'GPIO Pin Number') +
+    std_opts_td_tag(tag_prefix + '_pin_number_opt') +
+    std_opts_select_tag(tag_prefix + '_pin_number') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '0', '0') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '1', '1') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '2', '2') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '3', '3') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '4', '4') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '5', '5') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '6', '6') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '7', '7') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '8', '8') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '9', '9') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '10', '10') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '11', '11') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '12', '12') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '13', '13') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '14', '14') +
+    std_opts_option_tag(tag_prefix + '_pin_number', '15', '15') + `
       </select>
     </td>
   </tr>
@@ -239,14 +256,10 @@ var select_gpio_pin_table_row = function(tag_prefix) {
  * List RCC 'peripheral clocks'.
  */
 var rcc_clock_list_table_row = function(tag_prefix) {
-  return `
-  <tr class="` + tag_prefix + `_periph_clocks_row">
-    <td class="` + tag_prefix + `_periph_clocks_text">
-      Peripheral Clock:
-    </td>
-    <td class="` + tag_prefix + `_periph_clocks_opt">
-      <select id="` + tag_prefix + `_periph_clocks_tag" class="` + tag_prefix + `_periph_clocks_select">
-        <option selected="true" value="TODO" class="` + tag_prefix + `_periph_clocks_option">(None Available)</option>
+  return std_opts_tr_tag(tag_prefix + '_periph_clocks_row') +
+    std_opts_td_tag(tag_prefix + '_periph_clocks_text', 'Peripheral Clock:') +
+    std_opts_td_tag(tag_prefix + '_periph_clocks_opt') +
+    std_opts_select_tag(tag_prefix + '_periph_clocks') + `
       </select>
     </td>
   </tr>
@@ -291,38 +304,29 @@ var defined_labels_list_table_row = function(tag_prefix) {
  * Node-specific options.
  */
 // 'Boot' node options.
-var boot_node_options_html = `
-<table class="boot_options_table" cellpadding="0" cellspacing="0" border="0">
-  <tr class="boot_options_mcu_chip_row">
-    <td class="boot_options_mcu_chip_text">
-      Microcontroller chip type:
-    </td>
-    <td class="boot_options_mcu_chip_opt">
-      <select id="boot_options_mcu_chip_tag" class="boot_options_mcu_chip_select">
-        <option value="STM32F030F4" selected="true" class="boot_options_mcu_chip_option">
-          STM32F030F4
-        </option>
-        <option value="STM32F031F6" class="boot_options_mcu_chip_option">
-          STM32F031F6
-        </option>
-      </select>
-    </td>
-  </tr>
-</table>
+var boot_node_options_html = std_opts_table_tag('boot_options') +
+  std_opts_tr_tag('boot_options_mcu_chip_row') +
+    std_opts_td_full_tag('boot_options_mcu_chip_text',
+                         'Microcontroller chip type:') +
+    std_opts_td_tag('boot_options_mcu_chip_opt') +
+      std_opts_select_tag('boot_options_mcu_chip') +
+        std_opts_option_tag('boot_options_mcu_chip',
+                            'STM32F030F4',
+                            'STM32F030F4') +
+        std_opts_option_tag('boot_options_mcu_chip',
+                            'STM32F031F6',
+                            'STM32F031F6') +
+  `</select></td></tr></table>
 `;
 
 // 'Label' node options.
-var label_node_options_html = `
-<table class="define_label_options_table" cellpadding="0" cellspacing="0" border="0">
-  <tr class="define_label_options_label_name_row">
-    <td class="define_label_options_label_name_text">
-      Label name:
-    </td>
-    <td class="define_label_options_label_name_opt">
-      <input type="text" id="define_label_options_label_name_tag" class="define_label_options_label_name_input">
-    </td>
-  </tr>
-</table>
+var label_node_options_html = std_opts_table_tag('define_label_options') +
+  std_opts_tr_tag('define_label_options_label_name_row') +
+    std_opts_td_full_tag('define_label_options_label_name_text',
+                         'Label name:') +
+    std_opts_td_tag('define_label_options_label_name_opt') +
+      std_opts_input_text_tag('define_label_options_label_name') +
+  `</td></tr></table>
 `;
 
 // 'Jump' node options.
@@ -331,118 +335,76 @@ var jump_node_options_html = `
 `;
 
 // 'Delay' node options.
-var delay_node_options_html = `
-<table class="delay_options_table" cellpadding="0" cellspacing="0" border="0">
-  <tr class="delay_options_unit_row">
-    <td class="delay_options_unit_text">
-      Delay units:
-    </td>
-    <td class="delay_options_unit_opt">
-      <select id="delay_options_unit_tag" class="delay_options_unit_select">
-        <option selected="true" value="Cycles" class="delay_options_unit_option">
-          Cycles
-        </option>
-        <option value="Microseconds" class="delay_options_unit_option">
-          Microseconds
-        </option>
-        <option value="Milliseconds" class="delay_options_unit_option">
-          Milliseconds
-        </option>
-        <option value="Seconds" class="delay_options_unit_option">
-          Seconds
-        </option>
-      </select>
-    </td>
-  </tr>
-  <tr class="delay_options_value_row">
-    <td class="delay_options_value_text">
-      Units to delay:
-    </td>
-    <td class="delay_options_value_opt">
-      <input id="delay_options_value_tag" class="delay_options_value_input" type="number" value="0">
-    </td>
-  </tr>
-</table>
+var delay_node_options_html = std_opts_table_tag('delay_options') +
+  std_opts_tr_tag('delay_options_unit_row') +
+    std_opts_td_full_tag('delay_options_unit_text', 'Delay units:') +
+    std_opts_td_tag('delay_options_unit_opt') +
+      std_opts_select_tag('delay_options_unit') +
+        std_opts_option_tag('delay_options_unit', 'Cycles', 'Cycles') +
+        std_opts_option_tag('delay_options_unit',
+                            'Microseconds', 'Microseconds') +
+        std_opts_option_tag('delay_options_unit',
+                            'Milliseconds', 'Milliseconds') +
+        std_opts_option_tag('delay_options_unit',
+                            'Seconds', 'Seconds') +
+  `</select></td></tr>` +
+  std_opts_tr_tag('delay_options_value_row') +
+    std_opts_td_full_tag('delay_options_value_text', 'Units to delay:') +
+    std_opts_td_tag('delay_options_value_opt') +
+      std_opts_input_number_tag('delay_options_value') +
+  `</td></tr></table>
 `;
 
 // 'Setup GPIO Pin' node options.
-var init_gpio_node_options_html = `
-<table class="init_gpio_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + select_gpio_bank_table_row('init_gpio_options')
-    + select_gpio_pin_table_row('init_gpio_options') + `
-  <tr class="init_gpio_options_pin_func_row">
-    <td class="init_gpio_options_pin_func_text">
-      Pin function:
-    </td>
-    <td class="init_gpio_options_pin_func_opt">
-      <select id="init_gpio_options_pin_func_tag" class="init_gpio_options_pin_func_select">
-        <option selected="true" value="Output" class="init_gpio_options_pin_func_option">
-          Output
-        </option>
-        <option value="Input" class="init_gpio_options_pin_func_option">
-          Input
-        </option>
-        <option value="Analog" class="init_gpio_options_pin_func_option">
-          Analog
-        </option>
-        <option value="AF" class="init_gpio_options_pin_func_option">
-          Alternate Function
-        </option>
-      </select>
-    </td>
-  </tr>
-  <tr class="init_gpio_options_otype_row">
-    <td class="init_gpio_options_otype_text">
-      Output Type:
-    </td>
-    <td class="init_gpio_options_otype_opt">
-      <select id="init_gpio_options_otype_tag" class="init_gpio_options_otype_select">
-        <option selected="true" value="Push-Pull" class="init_gpio_options_otype_option">
-          Push-Pull
-        </option>
-        <option value="Open-Drain" class="init_gpio_options_otype_option">
-          Open-Drain
-        </option>
-      </select>
-    </td>
-  </tr>
-  <tr class="init_gpio_options_ospeed_row">
-    <td class="init_gpio_options_ospeed_text">
-      Output Speed:
-    </td>
-    <td class="init_gpio_options_ospeed_opt">
-      <select id="init_gpio_options_ospeed_tag" class="init_gpio_options_ospeed_select">
-        <option selected="true" value="H" class="init_gpio_options_ospeed_option">
-          High (50MHz)
-        </option>
-        <option value="M" class="init_gpio_options_ospeed_option">
-          Medium (10MHz)
-        </option>
-        <option value="L" class="init_gpio_options_ospeed_option">
-          Low (2MHz)
-        </option>
-      </select>
-    </td>
-  </tr>
-  <tr class="init_gpio_options_pupdr_row">
-    <td class="init_gpio_options_pupdr_text">
-      Pull-up / Pull-down:
-    </td>
-    <td class="init_gpio_options_pupdr_opt">
-      <select id="init_gpio_options_pupdr_tag" class="init_gpio_options_pupdr_select">
-        <option selected="true" value="PU" class="init_gpio_options_pupdr_option">
-          Enable Pull-up
-        </option>
-        <option value="PD" class="init_gpio_options_pupdr_option">
-          Enable Pull-down
-        </option>
-        <option value="None" class="init_gpio_options_pupdr_option">
-          No Pull-up/down
-        </option>
-      </select>
-    </td>
-  </tr>
-</table>
+var init_gpio_node_options_html = std_opts_table_tag('init_gpio_options') +
+  select_gpio_bank_table_row('init_gpio_options') +
+  select_gpio_pin_table_row('init_gpio_options') +
+  std_opts_tr_tag('init_gpio_options_pin_func_row') +
+    std_opts_td_full_tag('init_gpio_options_pin_func_text',
+                         'Pin Function:') +
+    std_opts_td_tag('init_gpio_options_pin_func_opt') +
+      std_opts_select_tag('init_gpio_options_pin_func') +
+        std_opts_option_tag('init_gpio_options_pin_func',
+                            'Output', 'Output') +
+        std_opts_option_tag('init_gpio_options_pin_func',
+                            'Input', 'Input') +
+        std_opts_option_tag('init_gpio_options_pin_func',
+                            'Analog', 'Analog') +
+        std_opts_option_tag('init_gpio_options_pin_func',
+                            'AF', 'Alternate Function') +
+  `</select></td></tr>` +
+  std_opts_tr_tag('init_gpio_options_otype_row') +
+    std_opts_td_full_tag('init_gpio_options_otype_text', 'Output Type:') +
+    std_opts_td_tag('init_gpio_options_otype_opt') +
+      std_opts_select_tag('init_gpio_options_otype') +
+        std_opts_option_tag('init_gpio_options_otype',
+                            'Push-Pull', 'Push-Pull') +
+        std_opts_option_tag('init_gpio_options_otype',
+                            'Open-Drain', 'Open-Drain') +
+  `</select></td></tr>` +
+  std_opts_tr_tag('init_gpio_options_ospeed_row') +
+    std_opts_td_full_tag('init_gpio_options_ospeed_text', 'Output Speed:') +
+    std_opts_td_tag('init_gpio_options_ospeed_opt') +
+      std_opts_select_tag('init_gpio_options_ospeed') +
+        std_opts_option_tag('init_gpio_options_ospeed',
+                            'H', 'High (50MHz)') +
+        std_opts_option_tag('init_gpio_options_ospeed',
+                            'M', 'Medium (10MHz)') +
+        std_opts_option_tag('init_gpio_options_ospeed',
+                            'L', 'Low (2MHz)') +
+  `</select></td></tr>` +
+  std_opts_tr_tag('init_gpio_options_pupdr_row') +
+    std_opts_td_full_tag('init_gpio_options_pupdr_text',
+                         'Pull-up / Pull-down') +
+    std_opts_td_tag('init_gpio_options_pupdr_opt') +
+      std_opts_select_tag('init_gpio_options_pupdr') +
+        std_opts_option_tag('init_gpio_options_pupdr',
+                            'PU', 'Enable Pull-up') +
+        std_opts_option_tag('init_gpio_options_pupdr',
+                            'PD', 'Enable Pull-down') +
+        std_opts_option_tag('init_gpio_options_pupdr',
+                            'None', 'No Pull-up/down') +
+  `</select></td></tr></table>
 `;
 
 // 'Set GPIO Output' node options.
@@ -592,8 +554,9 @@ var nop_node_options_html = `
 `;
 
 // 'Initialize I2C Peripheral' options.
-// TODO
 var i2c_init_node_options_html = `
+<table class="i2c_init_options_table" cellpadding="0" cellspacing="0" border="0">
+</table>
 `;
 
 // 'Deinitialize I2C Peripheral' options.
