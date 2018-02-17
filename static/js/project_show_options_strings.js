@@ -408,141 +408,113 @@ var init_gpio_node_options_html = std_opts_table_tag('init_gpio_options') +
 `;
 
 // 'Set GPIO Output' node options.
-var set_gpio_out_node_options_html = `
-<table class="set_gpio_out_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + select_gpio_bank_table_row('set_gpio_out_options')
-    + select_gpio_pin_table_row('set_gpio_out_options') + `
-  <tr class="set_gpio_out_options_value_row">
-    <td class="set_gpio_out_options_value_text">
-      Output value:
-    </td>
-    <td class="set_gpio_out_options_value_opt">
-      <select id="set_gpio_out_options_value_tag" class="set_gpio_out_options_value_select">
-        <option selected="true" value="On" class="set_gpio_out_options_value_option">
-          On
-        </option>
-        <option value="Off" class="set_gpio_out_options_value_option">
-          Off
-        </option>
-        <option value="Var" class="set_gpio_out_options_value_option">
-          Variable
-        </option>
-      </select>
-    </td>
-  </tr>
-  ` + defined_variables_list_table_row('set_gpio_out_options', 'Variable:') + `
-</table>
+var set_gpio_out_node_options_html = std_opts_table_tag('set_gpio_out_options') +
+  select_gpio_bank_table_row('set_gpio_out_options') +
+  select_gpio_pin_table_row('set_gpio_out_options') +
+  std_opts_tr_tag('set_gpio_out_options_value_row') +
+    std_opts_td_full_tag('set_gpio_out_options_value_text',
+                         'Output value:') +
+    std_opts_td_tag('set_gpio_out_options_value_opt') +
+      std_opts_select_tag('set_gpio_out_options_value') +
+        std_opts_option_tag('set_gpio_out_options_value', 'On', 'On') +
+        std_opts_option_tag('set_gpio_out_options_value', 'Off', 'Off') +
+        std_opts_option_tag('set_gpio_out_options_value', 'Var', 'Variable') +
+  `</select></td></tr>` +
+  defined_variables_list_table_row('set_gpio_out_options', 'Variable:') +
+  `</table>
 `;
 
 // 'Read GPIO_Input' node options.
-var read_gpio_in_node_options_html = `
-<table class="read_gpio_in_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + select_gpio_bank_table_row('read_gpio_in_options')
-    + select_gpio_pin_table_row('read_gpio_in_options')
-    + defined_variables_list_table_row('read_gpio_in_options', 'Store in Variable:') + `
-</table>
+var read_gpio_in_node_options_html = std_opts_table_tag('read_gpio_in_options') +
+  select_gpio_bank_table_row('read_gpio_in_options') +
+  select_gpio_pin_table_row('read_gpio_in_options') +
+  defined_variables_list_table_row('read_gpio_in_options', 'Store in Variable:') +
+  `</table>
 `;
 
 // 'Enable peripheral clock' node options.
-var rcc_enable_node_options_html = `
-<table class="rcc_enable_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + rcc_clock_list_table_row('rcc_enable_options') + `
-</table>
+var rcc_enable_node_options_html = std_opts_table_tag('rcc_enable_options') +
+  rcc_clock_list_table_row('rcc_enable_options') +
+  `</table>
 `;
 
 // 'Disable peripheral clock' node options.
-var rcc_disable_node_options_html = `
-<table class="rcc_disable_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + rcc_clock_list_table_row('rcc_disable_options') + `
-</table>
+var rcc_disable_node_options_html = std_opts_table_tag('rcc_disable_options') +
+  rcc_clock_list_table_row('rcc_disable_options') +
+  `</table>
 `;
 
 // 'Define variable' node options.
-var define_var_node_options_html = `
-<table class="define_var_options_table" cellpadding="0" cellspacing="0" border="0">
-  <tr class="define_var_options_var_name_row">
-    <td class="define_var_options_var_name_text">
-      Variable name:
-    </td>
-    <td class="define_var_options_var_name_opt">
-      <input type="text" id="define_var_options_var_name_tag" class="define_var_options_var_name_input">
-    </td>
-  </tr>
-  <tr class="define_var_options_var_type_row">
-    <td class="define_var_options_var_type_text">
-      Variable type:
-    </td>
-    <td class="define_var_options_var_type_opt">
-      <select id="define_var_options_var_type_tag" class="define_var_options_var_type_select">
-        <option selected="true" value="int" class="define_var_options_var_type_option">
-          Integer
-        </option>
-        <option value="float" class="define_var_options_var_type_option">
-          Floating-point
-        </option>
-        <option value="bool" class="define_var_options_var_type_option">
-          Boolean
-        </option>
-        <option value="char" class="define_var_options_var_type_option">
-          Letter
-        </option>
-      </select>
-    </td>
-  </tr>
-  <tr class="define_var_options_var_val_row">
-    <td class="define_var_options_var_val_text">
-      Starting value:
-    </td>
-    <td id="define_var_options_var_val_cell" class="define_var_options_var_val_opt">
+var define_var_node_options_html = std_opts_table_tag('define_var_options') +
+  std_opts_tr_tag('define_var_options_var_name_row') +
+    std_opts_td_full_tag('define_var_options_var_name_text',
+                       'Variable Name:') +
+    std_opts_td_tag('define_var_options_var_name_opt') +
+      std_opts_input_text_tag('define_var_options_var_name') +
+  `</td></tr>` +
+  std_opts_tr_tag('define_var_options_var_type_row') +
+    std_opts_td_full_tag('define_var_options_var_type_text',
+                       'Variable Type:') +
+    std_opts_td_tag('define_var_options_var_type_opt') +
+      std_opts_select_tag('define_var_options_var_type') +
+        std_opts_option_tag('define_var_options_var_type',
+                            'int', 'Integer') +
+        std_opts_option_tag('define_var_options_var_type',
+                            'float', 'Floating-point') +
+        std_opts_option_tag('define_var_options_var_type',
+                            'bool', 'Boolean') +
+        std_opts_option_tag('define_var_options_var_type',
+                            'char', 'Letter') +
+  `</select></td></tr>` +
+  std_opts_tr_tag('define_var_options_var_val_row') +
+    std_opts_td_full_tag('define_var_options_var_val_text',
+                         'Starting Value:') +
+    `<td id="define_var_options_var_val_cell" class="define_var_options_var_val_opt">
     </td>
   </tr>
 </table>
 `;
 
 // 'Set variable' node options.
-var set_var_node_options_html = `
-<table class="set_var_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + defined_variables_list_table_row('set_var_options', 'Variable:') + `
-  <tr class="set_var_options_var_new_value_row">
-    <td class="set_var_options_var_new_value_text">
-      New value:
-    </td>
-    <td id="set_var_options_var_new_value_cell" class="set_var_options_var_new_value_opt">
+var set_var_node_options_html = std_opts_table_tag('set_var_options') +
+  defined_variables_list_table_row('set_var_options', 'Variable:') +
+  std_opts_tr_tag('set_var_options_var_new_value_row') +
+    std_opts_td_full_tag('set_var_options_var_new_value_text',
+                         'New Value:') +
+    `<td id="set_var_options_var_new_value_cell" class="set_var_options_var_new_value_opt">
     </td>
   </tr>
 </table>
 `;
 
 // 'Modify Variable: Logic Not' node options.
-var set_var_logic_not_node_options_html = `
-<table class="set_var_logic_not_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + defined_variables_list_table_row('set_var_logic_not_options_A', 'Variable A:') + `
-  ` + defined_variables_list_table_row('set_var_logic_not_options_B', 'Variable B:') + `
-</table>
+var set_var_logic_not_node_options_html = std_opts_table_tag('set_var_logic_not_options') +
+  defined_variables_list_table_row('set_var_logic_not_options_A', 'Variable A:') +
+  defined_variables_list_table_row('set_var_logic_not_options_B', 'Variable B:') +
+  `</table>
 `;
 
 // 'Modify Variable: Addition or Subtraction' node options.
 // TODO: The 'C' in 'A = B + C'
-var set_var_addition_node_options_html = `
-<table class="set_var_addition_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + defined_variables_list_table_row('set_var_addition_options_A', 'Variable A:') + `
-  ` + defined_variables_list_table_row('set_var_addition_options_B', 'Variable B:') + `
-  <tr class="set_var_addition_options_C_type_row">
-    <td class="set_var_addition_options_C_type_text">
-      'C' Variable Type:
-    </td>
-    <td id="set_var_addition_options_C_type_cell" class="set_var_addition_options_C_type_opt">
-      <select id="set_var_addition_options_C_type_tag" class="set_var_addition_options_C_type_opt">
-        <option selected="true" value="val">Constant Value</option>
-        <option value="var">Defined Variable</option>
-      </select>
-    </td>
-  </tr>
-  <tr class="set_var_addition_options_C_val_row">
-    <td class="set_var_addition_options_C_val_text">
-      'C' Variable Value:
-    </td>
-    <td id="set_var_addition_options_C_val_cell" class="set_var_addition_options_C_val_opt">
+var set_var_addition_node_options_html = std_opts_table_tag('set_var_addition_options') +
+  defined_variables_list_table_row('set_var_addition_options_A',
+                                   'Variable A:') +
+  defined_variables_list_table_row('set_var_addition_options_B',
+                                   'Variable B:') +
+  std_opts_tr_tag('set_var_addition_options_C_type_row') +
+    std_opts_td_full_tag('set_var_addition_options_C_type_text',
+                         "'C' Variable Type:") +
+    `<td id="set_var_addition_options_C_type_cell" class="set_var_addition_options_C_type_opt">` +
+      std_opts_select_tag('set_var_addition_options_C_type') +
+        std_opts_option_tag('set_var_addition_options_C_type',
+                            'val', 'Constant Value') +
+        std_opts_option_tag('set_var_addition_options_C_type',
+                            'var', 'Defined Variable') +
+  `</select></td></tr>` +
+  std_opts_tr_tag('set_var_addition_options_C_val_row') +
+    std_opts_td_full_tag('set_var_addition_options_C_val_text',
+                         "'C' Variable Value:") +
+    `<td id="set_var_addition_options_C_val_cell" class="set_var_addition_options_C_val_opt">
     </td>
   </tr>
 </table>
@@ -554,9 +526,9 @@ var nop_node_options_html = `
 `;
 
 // 'Initialize I2C Peripheral' options.
-var i2c_init_node_options_html = `
-<table class="i2c_init_options_table" cellpadding="0" cellspacing="0" border="0">
-</table>
+// TODO
+var i2c_init_node_options_html = std_opts_table_tag('i2c_init_options_table') +
+  `</table>
 `;
 
 // 'Deinitialize I2C Peripheral' options.
