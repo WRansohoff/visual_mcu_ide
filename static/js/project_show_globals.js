@@ -58,6 +58,9 @@ var imgs_to_load = {
   Set_Var_Logic_Not: '/static/fsm_assets/set_not_node.png',
   Set_Var_Addition:  '/static/fsm_assets/set_addition_node.png',
   Nop_Node:          '/static/fsm_assets/no_op_node.png',
+  // Peripherals:
+  I2C_Init:          '/static/fsm_assets/init_i2c_node.png',
+  I2C_Deinit:        '/static/fsm_assets/deinit_i2c_node.png',
   // Branching nodes:
   Check_Truthy:      '/static/fsm_assets/check_truthy_node.png',
   Check_Equals:      '/static/fsm_assets/check_equals_node.png',
@@ -242,6 +245,28 @@ const tool_node_types = [
   },
   options_listeners: apply_nop_node_options_listeners,
   options_html: nop_node_options_html,
+},
+{
+  base_name: 'I2C_Init',
+  menu_name: 'Initialize I2C',
+  node_color: 'green',
+  default_options: {
+    i2c_periph_num: 1,
+    i2c_periph_speed: '100KHz',
+    // TODO: More I2C options.
+  },
+  options_listeners: apply_i2c_init_node_options_listeners,
+  options_html: i2c_init_node_options_html,
+},
+{
+  base_name: 'I2C_Deinit',
+  menu_name: 'Deinitialize I2C',
+  node_color: 'pink',
+  default_options: {
+    i2c_periph_num: 1,
+  },
+  options_listeners: apply_i2c_deinit_node_options_listeners,
+  options_html: i2c_deinit_node_options_html,
 },
 {
   base_name: 'Check_Truthy',

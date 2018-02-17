@@ -134,6 +134,12 @@ app:match("/project/:project_id", function(self)
   logic_mods_list["Logical Not"] = "Node"
   vars_logic_list["Variable Modification"] = logic_mods_list
   tool_list["Variables and Logic"] = vars_logic_list
+  periphs_list = { }
+  periphs_i2c_list = { }
+  periphs_i2c_list["Initialize I2C"] = "Node"
+  periphs_i2c_list["Deinitialize I2C"] = "Node"
+  periphs_list["I2C"] = periphs_i2c_list
+  tool_list["Hardware Peripherals"] = periphs_list
   branch_nodes_list = { }
   branch_nodes_list["Is Variable Truth-y?"] = "Node"
   branch_nodes_list["Are Variables Equal?"] = "Node"

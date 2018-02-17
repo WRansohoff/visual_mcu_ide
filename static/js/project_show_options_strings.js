@@ -591,6 +591,16 @@ var set_var_addition_node_options_html = `
 var nop_node_options_html = `
 `;
 
+// 'Initialize I2C Peripheral' options.
+// TODO
+var i2c_init_node_options_html = `
+`;
+
+// 'Deinitialize I2C Peripheral' options.
+// TODO
+var i2c_deinit_node_options_html = `
+`;
+
 // 'Is Variable Truth-y?' branching node options.
 var check_truthy_node_options_html = `
 <table class="check_truthy_options_table" cellpadding="0" cellspacing="0" border="0">
@@ -1180,6 +1190,16 @@ var apply_set_var_addition_node_options_listeners = function(cur_node) {
 // No-op node - currently no options, sort of by definition...
 var apply_nop_node_options_listeners = function(cur_node) {
   // Currently none.
+};
+
+// 'Initialize I2C Peripheral' options listeners.
+// TODO
+var apply_i2c_init_node_options_listeners = function(cur_node) {
+};
+
+// 'Deinitialize I2C Peripheral' options listeners.
+// TODO
+var apply_i2c_deinit_node_options_listeners = function(cur_node) {
 };
 
 var apply_check_truthy_options_listeners = function(cur_node) {
