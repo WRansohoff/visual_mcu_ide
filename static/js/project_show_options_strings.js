@@ -304,6 +304,33 @@ var defined_labels_list_table_row = function(tag_prefix) {
   `;
 };
 
+// I2C Channel selection. Currently only one option, on these small chips.
+var i2c_channel_select_table_row = function(tag_prefix) {
+  var cur_tag_prefix = tag_prefix + '_i2c_channel_select';
+  return std_opts_tr_tag(cur_tag_prefix) +
+    std_opts_td_full_tag(cur_tag_prefix + '_text', 'I2C Channel:') +
+    std_opts_td_tag(cur_tag_prefix + '_opt') +
+      std_opts_select_tag(cur_tag_prefix) +
+      std_opts_option_tag(cur_tag_prefix, 'I2C1_A9A10', 'I2C1 (A9/A10)') +
+  `</select></td></tr>
+  `;
+};
+
+// I2C Speed selection.
+var i2c_speed_select_table_row = function(tag_prefix) {
+  var cur_tag_prefix = tag_prefix + '_i2c_speed_select';
+  return std_opts_tr_tag(cur_tag_prefix) +
+    std_opts_td_full_tag(cur_tag_prefix + '_text', 'I2C Speed:') +
+    std_opts_td_tag(cur_tag_prefix + '_opt') +
+      std_opts_select_tag(cur_tag_prefix) +
+      std_opts_option_tag(cur_tag_prefix, '10KHz', '10KHz') +
+      std_opts_option_tag(cur_tag_prefix, '100KHz', '100KHz') +
+      std_opts_option_tag(cur_tag_prefix, '400KHz', '400KHz') +
+      std_opts_option_tag(cur_tag_prefix, '1MHz', '1MHz') +
+  `</select></td></tr>
+  `;
+};
+
 /*
  * Node-specific options.
  */
@@ -524,14 +551,16 @@ var nop_node_options_html = `
 `;
 
 // 'Initialize I2C Peripheral' options.
-// TODO
-var i2c_init_node_options_html = std_opts_table_tag('i2c_init_options_table') +
+var i2c_init_node_options_html = std_opts_table_tag('i2c_init_options') +
+  i2c_channel_select_table_row('i2c_init_options') +
+  i2c_speed_select_table_row('i2c_init_options') +
   `</table>
 `;
 
 // 'Deinitialize I2C Peripheral' options.
-// TODO
-var i2c_deinit_node_options_html = `
+var i2c_deinit_node_options_html = std_opts_table_tag('i2c_deinit_options') +
+  i2c_channel_select_table_row('i2c_deinit_options') +
+  `</table>
 `;
 
 // 'Initialize SSD1306 OLED Screen' options.
@@ -1143,6 +1172,31 @@ var apply_nop_node_options_listeners = function(cur_node) {
 // 'Initialize I2C Peripheral' options listeners.
 // TODO
 var apply_i2c_init_node_options_listeners = function(cur_node) {
+  var i2c_channel_tag = document.getElementById('i2c_init_options_i2c_channel_select_tag');
+  var i2c_speed_tag = document.getElementById('i2c_init_options_i2c_speed_select_tag');
+  if (cur_node && cur_node.options.i2c_periph_num && cur_node.options.scl_pin && cur_node.options.sda_pin) {
+    if (cur_node.options.i2c_periph_num == '1' &&
+        cur_node.options.scl_pin == 'A9' &&
+        cur_node.options.sda_pin == 'A10') {
+      i2c_channel_tag.value = 'I2C1_A9A10';
+    }
+  }
+  if (cur_node && cur_node.options.i2c_periph_speed) {
+    i2c_speed_tag.value = cur_node.options.i2c_periph_speed;
+  }
+
+  i2c_channel_tag.onchange = function() {
+    if (i2c_channel_tag.value == 'I2C1_A9A10') {
+      // I2C1 peripheral on GPIOA 9/10 Alt. Func. #4.
+      cur_node.options.i2c_periph_num = '1';
+      cur_node.options.scl_pin = 'A9';
+      cur_node.options.sda_pin = 'A10';
+      cur_node.options.gpio_af = 'AF4';
+    }
+  };
+  i2c_speed_tag.onchange = function() {
+    cur_node.options.i2c_periph_speed = i2c_speed_tag.value;
+  };
 };
 
 // 'Deinitialize I2C Peripheral' options listeners.
