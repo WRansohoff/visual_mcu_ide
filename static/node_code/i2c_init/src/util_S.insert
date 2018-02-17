@@ -1,5 +1,5 @@
 UTIL_S_I2C_INIT_DEC_START:
-.i2c_periph_init
+.global i2c_periph_init
 UTIL_S_I2C_INIT_DEC_DONE:
 
 UTIL_S_I2C_INIT_DEF_START:

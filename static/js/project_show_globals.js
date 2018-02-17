@@ -259,7 +259,7 @@ const tool_node_types = [
     i2c_periph_num: '1',
     scl_pin: 'A9',
     sda_pin: 'A10',
-    gpio_af: 'AF4',
+    gpio_af: 'AF_4',
     i2c_periph_speed: '100KHz',
     // TODO: More I2C options.
   },

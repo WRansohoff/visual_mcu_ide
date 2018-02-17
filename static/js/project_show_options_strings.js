@@ -215,18 +215,14 @@ var select_gpio_bank_table_row = function(tag_prefix) {
   return std_opts_tr_tag(tag_prefix + '_pin_bank_row') +
     std_opts_td_full_tag(tag_prefix + '_pin_bank_text', 'GPIO Pin Bank') +
     std_opts_td_tag(tag_prefix + '_pin_bank_opt') +
-    std_opts_select_tag(tag_prefix + '_pin_bank') +
-    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOA', 'GPIOA') +
-    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOB', 'GPIOB') +
-    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOC', 'GPIOC') +
-    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOD', 'GPIOD') +
-    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOE', 'GPIOE') +
-    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOF', 'GPIOF') +
-    std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOG', 'GPIOG') + `
-      </select>
-    </td>
-  </tr>
-  `;
+      std_opts_select_tag(tag_prefix + '_pin_bank') +
+        std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOA', 'GPIOA') +
+        std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOB', 'GPIOB') +
+        std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOC', 'GPIOC') +
+        std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOD', 'GPIOD') +
+        std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOE', 'GPIOE') +
+        std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOF', 'GPIOF') +
+  `</select></td></tr>`;
 };
 
 var select_gpio_pin_table_row = function(tag_prefix) {
@@ -1191,7 +1187,7 @@ var apply_i2c_init_node_options_listeners = function(cur_node) {
       cur_node.options.i2c_periph_num = '1';
       cur_node.options.scl_pin = 'A9';
       cur_node.options.sda_pin = 'A10';
-      cur_node.options.gpio_af = 'AF4';
+      cur_node.options.gpio_af = 'AF_4';
     }
   };
   i2c_speed_tag.onchange = function() {

@@ -1,0 +1,3 @@
+GLOBAL_EXTERN_I2C_INIT_START:
+extern void i2c_periph_init(unsigned int i2c_addr, unsigned int i2c_speed);
+GLOBAL_EXTERN_I2C_INIT_DONE:
