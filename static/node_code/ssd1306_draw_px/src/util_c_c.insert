@@ -1,0 +1,25 @@
+UTIL_C_C_SSD1306_DRAW_PX_START:
+/*
+ * Write a pixel in the current OLED framebuffer.
+ * Note that the positioning is a bit odd; each byte is a VERTICAL column
+ * of 8 pixels, but each successive byte increments the row position by 1.
+ * This means that the buffer is 8x 128-byte pages stacked on top of one
+ * another. To set an (x, y) pixel, we |= one position in one byte.
+ *   Byte offset = x + ((y / 8) * 128)
+ *   Bit offset  = (y & 0x07)
+ * 'color' indicates whether to set or unset the pixel. 0 means 'unset.'
+ */
+void oled_write_pixel(int x, int y, unsigned char color) {
+    int y_page = y / 8;
+    int byte_to_mod = x + (y_page * 128);
+    int bit_to_set = 0x01 << (y & 0x07);
+    if (color) {
+        oled_fb[byte_to_mod] |= bit_to_set;
+    }
+    else {
+        bit_to_set = ~bit_to_set;
+        oled_fb[byte_to_mod] &= bit_to_set;
+    }
+}
+
+UTIL_C_C_SSD1306_DRAW_PX_DONE:
