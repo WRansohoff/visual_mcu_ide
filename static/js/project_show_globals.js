@@ -65,6 +65,7 @@ var imgs_to_load = {
   SSD1306_Init:      '/static/fsm_assets/init_oled_screen_node.png',
   SSD1306_Draw_Px:   '/static/fsm_assets/oled_draw_pixel_node.png',
   SSD1306_Draw_Rect: '/static/fsm_assets/oled_draw_rect_node.png',
+  SSD1306_Refresh:   '/static/fsm_assets/oled_refresh_display_node.png',
   // Branching nodes:
   Check_Truthy:      '/static/fsm_assets/check_truthy_node.png',
   Check_Equals:      '/static/fsm_assets/check_equals_node.png',
@@ -315,6 +316,16 @@ const tool_node_types = [
   },
   options_listeners: apply_ssd1306_draw_rect_node_options_listeners,
   options_html: ssd1306_draw_rect_node_options_html,
+},
+{
+  base_name: 'SSD1306_Refresh',
+  menu_name: 'Refresh Display',
+  node_color: 'blue',
+  default_options: {
+    i2c_periph_num: '1',
+  },
+  options_listeners: apply_ssd1306_refresh_node_options_listeners,
+  options_html: ssd1306_refresh_options_html,
 },
 {
   base_name: 'Check_Truthy',

@@ -149,6 +149,7 @@ app:match("/project/:project_id", function(self)
   external_devices_ssd1306_list["Draw Vertical Line"] = "Node"
   external_devices_ssd1306_list["Draw Rectangle"] = "Node"
   external_devices_ssd1306_list["Draw Text"] = "Node"
+  external_devices_ssd1306_list["Refresh Display"] = "Node"
   external_devices_list["SSD1306 OLED Screen"] = external_devices_ssd1306_list
   tool_list["External Devices"] = external_devices_list
   branch_nodes_list = { }

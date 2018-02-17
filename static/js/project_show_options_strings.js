@@ -643,6 +643,12 @@ var ssd1306_draw_rect_node_options_html = std_opts_table_tag('ssd1306_draw_rect_
   `</td></tr></table>
 `;
 
+// SSD1306 OLED 'refresh display' node.
+var ssd1306_refresh_options_html = std_opts_table_tag('ssd1306_refresh_options') +
+  i2c_channel_select_table_row('ssd1306_refresh_options') +
+  `</table>
+`;
+
 // 'Is Variable Truth-y?' branching node options.
 var check_truthy_node_options_html = `
 <table class="check_truthy_options_table" cellpadding="0" cellspacing="0" border="0">
@@ -1396,6 +1402,21 @@ var apply_ssd1306_draw_rect_node_options_listeners = function(cur_node) {
   };
   outline_tag.onchange = function() {
     cur_node.options.outline = outline_tag.value;
+  };
+};
+
+// 'Refresh SSD1306 OLED Screen' options listeners.
+var apply_ssd1306_refresh_node_options_listeners = function(cur_node) {
+  var i2c_channel_tag = document.getElementById('ssd1306_refresh_options_i2c_channel_select_tag');
+  if (cur_node && cur_node.options.i2c_periph_num) {
+    if (cur_node.options.i2c_periph_num == '1') {
+      i2c_channel_tag.value = 'I2C1_A9A10';
+    }
+  }
+  i2c_channel_tag.onchange = function() {
+    if (i2c_channel_tag.value == 'I2C1_A9A10') {
+      cur_node.options.i2c_periph_num = '1';
+    }
   };
 };
 
