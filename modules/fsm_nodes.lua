@@ -1078,48 +1078,19 @@ end
 
 -- Ensure supporting functionality for SSD1306 pixel-drawing.
 function FSMNodes.ensure_support_methods_ssd1306_draw_px_node(node, proj_state)
-  -- This uses both a specific screen framebuffer drawing method,
-  -- and a common set of I2C communication methods.
-  local util_s_insert_path = 'static/node_code/ssd1306_draw_px/src/util_S.insert'
+  -- This uses a common set of I2C communication methods, and a C
+  -- framebuffer drawing metod. Also an I2C screen drawing method.
+  if not varm_util.ensure_i2c_comms_included('static/node_code/ssd1306_draw_px/', proj_state) then
+    return nil
+  end
+  if not varm_util.ensure_i2c_dc_comms_included('static/node_code/ssd1306_draw_px/', proj_state) then
+    return nil
+  end
+  if not varm_util.ensure_ssd1306_fb_included('static/node_code/ssd1306_draw_px/', proj_state) then
+    return nil
+  end
   local util_c_h_insert_path = 'static/node_code/ssd1306_draw_px/src/util_c_h.insert'
   local util_c_c_insert_path = 'static/node_code/ssd1306_draw_px/src/util_c_c.insert'
-  local global_h_insert_path = 'static/node_code/ssd1306_draw_px/src/global_h.insert'
-  -- 'util.S' declares.
-  if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_COMMS_DEC_START:',
-                                        'UTIL_S_I2C_COMMS_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') or
-     not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_DC_COMMS_DEC_START:',
-                                        'UTIL_S_I2C_DC_COMMS_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') or
-     not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEC_START:',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
-    return nil
-  end
-  -- 'util.S' defines.
-  if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_COMMS_DEF_START:',
-                                        'UTIL_S_I2C_COMMS_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') or
-     not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_DC_COMMS_DEF_START:',
-                                        'UTIL_S_I2C_DC_COMMS_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') or
-     not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEF_START:',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
-    return nil
-  end
   -- 'util_c.h' declares.
   if not varm_util.copy_block_into_file(util_c_h_insert_path,
                                         proj_state.base_dir .. 'src/util_c.h',
@@ -1136,33 +1107,70 @@ function FSMNodes.ensure_support_methods_ssd1306_draw_px_node(node, proj_state)
                                         '/ UTIL_C_DEFINITIONS:') then
     return nil
   end
-  -- 'global.h' declare.
-  if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_SSD1306_DRAW_FB_START:',
-                                        'GLOBAL_EXTERN_SSD1306_DRAW_FB_DONE:',
-                                        '/ ASM_METHOD_DEFINES:') then
-    return nil
-  end
-  if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_SSD1306_FB_VAR_START:',
-                                        'GLOBAL_EXTERN_SSD1306_FB_VAR_DONE:',
-                                        '/ SYS_GLOBAL_VAR_DEFINES:') then
-    return nil
-  end
   return true
 end
 
 -- Ensure supporting functionality for SSD1306 horizontal line drawing.
--- TODO
 function FSMNodes.ensure_support_methods_ssd1306_draw_horiz_line_node(node, proj_state)
+  if not varm_util.ensure_i2c_comms_included('static/node_code/ssd1306_draw_horiz_line/', proj_state) then
+    return nil
+  end
+  if not varm_util.ensure_i2c_dc_comms_included('static/node_code/ssd1306_draw_horiz_line/', proj_state) then
+    return nil
+  end
+  if not varm_util.ensure_ssd1306_fb_included('static/node_code/ssd1306_draw_horiz_line/', proj_state) then
+    return nil
+  end
+  local util_c_h_insert_path = 'static/node_code/ssd1306_draw_horiz_line/src/util_c_h.insert'
+  local util_c_c_insert_path = 'static/node_code/ssd1306_draw_horiz_line/src/util_c_c.insert'
+  -- 'util_c.h' declares.
+  if not varm_util.copy_block_into_file(util_c_h_insert_path,
+                                        proj_state.base_dir .. 'src/util_c.h',
+                                        'UTIL_C_H_SSD1306_DRAW_RECT_START:',
+                                        'UTIL_C_H_SSD1306_DRAW_RECT_DONE:',
+                                        '/ UTIL_C_DECLARATIONS:') then
+    return nil
+  end
+  -- 'util_c.c' defines.
+  if not varm_util.copy_block_into_file(util_c_c_insert_path,
+                                        proj_state.base_dir .. 'src/util_c.c',
+                                        'UTIL_C_C_SSD1306_DRAW_RECT_START:',
+                                        'UTIL_C_C_SSD1306_DRAW_RECT_DONE:',
+                                        '/ UTIL_C_DEFINITIONS:') then
+    return nil
+  end
   return true
 end
 
 -- Ensure supporting functionality for SSD1306 vertical line drawing.
--- TODO
 function FSMNodes.ensure_support_methods_ssd1306_draw_vert_line_node(node, proj_state)
+  if not varm_util.ensure_i2c_comms_included('static/node_code/ssd1306_draw_vert_line/', proj_state) then
+    return nil
+  end
+  if not varm_util.ensure_i2c_dc_comms_included('static/node_code/ssd1306_draw_vert_line/', proj_state) then
+    return nil
+  end
+  if not varm_util.ensure_ssd1306_fb_included('static/node_code/ssd1306_draw_vert_line/', proj_state) then
+    return nil
+  end
+  local util_c_h_insert_path = 'static/node_code/ssd1306_draw_vert_line/src/util_c_h.insert'
+  local util_c_c_insert_path = 'static/node_code/ssd1306_draw_vert_line/src/util_c_c.insert'
+  -- 'util_c.h' declares.
+  if not varm_util.copy_block_into_file(util_c_h_insert_path,
+                                        proj_state.base_dir .. 'src/util_c.h',
+                                        'UTIL_C_H_SSD1306_DRAW_RECT_START:',
+                                        'UTIL_C_H_SSD1306_DRAW_RECT_DONE:',
+                                        '/ UTIL_C_DECLARATIONS:') then
+    return nil
+  end
+  -- 'util_c.c' defines.
+  if not varm_util.copy_block_into_file(util_c_c_insert_path,
+                                        proj_state.base_dir .. 'src/util_c.c',
+                                        'UTIL_C_C_SSD1306_DRAW_RECT_START:',
+                                        'UTIL_C_C_SSD1306_DRAW_RECT_DONE:',
+                                        '/ UTIL_C_DEFINITIONS:') then
+    return nil
+  end
   return true
 end
 
@@ -1170,44 +1178,15 @@ end
 function FSMNodes.ensure_support_methods_ssd1306_draw_rect_node(node, proj_state)
   -- This uses both a specific screen framebuffer drawing method,
   -- and a common set of I2C communication methods.
-  local util_s_insert_path = 'static/node_code/ssd1306_draw_rect/src/util_S.insert'
   local util_c_h_insert_path = 'static/node_code/ssd1306_draw_rect/src/util_c_h.insert'
   local util_c_c_insert_path = 'static/node_code/ssd1306_draw_rect/src/util_c_c.insert'
-  local global_h_insert_path = 'static/node_code/ssd1306_draw_rect/src/global_h.insert'
-  -- 'util.S' declares.
-  if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_COMMS_DEC_START:',
-                                        'UTIL_S_I2C_COMMS_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') or
-     not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_DC_COMMS_DEC_START:',
-                                        'UTIL_S_I2C_DC_COMMS_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') or
-     not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEC_START:',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
+  if not varm_util.ensure_i2c_comms_included('static/node_code/ssd1306_draw_rect/', proj_state) then
     return nil
   end
-  -- 'util.S' defines.
-  if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_COMMS_DEF_START:',
-                                        'UTIL_S_I2C_COMMS_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') or
-     not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_DC_COMMS_DEF_START:',
-                                        'UTIL_S_I2C_DC_COMMS_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') or
-     not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEF_START:',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
+  if not varm_util.ensure_i2c_dc_comms_included('static/node_code/ssd1306_draw_rect/', proj_state) then
+    return nil
+  end
+  if not varm_util.ensure_ssd1306_fb_included('static/node_code/ssd1306_draw_rect/', proj_state) then
     return nil
   end
   -- 'util_c.h' declares.
@@ -1226,27 +1205,66 @@ function FSMNodes.ensure_support_methods_ssd1306_draw_rect_node(node, proj_state
                                         '/ UTIL_C_DEFINITIONS:') then
     return nil
   end
-  -- 'global.h' declare.
-  if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_SSD1306_DRAW_FB_START:',
-                                        'GLOBAL_EXTERN_SSD1306_DRAW_FB_DONE:',
-                                        '/ ASM_METHOD_DEFINES:') then
-    return nil
-  end
-  if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_SSD1306_FB_VAR_START:',
-                                        'GLOBAL_EXTERN_SSD1306_FB_VAR_DONE:',
-                                        '/ SYS_GLOBAL_VAR_DEFINES:') then
-    return nil
-  end
   return true
 end
 
 -- Ensure supporting functionality for SSD1306 text drawing.
--- TODO
 function FSMNodes.ensure_support_methods_ssd1306_draw_text_node(node, proj_state)
+  if not varm_util.ensure_i2c_comms_included('static/node_code/ssd1306_draw_text/', proj_state) then
+    return nil
+  end
+  if not varm_util.ensure_i2c_dc_comms_included('static/node_code/ssd1306_draw_text/', proj_state) then
+    return nil
+  end
+  if not varm_util.ensure_ssd1306_fb_included('static/node_code/ssd1306_draw_text/', proj_state) then
+    return nil
+  end
+  local util_c_h_insert_path = 'static/node_code/ssd1306_draw_text/src/util_c_h.insert'
+  local util_c_c_insert_path = 'static/node_code/ssd1306_draw_text/src/util_c_c.insert'
+  -- 'util_c.h' declares.
+  if not varm_util.copy_block_into_file(util_c_h_insert_path,
+                                        proj_state.base_dir .. 'src/util_c.h',
+                                        'UTIL_C_H_SSD1306_DRAW_PX_START:',
+                                        'UTIL_C_H_SSD1306_DRAW_PX_DONE:',
+                                        '/ UTIL_C_DECLARATIONS:') then
+    return nil
+  end
+  if not varm_util.copy_block_into_file(util_c_h_insert_path,
+                                        proj_state.base_dir .. 'src/util_c.h',
+                                        'UTIL_C_H_SSD1306_DRAW_RECT_START:',
+                                        'UTIL_C_H_SSD1306_DRAW_RECT_DONE:',
+                                        '/ UTIL_C_DECLARATIONS:') then
+    return nil
+  end
+  if not varm_util.copy_block_into_file(util_c_h_insert_path,
+                                        proj_state.base_dir .. 'src/util_c.h',
+                                        'UTIL_C_H_SSD1306_DRAW_TEXT_START:',
+                                        'UTIL_C_H_SSD1306_DRAW_TEXT_DONE:',
+                                        '/ UTIL_C_DECLARATIONS:') then
+    return nil
+  end
+  -- 'util_c.c' defines.
+  if not varm_util.copy_block_into_file(util_c_c_insert_path,
+                                        proj_state.base_dir .. 'src/util_c.c',
+                                        'UTIL_C_C_SSD1306_DRAW_PX_START:',
+                                        'UTIL_C_C_SSD1306_DRAW_PX_DONE:',
+                                        '/ UTIL_C_DEFINITIONS:') then
+    return nil
+  end
+  if not varm_util.copy_block_into_file(util_c_c_insert_path,
+                                        proj_state.base_dir .. 'src/util_c.c',
+                                        'UTIL_C_C_SSD1306_DRAW_RECT_START:',
+                                        'UTIL_C_C_SSD1306_DRAW_RECT_DONE:',
+                                        '/ UTIL_C_DEFINITIONS:') then
+    return nil
+  end
+  if not varm_util.copy_block_into_file(util_c_c_insert_path,
+                                        proj_state.base_dir .. 'src/util_c.c',
+                                        'UTIL_C_C_SSD1306_DRAW_TEXT_START:',
+                                        'UTIL_C_C_SSD1306_DRAW_TEXT_DONE:',
+                                        '/ UTIL_C_DEFINITIONS:') then
+    return nil
+  end
   return true
 end
 
@@ -1342,6 +1360,7 @@ end
 -- Append an 'SSD1306 draw pixel' node to the current program.
 function FSMNodes.append_ssd1306_draw_px_node(node, node_graph, proj_state)
   local node_text = '  // ("SSD1306 Draw Pixel" node)\n'
+  -- TODO: 'refresh display after' option, or delete i2c stuff.
   node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
   if node.options and node.options.i2c_periph_num and
      node.options.px_x and node.options.px_y and
@@ -1379,14 +1398,88 @@ function FSMNodes.append_ssd1306_draw_px_node(node, node_graph, proj_state)
 end
 
 -- Append an 'SSD1306 draw horizontal line' node to the current program.
--- TODO
 function FSMNodes.append_ssd1306_draw_horiz_line_node(node, node_graph, proj_state)
+  local node_text = '  // ("SSD1306 Draw Horizontal Line" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- TODO: 'refresh display after' option, or delete i2c stuff.
+  if node.options and node.options.i2c_periph_num and
+     node.options.line_x and node.options.line_y and
+     node.options.line_length and node.options.line_color then
+    local i2c_port = tostring(node.options.i2c_periph_num)
+    local i2c_base_addr = nil
+    if i2c_port == '1' then
+      i2c_base_addr = '0x40005400'
+    else
+      return nil
+    end
+    local line_x = tostring(node.options.line_x)
+    local line_y = tostring(node.options.line_y)
+    local line_len = tostring(node.options.line_length)
+    -- Default to 'On'.
+    local line_col = '1'
+    if node.options.line_color == 'Off' then
+      line_col = '0'
+    end
+    node_text = node_text .. '  oled_draw_h_line(' .. line_x .. ', ' ..
+                line_y .. ', ' .. line_len .. ', ' .. line_col .. ');\n'
+  else
+    return nil
+  end
+  -- (Done)
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "SSD1306 Draw Horizontal Line" node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
   return true
 end
 
 -- Append an 'SSD1306 draw vertical line' node to the current program.
--- TODO
 function FSMNodes.append_ssd1306_draw_vert_line_node(node, node_graph, proj_state)
+  local node_text = '  // ("SSD1306 Draw Vertical Line" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- TODO: 'refresh display after' option, or delete i2c stuff.
+  if node.options and node.options.i2c_periph_num and
+     node.options.line_x and node.options.line_y and
+     node.options.line_length and node.options.line_color then
+    local i2c_port = tostring(node.options.i2c_periph_num)
+    local i2c_base_addr = nil
+    if i2c_port == '1' then
+      i2c_base_addr = '0x40005400'
+    else
+      return nil
+    end
+    local line_x = tostring(node.options.line_x)
+    local line_y = tostring(node.options.line_y)
+    local line_len = tostring(node.options.line_length)
+    -- Default to 'On'.
+    local line_col = '1'
+    if node.options.line_color == 'Off' then
+      line_col = '0'
+    end
+    node_text = node_text .. '  oled_draw_v_line(' .. line_x .. ', ' ..
+                line_y .. ', ' .. line_len .. ', ' .. line_col .. ');\n'
+  else
+    return nil
+  end
+  -- (Done)
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "SSD1306 Draw Vertical Line" node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
   return true
 end
 
@@ -1442,8 +1535,60 @@ function FSMNodes.append_ssd1306_draw_rect_node(node, node_graph, proj_state)
 end
 
 -- Append an 'SSD1306 draw text' node to the current program.
--- TODO
 function FSMNodes.append_ssd1306_draw_text_node(node, node_graph, proj_state)
+  local node_text = '  // ("SSD1306 Draw Text" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- TODO: 'refresh display after' option, or delete i2c stuff.
+  if node.options and node.options.i2c_periph_num and
+     node.options.text_x and node.options.text_y and
+     node.options.text_line and node.options.text_size and
+     node.options.text_color then
+    local i2c_port = tostring(node.options.i2c_periph_num)
+    local i2c_base_addr = nil
+    if i2c_port == '1' then
+      i2c_base_addr = '0x40005400'
+    else
+      return nil
+    end
+    local text_x = tostring(node.options.text_x)
+    local cur_char_x = tonumber(text_x)
+    local text_y = tostring(node.options.text_y)
+    local text_str = node.options.text_line
+    -- Default to 'small' text.
+    local text_size = 'small'
+    local char_width = '6'
+    if node.options.text_size == 'L' then
+      text_size = 'big'
+      char_width = '11'
+    end
+    -- Default to 'On'.
+    local text_color = '1'
+    if node.options.text_color == 'Off' then
+      text_color = '0'
+    end
+    -- Draw the text string.
+    -- TODO: Use the C 'draw_text' methods.
+    for cur_char in text_str:gmatch(".") do
+      node_text = node_text .. '  oled_draw_' .. text_size .. '_letter(' ..
+                  tostring(cur_char_x) .. ', ' .. text_y .. ", '" ..
+                  cur_char .. "', " .. text_color .. ');\n'
+      cur_char_x = cur_char_x + char_width
+    end
+  else
+    return nil
+  end
+  -- (Done)
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "SSD1306 Draw Text" node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
   return true
 end
 
