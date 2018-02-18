@@ -1,0 +1,441 @@
+UTIL_C_C_SSD1306_DRAW_PX_START:
+/*
+ * Write a pixel in the current OLED framebuffer.
+ * Note that the positioning is a bit odd; each byte is a VERTICAL column
+ * of 8 pixels, but each successive byte increments the row position by 1.
+ * This means that the buffer is 8x 128-byte pages stacked on top of one
+ * another. To set an (x, y) pixel, we |= one position in one byte.
+ *   Byte offset = x + ((y / 8) * 128)
+ *   Bit offset  = (y & 0x07)
+ * 'color' indicates whether to set or unset the pixel. 0 means 'unset.'
+ */
+void oled_write_pixel(int x, int y, unsigned char color) {
+    int y_page = y / 8;
+    int byte_to_mod = x + (y_page * 128);
+    int bit_to_set = 0x01 << (y & 0x07);
+    if (color) {
+        oled_fb[byte_to_mod] |= bit_to_set;
+    }
+    else {
+        bit_to_set = ~bit_to_set;
+        oled_fb[byte_to_mod] &= bit_to_set;
+    }
+}
+
+UTIL_C_C_SSD1306_DRAW_PX_DONE:
+
+UTIL_C_C_SSD1306_DRAW_RECT_START:
+/*
+ * Draw a horizontal line.
+ * First, calculate the Y bitmask and byte offset, then just go from x->x.
+ */
+void oled_draw_h_line(int x, int y, int w, unsigned char color) {
+    int y_page_offset = y / 8;
+    y_page_offset *= 128;
+    int bit_to_set = 0x01 << (y & 0x07);
+    if (!color) {
+        bit_to_set = ~bit_to_set;
+    }
+    int x_pos;
+    for (x_pos = x; x_pos < (x+w); ++x_pos) {
+        if (color) {
+            oled_fb[x_pos + y_page_offset] |= bit_to_set;
+        }
+        else {
+            oled_fb[x_pos + y_page_offset] &= bit_to_set;
+        }
+    }
+}
+
+/*
+ * Draw a veritcal line.
+ */
+void oled_draw_v_line(int x, int y, int h, unsigned char color) {
+    int y_page_offset;
+    int bit_to_set;
+    int y_pos;
+    for (y_pos = y; y_pos < (y+h); ++y_pos) {
+        y_page_offset = y_pos/8;
+        y_page_offset *= 128;
+        bit_to_set = 0x01 << (y_pos & 0x07);
+        if (color) {
+            oled_fb[x + y_page_offset] |= bit_to_set;
+        }
+        else {
+            bit_to_set = ~bit_to_set;
+            oled_fb[x + y_page_offset] &= bit_to_set;
+        }
+    }
+}
+
+/*
+ * Draw a rectangle on the display.
+ * I guess just pick the longer dimension, and either draw
+ * horizontal or vertical lines.
+ * Notable args:
+ *   - outline: If <=0, fill the rectangle with 'color'.
+ *              If >0, draw an outline inside the dimensions of N pixels.
+ *   - color: If 0, clear drawn bits. If not 0, set drawn bits.
+ */
+void oled_draw_rect(int x, int y, int w, int h,
+                    int outline, unsigned char color) {
+    if (outline > 0) {
+        // Draw an outline.
+        int o_pos;
+        // Top.
+        for (o_pos = y; o_pos < (y+outline); ++o_pos) {
+            oled_draw_h_line(x, o_pos, w, color);
+        }
+        // Bottom.
+        for (o_pos = (y+h-1); o_pos > (y+h-1-outline); --o_pos) {
+            oled_draw_h_line(x, o_pos, w, color);
+        }
+        // Left.
+        for (o_pos = x; o_pos < (x+outline); ++o_pos) {
+            oled_draw_v_line(o_pos, y, h, color);
+        }
+        // Right.
+        for (o_pos = (x+w-1); o_pos > (x+w-1-outline); --o_pos) {
+            oled_draw_v_line(o_pos, y, h, color);
+        }
+    }
+    else {
+        // Draw a filled rectangle.
+        if (w > h) {
+            // Draw fewer horizontal lines than vertical ones.
+            int y_pos;
+            for (y_pos = y; y_pos < (y+h); ++y_pos) {
+                oled_draw_h_line(x, y_pos, w, color);
+            }
+        }
+        else {
+            // Draw fewer (or ==) vertical lines than horizontal ones.
+            int x_pos;
+            for (x_pos = x; x_pos < (x+w); ++x_pos) {
+                oled_draw_v_line(x_pos, y, h, color);
+            }
+        }
+    }
+}
+
+UTIL_C_C_SSD1306_DRAW_RECT_DONE:
+
+UTIL_C_C_SSD1306_DRAW_TEXT_START:
+/*
+ * Draw a small letter. Each one is 5px wide (+1px for a space) and 8px
+ * tall. So if y%8==0 they can easily fit in 1.5 words.
+ * But for now, just write a series of lines and pixels for most letters.
+ * To save code space, only use letters that are...well, used.
+ * TODO: The whole alphabet and some symbols.
+ */
+void oled_draw_small_letter(int x, int y, char c, unsigned char color) {
+    if (c == 'A') {
+        oled_draw_v_line(x, y+3, 5, 1);
+        oled_draw_v_line(x+4, y+3, 5, 1);
+        oled_draw_v_line(x+1, y+1, 2, 1);
+        oled_draw_v_line(x+3, y+1, 2, 1);
+        oled_write_pixel(x+2, y, 1);
+        oled_draw_h_line(x+1, y+4, 3, 1);
+    }
+    else if (c == 'D') {
+        oled_draw_v_line(x, y, 8, 1);
+        oled_draw_v_line(x+4, y+1, 6, 1);
+        oled_draw_h_line(x+1, y, 3, 1);
+        oled_draw_h_line(x+1, y+7, 3, 1);
+    }
+    else if (c == 'E') {
+        oled_draw_v_line(x, y, 8, 1);
+        oled_draw_h_line(x+1, y, 4, 1);
+        oled_draw_h_line(x+1, y+7, 4, 1);
+        oled_draw_h_line(x+1, y+4, 3, 1);
+    }
+    else if (c == 'M') {
+        oled_draw_v_line(x, y, 8, 1);
+        oled_draw_v_line(x+4, y, 8, 1);
+        oled_draw_v_line(x+2, y+2, 2, 1);
+        oled_write_pixel(x+1, y+1, 1);
+        oled_write_pixel(x+3, y+1, 1);
+    }
+    else if (c == 'O') {
+        oled_draw_v_line(x, y+1, 6, 1);
+        oled_draw_v_line(x+4, y+1, 6, 1);
+        oled_draw_h_line(x+1, y, 3, 1);
+        oled_draw_h_line(x+1, y+7, 3, 1);
+    }
+    else if (c == 'S') {
+        oled_draw_v_line(x, y+1, 2, 1);
+        oled_draw_v_line(x, y+5, 2, 1);
+        oled_draw_v_line(x+4, y+1, 2, 1);
+        oled_draw_v_line(x+4, y+5, 2, 1);
+        oled_draw_h_line(x+1, y, 3, 1);
+        oled_draw_h_line(x+1, y+7, 3, 1);
+        oled_draw_h_line(x+1, y+3, 2, 1);
+        oled_draw_h_line(x+2, y+4, 2, 1);
+    }
+    else if (c == 'T') {
+        oled_draw_h_line(x, y, 5, 1);
+        oled_draw_v_line(x+2, y, 8, 1);
+    }
+    else if (c == 'a') {
+        oled_draw_h_line(x+1, y+2, 3, 1);
+        oled_draw_h_line(x+1, y+4, 3, 1);
+        oled_draw_h_line(x+1, y+7, 3, 1);
+        oled_draw_v_line(x, y+5, 2, 1);
+        oled_draw_v_line(x+4, y+3, 4, 1);
+    }
+    else if (c == 'e') {
+        oled_draw_h_line(x+1, y+1, 3, 1);
+        oled_draw_h_line(x+1, y+4, 3, 1);
+        oled_draw_h_line(x+1, y+7, 3, 1);
+        oled_write_pixel(x+4, y+6, 1);
+        oled_draw_v_line(x, y+2, 5, 1);
+        oled_draw_v_line(x+4, y+2, 3, 1);
+    }
+    else if (c == 'f') {
+        oled_draw_h_line(x+2, y, 2, 1);
+        oled_draw_h_line(x, y+4, 4, 1);
+        oled_draw_v_line(x+1, y+1, 7, 1);
+        oled_draw_v_line(x+4, y+1, 2, 1);
+    }
+    else if (c == 'i') {
+        oled_write_pixel(x+2, y+1, 1);
+        oled_draw_v_line(x+2, y+3, 5, 1);
+    }
+    else if (c == 'l') {
+        oled_draw_v_line(x+2, y, 8, 1);
+    }
+    else if (c == 'm') {
+        oled_draw_h_line(x+1, y+3, 3, 1);
+        oled_draw_v_line(x, y+2, 6, 1);
+        oled_draw_v_line(x+2, y+3, 5, 1);
+        oled_draw_v_line(x+4, y+3, 5, 1);
+    }
+    else if (c == 'n') {
+        oled_draw_h_line(x+1, y+3, 2, 1);
+        oled_draw_v_line(x, y+2, 6, 1);
+        oled_draw_v_line(x+3, y+4, 4, 1);
+    }
+    else if (c == 'o') {
+        oled_draw_h_line(x+1, y+3, 3, 1);
+        oled_draw_h_line(x+1, y+7, 3, 1);
+        oled_draw_v_line(x, y+4, 3, 1);
+        oled_draw_v_line(x+4, y+4, 3, 1);
+    }
+    else if (c == 'r') {
+        oled_draw_h_line(x+2, y+3, 2, 1);
+        oled_write_pixel(x+4, y+4, 1);
+        oled_draw_v_line(x+1, y+2, 6, 1);
+    }
+    else if (c == 's') {
+        oled_draw_h_line(x+2, y+1, 2, 1);
+        oled_draw_h_line(x+2, y+4, 2, 1);
+        oled_draw_h_line(x+2, y+7, 2, 1);
+        oled_write_pixel(x+1, y+6, 1);
+        oled_write_pixel(x+4, y+2, 1);
+        oled_draw_v_line(x+1, y+2, 2, 1);
+        oled_draw_v_line(x+4, y+5, 2, 1);
+    }
+    else if (c == 't') {
+        oled_draw_h_line(x, y+2, 4, 1);
+        oled_draw_h_line(x+2, y+7, 2, 1);
+        oled_write_pixel(x+4, y+6, 1);
+        oled_draw_v_line(x+1, y, 7, 1);
+    }
+    else if (c == 'u') {
+        oled_draw_h_line(x+1, y+6, 4, 1);
+        oled_write_pixel(x+4, y+7, 1);
+        oled_draw_v_line(x, y+2, 4, 1);
+        oled_draw_v_line(x+3, y+2, 4, 1);
+    }
+    else if (c == 'x') {
+        oled_write_pixel(x, y+3, 1);
+        oled_write_pixel(x, y+7, 1);
+        oled_write_pixel(x+1, y+4, 1);
+        oled_write_pixel(x+1, y+6, 1);
+        oled_write_pixel(x+2, y+5, 1);
+        oled_write_pixel(x+3, y+4, 1);
+        oled_write_pixel(x+3, y+6, 1);
+        oled_write_pixel(x+4, y+3, 1);
+        oled_write_pixel(x+4, y+7, 1);
+    }
+    else if (c == 'y') {
+        oled_draw_h_line(x+1, y+4, 2, 1);
+        oled_draw_h_line(x+1, y+7, 2, 1);
+        oled_write_pixel(x, y+6, 1);
+        oled_draw_v_line(x, y+2, 2, 1);
+        oled_draw_v_line(x+3, y+2, 5, 1);
+    }
+    else if (c == ':') {
+        oled_write_pixel(x+2, y+2, 1);
+        oled_write_pixel(x+2, y+5, 1);
+    }
+    else if (c == '/') {
+        oled_draw_v_line(x+1, y+5, 2, 1);
+        oled_draw_v_line(x+2, y+3, 2, 1);
+        oled_draw_v_line(x+3, y+1, 2, 1);
+    }
+    else if (c == '>') {
+        oled_write_pixel(x+1, y+1, 1);
+        oled_write_pixel(x+2, y+2, 1);
+        oled_write_pixel(x+3, y+3, 1);
+        oled_write_pixel(x+2, y+4, 1);
+        oled_write_pixel(x+1, y+5, 1);
+    }
+    else if (c == ' ') {
+    }
+}
+
+/*
+ * Draw a line of small text. Does not do text wrapping.
+ * String must be a C-string (null or '0x0'-terminated.)
+ */
+void oled_draw_small_text(int x, int y, char* cc, unsigned char color) {
+    int i = 0;
+    int offset = 0;
+    while (cc[i] != '\0') {
+        oled_draw_small_letter(x + offset, y, cc[i], color);
+        offset += 6;
+        ++i;
+    }
+}
+
+/*
+ * Draw a large letter. These are about 18px monospace.
+ * I only added the subset of letters needed, to save code space.
+ */
+void oled_draw_big_letter(int x, int y, char c, unsigned char color) {
+    if (c == 'A') {
+        oled_draw_rect(x, y+11, 2, 2, 0, color);
+        oled_draw_rect(x+7, y+11, 2, 2, 0, color);
+        oled_draw_rect(x+1, y+8, 2, 3, 0, color);
+        oled_draw_rect(x+1, y+8, 7, 2, 0, color);
+        oled_draw_rect(x+6, y+8, 2, 3, 0, color);
+        oled_draw_rect(x+2, y+4, 2, 4, 0, color);
+        oled_draw_rect(x+5, y+4, 2, 4, 0, color);
+        oled_draw_rect(x+3, y, 3, 4, 0, color);
+    }
+    else if (c == 'D') {
+        oled_draw_rect(x, y, 2, 13, 0, color);
+        oled_draw_rect(x+2, y, 4, 2, 0, color);
+        oled_draw_rect(x+2, y+11, 4, 2, 0, color);
+        oled_draw_rect(x+5, y+1, 2, 2, 0, color);
+        oled_draw_rect(x+6, y+2, 2, 2, 0, color);
+        oled_draw_rect(x+7, y+3, 2, 7, 0, color);
+        oled_draw_rect(x+5, y+10, 2, 2, 0, color);
+        oled_draw_rect(x+6, y+9, 2, 2, 0, color);
+    }
+    else if (c == 'E') {
+        oled_draw_rect(x, y, 2, 13, 0, color);
+        oled_draw_rect(x+2, y, 7, 2, 0, color);
+        oled_draw_rect(x+2, y+5, 7, 2, 0, color);
+        oled_draw_rect(x+2, y+11, 7, 2, 0, color);
+    }
+    else if (c == 'I') {
+        oled_draw_rect(x, y, 8, 2, 0, color);
+        oled_draw_rect(x+3, y+2, 2, 9, 0, color);
+        oled_draw_rect(x, y+11, 8, 2, 0, color);
+    }
+    else if (c == 'L') {
+        oled_draw_rect(x, y, 2, 13, 0, color);
+        oled_draw_rect(x+2, y+11, 7, 2, 0, color);
+    }
+    else if (c == 'M') {
+        oled_draw_rect(x, y, 2, 13, 0, color);
+        oled_draw_rect(x+2, y, 1, 4, 0, color);
+        oled_draw_rect(x+6, y, 1, 4, 0, color);
+        oled_draw_rect(x+3, y+3, 1, 4, 0, color);
+        oled_draw_rect(x+5, y+3, 1, 4, 0, color);
+        oled_draw_rect(x+4, y+5, 1, 3, 0, color);
+        oled_draw_rect(x+7, y, 2, 13, 0, color);
+    }
+    else if (c == 'N') {
+        oled_draw_rect(x, y, 2, 13, 0, color);
+        oled_draw_rect(x+7, y, 2, 13, 0, color);
+        oled_draw_v_line(x+2, y, 3, color);
+        oled_draw_v_line(x+3, y+2, 4, color);
+        oled_draw_v_line(x+4, y+5, 3, color);
+        oled_draw_v_line(x+5, y+7, 4, color);
+        oled_draw_v_line(x+6, y+10, 3, color);
+    }
+    else if (c == 'O') {
+        oled_draw_rect(x, y+3, 2, 7, 0, color);
+        oled_draw_rect(x+7, y+3, 2, 7, 0, color);
+        oled_draw_rect(x+2, y, 5, 2, 0, color);
+        oled_draw_rect(x+2, y+11, 5, 2, 0, color);
+        oled_draw_rect(x+1, y+1, 2, 2, 0, color);
+        oled_draw_rect(x+1, y+10, 2, 2, 0, color);
+        oled_draw_rect(x+6, y+1, 2, 2, 0, color);
+        oled_draw_rect(x+6, y+10, 2, 2, 0, color);
+    }
+    else if (c == 'R') {
+        oled_draw_rect(x, y, 2, 13, 0, color);
+        oled_draw_rect(x+2, y, 5, 2, 0, color);
+        oled_draw_rect(x+6, y+1, 2, 2, 0, color);
+        oled_draw_rect(x+6, y+5, 2, 2, 0, color);
+        oled_draw_rect(x+6, y+8, 2, 2, 0, color);
+        oled_draw_rect(x+2, y+6, 5, 2, 0, color);
+        oled_draw_rect(x+7, y+2, 2, 4, 0, color);
+        oled_draw_rect(x+7, y+9, 2, 4, 0, color);
+    }
+    else if (c == 'S') {
+        oled_draw_rect(x+2, y, 6, 2, 0, color);
+        oled_draw_rect(x+1, y+1, 2, 2, 0, color);
+        oled_draw_rect(x+1, y+4, 2, 2, 0, color);
+        oled_draw_rect(x, y+2, 2, 3, 0, color);
+        oled_draw_rect(x+2, y+5, 5, 2, 0, color);
+        oled_draw_rect(x+6, y+6, 2, 2, 0, color);
+        oled_draw_rect(x+6, y+10, 2, 2, 0, color);
+        oled_draw_rect(x+7, y+7, 2, 4, 0, color);
+        oled_draw_rect(x, y+11, 7, 2, 0, color);
+    }
+    else if (c == 'T') {
+        oled_draw_rect(x, y, 9, 2, 0, color);
+        oled_draw_rect(x+4, y+2, 2, 11, 0, color);
+    }
+    else if (c == 'U') {
+        oled_draw_rect(x, y, 2, 11, 0, color);
+        oled_draw_rect(x+7, y, 2, 11, 0, color);
+        oled_draw_rect(x+1, y+10, 2, 2, 0, color);
+        oled_draw_rect(x+6, y+10, 2, 2, 0, color);
+        oled_draw_rect(x+2, y+11, 5, 2, 0, color);
+    }
+    else if (c == 'Y') {
+        oled_draw_rect(x, y, 2, 3, 0, color);
+        oled_draw_rect(x+6, y, 2, 3, 0, color);
+        oled_draw_rect(x+1, y+2, 2, 2, 0, color);
+        oled_draw_rect(x+5, y+2, 2, 2, 0, color);
+        oled_draw_rect(x+2, y+4, 4, 2, 0, color);
+        oled_draw_rect(x+3, y+6, 2, 7, 0, color);
+    }
+    else if (c == ':') {
+        oled_draw_rect(x, y+2, 3, 3, 0, color);
+        oled_draw_rect(x, y+8, 3, 3, 0, color);
+    }
+    else if (c == '?') {
+        oled_draw_rect(x+1, y, 6, 2, 0, color);
+        oled_draw_rect(x+6, y+1, 2, 4, 0, color);
+        oled_draw_rect(x+5, y+4, 2, 2, 0, color);
+        oled_draw_rect(x+4, y+5, 2, 2, 0, color);
+        oled_draw_rect(x+3, y+6, 2, 4, 0, color);
+        oled_draw_rect(x+3, y+11, 2, 2, 0, color);
+    }
+    else if (c == '!') {
+        oled_draw_rect(x+4, y, 2, 9, 0, color);
+        oled_draw_rect(x+4, y+11, 2, 2, 0, color);
+    }
+}
+
+/*
+ * Draw a line of big text. Does not do text wrapping.
+ */
+void oled_draw_big_text(int x, int y, char* cc, unsigned char color) {
+    int i = 0;
+    int offset = 0;
+    while (cc[i] != '\0') {
+        oled_draw_big_letter(x + offset, y, cc[i], color);
+        offset += 11;
+        ++i;
+    }
+}
+
+UTIL_C_C_SSD1306_DRAW_TEXT_DONE:
