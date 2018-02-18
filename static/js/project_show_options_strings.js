@@ -591,14 +591,66 @@ var ssd1306_draw_pixel_node_options_html = std_opts_table_tag('ssd1306_draw_px_o
 `;
 
 // 'SSD1306 Screen Draw Horizontal Line' options.
-// TODO
 var ssd1306_draw_horiz_line_options_html = std_opts_table_tag('ssd1306_draw_horiz_line_options') +
+  i2c_channel_select_table_row('ssd1306_draw_horiz_line_options') +
+  std_opts_tr_tag('ssd1306_draw_horiz_line_options_xc_row') +
+    std_opts_td_full_tag('ssd1306_draw_horiz_line_options_xc_text',
+                         'X-Coordinate:') +
+    std_opts_td_tag('ssd1306_draw_horiz_line_options_xc_opt') +
+      std_opts_input_number_tag('ssd1306_draw_horiz_line_options_xc') +
+  `</td></tr>` +
+  std_opts_tr_tag('ssd1306_draw_horiz_line_options_yc_row') +
+    std_opts_td_full_tag('ssd1306_draw_horiz_line_options_yc_text',
+                         'Y-Coordinate:') +
+    std_opts_td_tag('ssd1306_draw_horiz_line_options_yc_opt') +
+      std_opts_input_number_tag('ssd1306_draw_horiz_line_options_yc') +
+  `</td></tr>` +
+  std_opts_tr_tag('ssd1306_draw_horiz_line_options_len_row') +
+    std_opts_td_full_tag('ssd1306_draw_horiz_line_options_len_text',
+                         'Line Length:') +
+    std_opts_td_tag('ssd1306_draw_horiz_line_options_len_opt') +
+      std_opts_input_number_tag('ssd1306_draw_horiz_line_options_len') +
+  `</td></tr>` +
+  std_opts_tr_tag('ssd1306_draw_horiz_line_options_col_row') +
+    std_opts_td_full_tag('ssd1306_draw_horiz_line_options_col_text',
+                         '"Color":') +
+    std_opts_td_tag('ssd1306_draw_horiz_line_options_col_opt') +
+      std_opts_select_tag('ssd1306_draw_horiz_line_options_col') +
+        std_opts_option_tag('ssd1306_draw_horiz_line_options_col', 'On', 'On') +
+        std_opts_option_tag('ssd1306_draw_horiz_line_options_col', 'Off', 'Off') +
+  `</select></td></tr>` +
   `</table>
 `;
 
 // 'SSD1306 Screen Draw Vertical Line' options.
-// TODO
 var ssd1306_draw_vert_line_options_html = std_opts_table_tag('ssd1306_draw_vert_line_options') +
+  i2c_channel_select_table_row('ssd1306_draw_vert_line_options') +
+  std_opts_tr_tag('ssd1306_draw_vert_line_options_xc_row') +
+    std_opts_td_full_tag('ssd1306_draw_vert_line_options_xc_text',
+                         'X-Coordinate:') +
+    std_opts_td_tag('ssd1306_draw_vert_line_options_xc_opt') +
+      std_opts_input_number_tag('ssd1306_draw_vert_line_options_xc') +
+  `</td></tr>` +
+  std_opts_tr_tag('ssd1306_draw_vert_line_options_yc_row') +
+    std_opts_td_full_tag('ssd1306_draw_vert_line_options_yc_text',
+                         'Y-Coordinate:') +
+    std_opts_td_tag('ssd1306_draw_vert_line_options_yc_opt') +
+      std_opts_input_number_tag('ssd1306_draw_vert_line_options_yc') +
+  `</td></tr>` +
+  std_opts_tr_tag('ssd1306_draw_vert_line_options_len_row') +
+    std_opts_td_full_tag('ssd1306_draw_vert_line_options_len_text',
+                         'Line Length:') +
+    std_opts_td_tag('ssd1306_draw_vert_line_options_len_opt') +
+      std_opts_input_number_tag('ssd1306_draw_vert_line_options_len') +
+  `</td></tr>` +
+  std_opts_tr_tag('ssd1306_draw_vert_line_options_col_row') +
+    std_opts_td_full_tag('ssd1306_draw_vert_line_options_col_text',
+                         '"Color":') +
+    std_opts_td_tag('ssd1306_draw_vert_line_options_col_opt') +
+      std_opts_select_tag('ssd1306_draw_vert_line_options_col') +
+        std_opts_option_tag('ssd1306_draw_vert_line_options_col', 'On', 'On') +
+        std_opts_option_tag('ssd1306_draw_vert_line_options_col', 'Off', 'Off') +
+  `</select></td></tr>` +
   `</table>
 `;
 
@@ -658,6 +710,33 @@ var ssd1306_draw_rect_node_options_html = std_opts_table_tag('ssd1306_draw_rect_
 // 'SSD1306 Screen Draw Text' options.
 // TODO
 var ssd1306_draw_text_options_html = std_opts_table_tag('ssd1306_draw_text_options') +
+  i2c_channel_select_table_row('ssd1306_draw_text_options') +
+  std_opts_tr_tag('ssd1306_draw_text_options_xc_row') +
+    std_opts_td_full_tag('ssd1306_draw_text_options_xc_text',
+                         'X-Coordinate:') +
+    std_opts_td_tag('ssd1306_draw_text_options_xc_opt') +
+      std_opts_input_number_tag('ssd1306_draw_text_options_xc') +
+  `</td></tr>` +
+  std_opts_tr_tag('ssd1306_draw_text_options_yc_row') +
+    std_opts_td_full_tag('ssd1306_draw_text_options_yc_text',
+                         'Y-Coordinate:') +
+    std_opts_td_tag('ssd1306_draw_text_options_yc_opt') +
+      std_opts_input_number_tag('ssd1306_draw_text_options_yc') +
+  `</td></tr>` +
+  std_opts_tr_tag('ssd1306_draw_text_options_txt_row') +
+    std_opts_td_full_tag('ssd1306_draw_text_options_txt_text',
+                         'Display Text:') +
+    std_opts_td_tag('ssd1306_draw_text_options_txt_opt') +
+      std_opts_input_text_tag('ssd1306_draw_text_options_txt') +
+  `</td></tr>` +
+  std_opts_tr_tag('ssd1306_draw_text_options_col_row') +
+    std_opts_td_full_tag('ssd1306_draw_text_options_col_text',
+                         '"Color":') +
+    std_opts_td_tag('ssd1306_draw_text_options_col_opt') +
+      std_opts_select_tag('ssd1306_draw_text_options_col') +
+        std_opts_option_tag('ssd1306_draw_text_options_col', 'On', 'On') +
+        std_opts_option_tag('ssd1306_draw_text_options_col', 'Off', 'Off') +
+  `</select></td></tr>` +
   `</table>
 `;
 
