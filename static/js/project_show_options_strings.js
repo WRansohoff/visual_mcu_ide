@@ -708,7 +708,6 @@ var ssd1306_draw_rect_node_options_html = std_opts_table_tag('ssd1306_draw_rect_
 `;
 
 // 'SSD1306 Screen Draw Text' options.
-// TODO
 var ssd1306_draw_text_options_html = std_opts_table_tag('ssd1306_draw_text_options') +
   i2c_channel_select_table_row('ssd1306_draw_text_options') +
   std_opts_tr_tag('ssd1306_draw_text_options_xc_row') +
@@ -1427,13 +1426,97 @@ var apply_ssd1306_draw_pixel_node_options_listeners = function(cur_node) {
 };
 
 // 'SSD1306 Screen Draw Horizontal Line' options listeners.
-// TODO
 var apply_ssd1306_draw_horiz_line_node_options_listeners = function(cur_node) {
+  var i2c_channel_tag = document.getElementById('ssd1306_draw_horiz_line_options_i2c_channel_select_tag');
+  var x_coord_tag = document.getElementById('ssd1306_draw_horiz_line_options_xc_tag');
+  var y_coord_tag = document.getElementById('ssd1306_draw_horiz_line_options_yc_tag');
+  var length_tag = document.getElementById('ssd1306_draw_horiz_line_options_len_tag');
+  var color_tag = document.getElementById('ssd1306_draw_horiz_line_options_col_tag');
+  // Set loaded values.
+  if (cur_node) {
+    if (cur_node.options.i2c_periph_num) {
+      if (cur_node.options.i2c_periph_num == '1') {
+        i2c_channel_tag.value = 'I2C1_A9A10';
+      }
+    }
+    if (cur_node.options.line_x) {
+      x_coord_tag.value = cur_node.options.line_x;
+    }
+    if (cur_node.options.line_y) {
+      y_coord_tag.value = cur_node.options.line_y;
+    }
+    if (cur_node.options.line_length) {
+      length_tag.value = cur_node.options.line_length;
+    }
+    if (cur_node.options.line_color) {
+      color_tag.value = cur_node.options.line_color;
+    }
+  }
+  // Set listeners.
+  i2c_channel_tag.onchange = function() {
+    if (i2c_channel_tag.value == 'I2C1_A9A10') {
+      cur_node.options.i2c_periph_num = '1';
+    }
+  };
+  x_coord_tag.onchange = function() {
+    cur_node.options.line_x = x_coord_tag.value;
+  };
+  y_coord_tag.onchange = function() {
+    cur_node.options.line_y = y_coord_tag.value;
+  };
+  length_tag.onchange = function() {
+    cur_node.options.line_length = length_tag.value;
+  };
+  color_tag.onchange = function() {
+    cur_node.options.line_color = color_tag.value;
+  };
 };
 
 // 'SSD1306 Screen Draw Vertical Line' options listeners.
-// TODO
 var apply_ssd1306_draw_vert_line_node_options_listeners = function(cur_node) {
+  var i2c_channel_tag = document.getElementById('ssd1306_draw_vert_line_options_i2c_channel_select_tag');
+  var x_coord_tag = document.getElementById('ssd1306_draw_vert_line_options_xc_tag');
+  var y_coord_tag = document.getElementById('ssd1306_draw_vert_line_options_yc_tag');
+  var length_tag = document.getElementById('ssd1306_draw_vert_line_options_len_tag');
+  var color_tag = document.getElementById('ssd1306_draw_vert_line_options_col_tag');
+  // Set loaded values.
+  if (cur_node) {
+    if (cur_node.options.i2c_periph_num) {
+      if (cur_node.options.i2c_periph_num == '1') {
+        i2c_channel_tag.value = 'I2C1_A9A10';
+      }
+    }
+    if (cur_node.options.line_x) {
+      x_coord_tag.value = cur_node.options.line_x;
+    }
+    if (cur_node.options.line_y) {
+      y_coord_tag.value = cur_node.options.line_y;
+    }
+    if (cur_node.options.line_length) {
+      length_tag.value = cur_node.options.line_length;
+    }
+    if (cur_node.options.line_color) {
+      color_tag.value = cur_node.options.line_color;
+    }
+  }
+  // Set listeners.
+  i2c_channel_tag.onchange = function() {
+    if (i2c_channel_tag.value == 'I2C1_A9A10') {
+      cur_node.options.i2c_periph_num = '1';
+    }
+  };
+  x_coord_tag.onchange = function() {
+    cur_node.options.line_x = x_coord_tag.value;
+  };
+  y_coord_tag.onchange = function() {
+    cur_node.options.line_y = y_coord_tag.value;
+  };
+  length_tag.onchange = function() {
+    cur_node.options.line_length = length_tag.value;
+  };
+  color_tag.onchange = function() {
+    cur_node.options.line_color = color_tag.value;
+  };
 };
 
 // 'SSD1306 Screen Draw Rect' options listeners.
@@ -1514,8 +1597,50 @@ var apply_ssd1306_draw_rect_node_options_listeners = function(cur_node) {
 
 
 // 'SSD1306 Screen Draw Text' options listeners.
-// TODO
 var apply_ssd1306_draw_text_node_options_listeners = function(cur_node) {
+  var i2c_channel_tag = document.getElementById('ssd1306_draw_text_options_i2c_channel_select_tag');
+  var x_coord_tag = document.getElementById('ssd1306_draw_text_options_xc_tag');
+  var y_coord_tag = document.getElementById('ssd1306_draw_text_options_yc_tag');
+  var txt_tag = document.getElementById('ssd1306_draw_text_options_txt_tag');
+  var color_tag = document.getElementById('ssd1306_draw_text_options_col_tag');
+  // Set loaded values.
+  if (cur_node) {
+    if (cur_node.options.i2c_periph_num) {
+      if (cur_node.options.i2c_periph_num == '1') {
+        i2c_channel_tag.value = 'I2C1_A9A10';
+      }
+    }
+    if (cur_node.options.text_x) {
+      x_coord_tag.value = cur_node.options.text_x;
+    }
+    if (cur_node.options.text_y) {
+      y_coord_tag.value = cur_node.options.text_y;
+    }
+    if (cur_node.options.text_line) {
+      txt_tag.value = cur_node.options.text_line;
+    }
+    if (cur_node.options.text_color) {
+      color_tag.value = cur_node.options.text_color;
+    }
+  }
+  // Set listeners.
+  i2c_channel_tag.onchange = function() {
+    if (i2c_channel_tag.value == 'I2C1_A9A10') {
+      cur_node.options.i2c_periph_num = '1';
+    }
+  };
+  x_coord_tag.onchange = function() {
+    cur_node.options.text_x = x_coord_tag.value;
+  };
+  y_coord_tag.onchange = function() {
+    cur_node.options.text_y = y_coord_tag.value;
+  };
+  txt_tag.onchange = function() {
+    cur_node.options.text_line = txt_tag.value;
+  };
+  color_tag.onchange = function() {
+    cur_node.options.text_color = color_tag.value;
+  };
 };
 
 // 'Refresh SSD1306 OLED Screen' options listeners.

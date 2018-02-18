@@ -358,6 +358,7 @@ const tool_node_types = [
     text_y: '0',
     text_line: '',
     text_size: 'S',
+    text_color: 'On',
   },
   options_listeners: apply_ssd1306_draw_text_node_options_listeners,
   options_html: ssd1306_draw_text_options_html,

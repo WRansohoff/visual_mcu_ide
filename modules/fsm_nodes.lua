@@ -337,9 +337,24 @@ function FSMNodes.process_node(node, node_graph, proj_state)
         FSMNodes.append_ssd1306_draw_px_node(node, node_graph, proj_state)) then
       return true
     end
+  elseif node.node_type == 'SSD1306_Draw_HL' then
+    if (FSMNodes.ensure_support_methods_ssd1306_draw_horiz_line_node(node, proj_state) and
+        FSMNodes.append_ssd1306_draw_horiz_line_node(node, node_graph, proj_state)) then
+      return true
+    end
+  elseif node.node_type == 'SSD1306_Draw_VL' then
+    if (FSMNodes.ensure_support_methods_ssd1306_draw_vert_line_node(node, proj_state) and
+        FSMNodes.append_ssd1306_draw_vert_line_node(node, node_graph, proj_state)) then
+      return true
+    end
   elseif node.node_type == 'SSD1306_Draw_Rect' then
     if (FSMNodes.ensure_support_methods_ssd1306_draw_rect_node(node, proj_state) and
         FSMNodes.append_ssd1306_draw_rect_node(node, node_graph, proj_state)) then
+      return true
+    end
+  elseif node.node_type == 'SSD1306_Draw_Text' then
+    if (FSMNodes.ensure_support_methods_ssd1306_draw_text_node(node, proj_state) and
+        FSMNodes.append_ssd1306_draw_text_node(node, node_graph, proj_state)) then
       return true
     end
   elseif node.node_type == 'SSD1306_Refresh' then
@@ -1139,6 +1154,18 @@ function FSMNodes.ensure_support_methods_ssd1306_draw_px_node(node, proj_state)
   return true
 end
 
+-- Ensure supporting functionality for SSD1306 horizontal line drawing.
+-- TODO
+function FSMNodes.ensure_support_methods_ssd1306_draw_horiz_line_node(node, proj_state)
+  return true
+end
+
+-- Ensure supporting functionality for SSD1306 vertical line drawing.
+-- TODO
+function FSMNodes.ensure_support_methods_ssd1306_draw_vert_line_node(node, proj_state)
+  return true
+end
+
 -- Ensure supporting functionality for SSD1306 rect-drawing.
 function FSMNodes.ensure_support_methods_ssd1306_draw_rect_node(node, proj_state)
   -- This uses both a specific screen framebuffer drawing method,
@@ -1214,6 +1241,12 @@ function FSMNodes.ensure_support_methods_ssd1306_draw_rect_node(node, proj_state
                                         '/ SYS_GLOBAL_VAR_DEFINES:') then
     return nil
   end
+  return true
+end
+
+-- Ensure supporting functionality for SSD1306 text drawing.
+-- TODO
+function FSMNodes.ensure_support_methods_ssd1306_draw_text_node(node, proj_state)
   return true
 end
 
@@ -1345,6 +1378,18 @@ function FSMNodes.append_ssd1306_draw_px_node(node, node_graph, proj_state)
   return true
 end
 
+-- Append an 'SSD1306 draw horizontal line' node to the current program.
+-- TODO
+function FSMNodes.append_ssd1306_draw_horiz_line_node(node, node_graph, proj_state)
+  return true
+end
+
+-- Append an 'SSD1306 draw vertical line' node to the current program.
+-- TODO
+function FSMNodes.append_ssd1306_draw_vert_line_node(node, node_graph, proj_state)
+  return true
+end
+
 -- Append an 'SSD1306 draw rect' node to the current program.
 function FSMNodes.append_ssd1306_draw_rect_node(node, node_graph, proj_state)
   local node_text = '  // ("SSD1306 Draw Rect" node)\n'
@@ -1393,6 +1438,12 @@ function FSMNodes.append_ssd1306_draw_rect_node(node, node_graph, proj_state)
                                     node_text) then
     return nil
   end
+  return true
+end
+
+-- Append an 'SSD1306 draw text' node to the current program.
+-- TODO
+function FSMNodes.append_ssd1306_draw_text_node(node, node_graph, proj_state)
   return true
 end
 
