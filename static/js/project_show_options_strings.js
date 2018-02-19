@@ -751,6 +751,16 @@ var ssd1306_draw_text_options_html = std_opts_table_tag('ssd1306_draw_text_optio
         std_opts_option_tag('ssd1306_draw_text_options_col', 'On', 'On') +
         std_opts_option_tag('ssd1306_draw_text_options_col', 'Off', 'Off') +
   `</select></td></tr>` +
+  std_opts_tr_tag('ssd1306_draw_text_options_size_row') +
+    std_opts_td_full_tag('ssd1306_draw_text_options_size_text',
+                         'Text Size:') +
+    std_opts_td_tag('ssd1306_draw_text_options_size_opt') +
+      std_opts_select_tag('ssd1306_draw_text_options_size') +
+        std_opts_option_tag('ssd1306_draw_text_options_size',
+                            'S', 'Small (6x8)') +
+        std_opts_option_tag('ssd1306_draw_text_options_size',
+                            'L', 'Large (12x16)') +
+  `</select></td></tr>` +
   `</table>
 `;
 
@@ -1622,6 +1632,7 @@ var apply_ssd1306_draw_text_node_options_listeners = function(cur_node) {
   var var_name_row_tag = document.getElementById('ssd1306_draw_text_options_var_list_row_tag');
   var var_name_tag = document.getElementById('ssd1306_draw_text_options_var_list_tag');
   var color_tag = document.getElementById('ssd1306_draw_text_options_col_tag');
+  var size_tag = document.getElementById('ssd1306_draw_text_options_size_tag');
   populate_defined_vars_dropdown('ssd1306_draw_text_options_var_list_tag', cur_node, cur_node.options.text_var);
   // Set loaded values.
   if (cur_node) {
@@ -1656,6 +1667,9 @@ var apply_ssd1306_draw_text_node_options_listeners = function(cur_node) {
     if (cur_node.options.text_color) {
       color_tag.value = cur_node.options.text_color;
     }
+    if (cur_node.options.text_size) {
+      size_tag.value = cur_node.options.text_size;
+    }
   }
   // Set listeners.
   i2c_channel_tag.onchange = function() {
@@ -1688,6 +1702,9 @@ var apply_ssd1306_draw_text_node_options_listeners = function(cur_node) {
   };
   color_tag.onchange = function() {
     cur_node.options.text_color = color_tag.value;
+  };
+  size_tag.onchange = function() {
+    cur_node.options.text_size = size_tag.value;
   };
 };
 

@@ -1248,8 +1248,8 @@ function FSMNodes.ensure_support_methods_ssd1306_draw_text_node(node, proj_state
   end
   if not varm_util.copy_block_into_file(util_c_h_insert_path,
                                         proj_state.base_dir .. 'src/util_c.h',
-                                        'UTIL_C_H_SSD1306_DRAW_TEXT_ALT_START:',
-                                        'UTIL_C_H_SSD1306_DRAW_TEXT_ALT_DONE:',
+                                        'UTIL_C_H_SSD1306_DRAW_TEXT_START:',
+                                        'UTIL_C_H_SSD1306_DRAW_TEXT_DONE:',
                                         '/ UTIL_C_DECLARATIONS:') then
     return nil
   end
@@ -1270,8 +1270,8 @@ function FSMNodes.ensure_support_methods_ssd1306_draw_text_node(node, proj_state
   end
   if not varm_util.copy_block_into_file(util_c_c_insert_path,
                                         proj_state.base_dir .. 'src/util_c.c',
-                                        'UTIL_C_C_SSD1306_DRAW_TEXT_ALT_START:',
-                                        'UTIL_C_C_SSD1306_DRAW_TEXT_ALT_DONE:',
+                                        'UTIL_C_C_SSD1306_DRAW_TEXT_START:',
+                                        'UTIL_C_C_SSD1306_DRAW_TEXT_DONE:',
                                         '/ UTIL_C_DEFINITIONS:') then
     return nil
   end
@@ -1582,11 +1582,9 @@ function FSMNodes.append_ssd1306_draw_text_node(node, node_graph, proj_state)
     local text_str = node.options.text_line
     local text_var = node.options.text_var
     -- Default to 'small' text.
-    local text_size = 'small'
     local char_width = '6'
     if node.options.text_size == 'L' then
-      text_size = 'big'
-      char_width = '11'
+      char_width = '12'
     end
     -- Default to 'On'.
     local text_color = '1'
@@ -1600,9 +1598,9 @@ function FSMNodes.append_ssd1306_draw_text_node(node, node_graph, proj_state)
       node_text = node_text .. '  snprintf(oled_line_buf, 23, "%s", "' ..
                   text_str .. '");\n'
       node_text = node_text .. "  oled_line_buf[23] = '\\0';\n"
-      node_text = node_text .. '  oled_draw_small_text_alt(' ..
+      node_text = node_text .. '  oled_draw_text(' ..
                   text_x .. ', ' .. text_y .. ', oled_line_buf, ' ..
-                  text_color .. ');\n'
+                  text_color .. ", '" .. node.options.text_size:sub(1,1) .. "');\n"
     elseif text_type == 'var' then
       -- Draw a variable as a string.
       -- Get the variable's type.
@@ -1617,16 +1615,16 @@ function FSMNodes.append_ssd1306_draw_text_node(node, node_graph, proj_state)
         return nil
       end
       if var_type == 'int' then
-        node_text = node_text .. '  oled_draw_small_letter_alti(' ..
+        node_text = node_text .. '  oled_draw_letter_i(' ..
                     text_x .. ', ' .. text_y .. ', ' .. text_var ..
-                    ', ' .. text_color .. ');\n'
+                    ', ' .. text_color .. ", '" .. node.options.text_size .. "');\n"
       elseif var_type == 'float' then
         -- TODO
         return nil
       elseif var_type == 'char' then
-        node_text = node_text .. '  oled_draw_small_letter_altc(' ..
+        node_text = node_text .. '  oled_draw_letter_c(' ..
                     text_x .. ', ' .. text_y .. ', ' .. text_var ..
-                    ', ' .. text_color .. ');\n'
+                    ', ' .. text_color .. ", '" .. node.options.text_size .. "');\n"
       elseif var_type == 'bool' then
         -- TODO
         return nil
