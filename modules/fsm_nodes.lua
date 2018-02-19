@@ -198,6 +198,7 @@ function FSMNodes.gen_bare_source_files(boot_node, cur_proj_state)
   -- One of the files copied, 'src/global.h', should also have initial
   -- global/static variable declarations:
   local g_vars_text = ''
+  local m_vars_text = ''
   for i, val in pairs(cur_proj_state.global_decs) do
     if val and val.var_name and val.var_type and val.var_val then
       local var_c_type = val.var_type
@@ -215,12 +216,20 @@ function FSMNodes.gen_bare_source_files(boot_node, cur_proj_state)
       elseif var_c_type == 'char' then
         var_c_val = "'" .. var_c_val .. "'"
       end
-      g_vars_text = g_vars_text .. 'static ' .. var_c_type .. ' ' .. val.var_name .. ' = ' .. var_c_val .. ';\n'
+      g_vars_text = g_vars_text .. 'volatile ' .. var_c_type .. ' ' ..
+                    val.var_name .. ';\n'
+      m_vars_text = m_vars_text .. '  ' .. val.var_name .. ' = ' ..
+                    var_c_val .. ';\n'
     end
   end
   if not varm_util.insert_into_file(cur_proj_state.base_dir .. 'src/global.h',
                                     "/ GLOBAL_VAR_DEFINES:",
                                     g_vars_text) then
+    copy_success = false
+  end
+  if not varm_util.insert_into_file(cur_proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_VAR_DEFS:",
+                                    m_vars_text) then
     copy_success = false
   end
 
@@ -1221,6 +1230,7 @@ function FSMNodes.ensure_support_methods_ssd1306_draw_text_node(node, proj_state
   end
   local util_c_h_insert_path = 'static/node_code/ssd1306_draw_text/src/util_c_h.insert'
   local util_c_c_insert_path = 'static/node_code/ssd1306_draw_text/src/util_c_c.insert'
+  local global_h_insert_path = 'static/node_code/ssd1306_draw_text/src/global_h.insert'
   -- 'util_c.h' declares.
   if not varm_util.copy_block_into_file(util_c_h_insert_path,
                                         proj_state.base_dir .. 'src/util_c.h',
@@ -1238,8 +1248,8 @@ function FSMNodes.ensure_support_methods_ssd1306_draw_text_node(node, proj_state
   end
   if not varm_util.copy_block_into_file(util_c_h_insert_path,
                                         proj_state.base_dir .. 'src/util_c.h',
-                                        'UTIL_C_H_SSD1306_DRAW_TEXT_START:',
-                                        'UTIL_C_H_SSD1306_DRAW_TEXT_DONE:',
+                                        'UTIL_C_H_SSD1306_DRAW_TEXT_ALT_START:',
+                                        'UTIL_C_H_SSD1306_DRAW_TEXT_ALT_DONE:',
                                         '/ UTIL_C_DECLARATIONS:') then
     return nil
   end
@@ -1260,9 +1270,24 @@ function FSMNodes.ensure_support_methods_ssd1306_draw_text_node(node, proj_state
   end
   if not varm_util.copy_block_into_file(util_c_c_insert_path,
                                         proj_state.base_dir .. 'src/util_c.c',
-                                        'UTIL_C_C_SSD1306_DRAW_TEXT_START:',
-                                        'UTIL_C_C_SSD1306_DRAW_TEXT_DONE:',
+                                        'UTIL_C_C_SSD1306_DRAW_TEXT_ALT_START:',
+                                        'UTIL_C_C_SSD1306_DRAW_TEXT_ALT_DONE:',
                                         '/ UTIL_C_DEFINITIONS:') then
+    return nil
+  end
+  -- 'global.h' definitions.
+  if not varm_util.copy_block_into_file(global_h_insert_path,
+                                        proj_state.base_dir .. 'src/global.h',
+                                        'GLOBAL_DEFS_SSD1306_SMALL_TEXT_CHARS_START:',
+                                        'GLOBAL_DEFS_SSD1306_SMALL_TEXT_CHARS_DONE',
+                                        '/ SYS_GLOBAL_VAR_DEFINES:') then
+    return nil
+  end
+  if not varm_util.copy_block_into_file(global_h_insert_path,
+                                        proj_state.base_dir .. 'src/global.h',
+                                        'GLOBAL_DEFS_SSD1306_TEXT_LINE_BUF_START:',
+                                        'GLOBAL_DEFS_SSD1306_TEXT_LINE_BUF_DONE:',
+                                        '/ SYS_GLOBAL_VAR_DEFINES:') then
     return nil
   end
   return true
@@ -1541,7 +1566,7 @@ function FSMNodes.append_ssd1306_draw_text_node(node, node_graph, proj_state)
   -- TODO: 'refresh display after' option, or delete i2c stuff.
   if node.options and node.options.i2c_periph_num and
      node.options.text_x and node.options.text_y and
-     node.options.text_line and node.options.text_size and
+     node.options.text_type and node.options.text_size and
      node.options.text_color then
     local i2c_port = tostring(node.options.i2c_periph_num)
     local i2c_base_addr = nil
@@ -1553,7 +1578,9 @@ function FSMNodes.append_ssd1306_draw_text_node(node, node_graph, proj_state)
     local text_x = tostring(node.options.text_x)
     local cur_char_x = tonumber(text_x)
     local text_y = tostring(node.options.text_y)
+    local text_type = node.options.text_type
     local text_str = node.options.text_line
+    local text_var = node.options.text_var
     -- Default to 'small' text.
     local text_size = 'small'
     local char_width = '6'
@@ -1568,11 +1595,46 @@ function FSMNodes.append_ssd1306_draw_text_node(node, node_graph, proj_state)
     end
     -- Draw the text string.
     -- TODO: Use the C 'draw_text' methods.
-    for cur_char in text_str:gmatch(".") do
-      node_text = node_text .. '  oled_draw_' .. text_size .. '_letter(' ..
-                  tostring(cur_char_x) .. ', ' .. text_y .. ", '" ..
-                  cur_char .. "', " .. text_color .. ');\n'
-      cur_char_x = cur_char_x + char_width
+    if text_type == 'val' then
+      text_str = text_str:sub(1, 23)
+      node_text = node_text .. '  snprintf(oled_line_buf, 23, "%s", "' ..
+                  text_str .. '");\n'
+      node_text = node_text .. "  oled_line_buf[23] = '\\0';\n"
+      node_text = node_text .. '  oled_draw_small_text_alt(' ..
+                  text_x .. ', ' .. text_y .. ', oled_line_buf, ' ..
+                  text_color .. ');\n'
+    elseif text_type == 'var' then
+      -- Draw a variable as a string.
+      -- Get the variable's type.
+      local var_type = ''
+      local type_str = ''
+      for i, val in pairs(proj_state.global_decs) do
+        if val and val.var_name == text_var then
+          var_type = val.var_type
+        end
+      end
+      if (not var_type) or var_type == '' then
+        return nil
+      end
+      if var_type == 'int' then
+        node_text = node_text .. '  oled_draw_small_letter_alti(' ..
+                    text_x .. ', ' .. text_y .. ', ' .. text_var ..
+                    ', ' .. text_color .. ');\n'
+      elseif var_type == 'float' then
+        -- TODO
+        return nil
+      elseif var_type == 'char' then
+        node_text = node_text .. '  oled_draw_small_letter_altc(' ..
+                    text_x .. ', ' .. text_y .. ', ' .. text_var ..
+                    ', ' .. text_color .. ');\n'
+      elseif var_type == 'bool' then
+        -- TODO
+        return nil
+      else
+        return nil
+      end
+    else
+      return nil
     end
   else
     return nil

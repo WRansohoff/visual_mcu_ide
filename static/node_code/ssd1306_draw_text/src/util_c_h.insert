@@ -15,3 +15,10 @@ void oled_draw_small_text(int x, int y, char* cc, unsigned char color);
 void oled_draw_big_letter(int x, int y, char c, unsigned char color);
 void oled_draw_big_text(int x, int y, char* cc, unsigned char color);
 UTIL_C_H_SSD1306_DRAW_TEXT_DONE:
+
+UTIL_C_H_SSD1306_DRAW_TEXT_ALT_START:
+void oled_draw_small_letter_alt(int x, int y, unsigned int w0, unsigned int w1, unsigned char color);
+void oled_draw_small_letter_altc(int x, int y, char c, unsigned char color);
+void oled_draw_small_letter_alti(int x, int y, int ic, unsigned char color);
+void oled_draw_small_text_alt(int x, int y, char* cc, unsigned char color);
+UTIL_C_H_SSD1306_DRAW_TEXT_ALT_DONE:

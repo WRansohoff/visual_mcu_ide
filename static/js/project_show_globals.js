@@ -356,6 +356,8 @@ const tool_node_types = [
     i2c_periph_num: '1',
     text_x: '0',
     text_y: '0',
+    text_type: 'val',
+    text_var: '(None)',
     text_line: '',
     text_size: 'S',
     text_color: 'On',

@@ -130,156 +130,183 @@ UTIL_C_C_SSD1306_DRAW_TEXT_START:
  */
 void oled_draw_small_letter(int x, int y, char c, unsigned char color) {
     if (c == 'A') {
-        oled_draw_v_line(x, y+3, 5, 1);
-        oled_draw_v_line(x+4, y+3, 5, 1);
-        oled_draw_v_line(x+1, y+1, 2, 1);
-        oled_draw_v_line(x+3, y+1, 2, 1);
-        oled_write_pixel(x+2, y, 1);
-        oled_draw_h_line(x+1, y+4, 3, 1);
+        oled_draw_v_line(x, y+3, 5, color);
+        oled_draw_v_line(x+4, y+3, 5, color);
+        oled_draw_v_line(x+1, y+1, 2, color);
+        oled_draw_v_line(x+3, y+1, 2, color);
+        oled_write_pixel(x+2, y, color);
+        oled_draw_h_line(x+1, y+4, 3, color);
     }
     else if (c == 'D') {
-        oled_draw_v_line(x, y, 8, 1);
-        oled_draw_v_line(x+4, y+1, 6, 1);
-        oled_draw_h_line(x+1, y, 3, 1);
-        oled_draw_h_line(x+1, y+7, 3, 1);
+        oled_draw_v_line(x, y, 8, color);
+        oled_draw_v_line(x+4, y+1, 6, color);
+        oled_draw_h_line(x+1, y, 3, color);
+        oled_draw_h_line(x+1, y+7, 3, color);
     }
     else if (c == 'E') {
-        oled_draw_v_line(x, y, 8, 1);
-        oled_draw_h_line(x+1, y, 4, 1);
-        oled_draw_h_line(x+1, y+7, 4, 1);
-        oled_draw_h_line(x+1, y+4, 3, 1);
+        oled_draw_v_line(x, y, 8, color);
+        oled_draw_h_line(x+1, y, 4, color);
+        oled_draw_h_line(x+1, y+7, 4, color);
+        oled_draw_h_line(x+1, y+4, 3, color);
+    }
+    else if (c == 'I') {
+        oled_draw_h_line(x, y, 5, color);
+        oled_draw_h_line(x, y+7, 5, color);
+        oled_draw_v_line(x+2, y+1, 6, color);
     }
     else if (c == 'M') {
-        oled_draw_v_line(x, y, 8, 1);
-        oled_draw_v_line(x+4, y, 8, 1);
-        oled_draw_v_line(x+2, y+2, 2, 1);
-        oled_write_pixel(x+1, y+1, 1);
-        oled_write_pixel(x+3, y+1, 1);
+        oled_draw_v_line(x, y, 8, color);
+        oled_draw_v_line(x+4, y, 8, color);
+        oled_draw_v_line(x+2, y+2, 2, color);
+        oled_write_pixel(x+1, y+1, color);
+        oled_write_pixel(x+3, y+1, color);
     }
     else if (c == 'O') {
-        oled_draw_v_line(x, y+1, 6, 1);
-        oled_draw_v_line(x+4, y+1, 6, 1);
-        oled_draw_h_line(x+1, y, 3, 1);
-        oled_draw_h_line(x+1, y+7, 3, 1);
+        oled_draw_v_line(x, y+1, 6, color);
+        oled_draw_v_line(x+4, y+1, 6, color);
+        oled_draw_h_line(x+1, y, 3, color);
+        oled_draw_h_line(x+1, y+7, 3, color);
     }
     else if (c == 'S') {
-        oled_draw_v_line(x, y+1, 2, 1);
-        oled_draw_v_line(x, y+5, 2, 1);
-        oled_draw_v_line(x+4, y+1, 2, 1);
-        oled_draw_v_line(x+4, y+5, 2, 1);
-        oled_draw_h_line(x+1, y, 3, 1);
-        oled_draw_h_line(x+1, y+7, 3, 1);
-        oled_draw_h_line(x+1, y+3, 2, 1);
-        oled_draw_h_line(x+2, y+4, 2, 1);
+        oled_draw_v_line(x, y+1, 2, color);
+        oled_draw_v_line(x, y+5, 2, color);
+        oled_draw_v_line(x+4, y+1, 2, color);
+        oled_draw_v_line(x+4, y+5, 2, color);
+        oled_draw_h_line(x+1, y, 3, color);
+        oled_draw_h_line(x+1, y+7, 3, color);
+        oled_draw_h_line(x+1, y+3, 2, color);
+        oled_draw_h_line(x+2, y+4, 2, color);
     }
     else if (c == 'T') {
-        oled_draw_h_line(x, y, 5, 1);
-        oled_draw_v_line(x+2, y, 8, 1);
+        oled_draw_h_line(x, y, 5, color);
+        oled_draw_v_line(x+2, y, 8, color);
     }
     else if (c == 'a') {
-        oled_draw_h_line(x+1, y+2, 3, 1);
-        oled_draw_h_line(x+1, y+4, 3, 1);
-        oled_draw_h_line(x+1, y+7, 3, 1);
-        oled_draw_v_line(x, y+5, 2, 1);
-        oled_draw_v_line(x+4, y+3, 4, 1);
+        oled_draw_h_line(x+1, y+2, 3, color);
+        oled_draw_h_line(x+1, y+4, 3, color);
+        oled_draw_h_line(x+1, y+7, 3, color);
+        oled_draw_v_line(x, y+5, 2, color);
+        oled_draw_v_line(x+4, y+3, 4, color);
+    }
+    else if (c == 'd') {
+        oled_draw_v_line(x, y+5, 2, color);
+        oled_draw_h_line(x+1, y+4, 2, color);
+        oled_draw_h_line(x+1, y+7, 4, color);
+        oled_draw_v_line(x+3, y, 8, color);
     }
     else if (c == 'e') {
-        oled_draw_h_line(x+1, y+1, 3, 1);
-        oled_draw_h_line(x+1, y+4, 3, 1);
-        oled_draw_h_line(x+1, y+7, 3, 1);
-        oled_write_pixel(x+4, y+6, 1);
-        oled_draw_v_line(x, y+2, 5, 1);
-        oled_draw_v_line(x+4, y+2, 3, 1);
+        oled_draw_h_line(x+1, y+1, 3, color);
+        oled_draw_h_line(x+1, y+4, 3, color);
+        oled_draw_h_line(x+1, y+7, 3, color);
+        oled_write_pixel(x+4, y+6, color);
+        oled_draw_v_line(x, y+2, 5, color);
+        oled_draw_v_line(x+4, y+2, 3, color);
     }
     else if (c == 'f') {
-        oled_draw_h_line(x+2, y, 2, 1);
-        oled_draw_h_line(x, y+4, 4, 1);
-        oled_draw_v_line(x+1, y+1, 7, 1);
-        oled_draw_v_line(x+4, y+1, 2, 1);
+        oled_draw_h_line(x+2, y, 2, color);
+        oled_draw_h_line(x, y+4, 4, color);
+        oled_draw_v_line(x+1, y+1, 7, color);
+        oled_draw_v_line(x+4, y+1, 2, color);
     }
     else if (c == 'i') {
-        oled_write_pixel(x+2, y+1, 1);
-        oled_draw_v_line(x+2, y+3, 5, 1);
+        oled_write_pixel(x+2, y+1, color);
+        oled_draw_v_line(x+2, y+3, 5, color);
     }
     else if (c == 'l') {
-        oled_draw_v_line(x+2, y, 8, 1);
+        oled_draw_v_line(x+2, y, 8, color);
     }
     else if (c == 'm') {
-        oled_draw_h_line(x+1, y+3, 3, 1);
-        oled_draw_v_line(x, y+2, 6, 1);
-        oled_draw_v_line(x+2, y+3, 5, 1);
-        oled_draw_v_line(x+4, y+3, 5, 1);
+        oled_draw_h_line(x+1, y+3, 3, color);
+        oled_draw_v_line(x, y+2, 6, color);
+        oled_draw_v_line(x+2, y+3, 5, color);
+        oled_draw_v_line(x+4, y+3, 5, color);
     }
     else if (c == 'n') {
-        oled_draw_h_line(x+1, y+3, 2, 1);
-        oled_draw_v_line(x, y+2, 6, 1);
-        oled_draw_v_line(x+3, y+4, 4, 1);
+        oled_draw_h_line(x+1, y+3, 2, color);
+        oled_draw_v_line(x, y+2, 6, color);
+        oled_draw_v_line(x+3, y+4, 4, color);
     }
     else if (c == 'o') {
-        oled_draw_h_line(x+1, y+3, 3, 1);
-        oled_draw_h_line(x+1, y+7, 3, 1);
-        oled_draw_v_line(x, y+4, 3, 1);
-        oled_draw_v_line(x+4, y+4, 3, 1);
+        oled_draw_h_line(x+1, y+3, 3, color);
+        oled_draw_h_line(x+1, y+7, 3, color);
+        oled_draw_v_line(x, y+4, 3, color);
+        oled_draw_v_line(x+4, y+4, 3, color);
     }
     else if (c == 'r') {
-        oled_draw_h_line(x+2, y+3, 2, 1);
-        oled_write_pixel(x+4, y+4, 1);
-        oled_draw_v_line(x+1, y+2, 6, 1);
+        oled_draw_h_line(x+2, y+3, 2, color);
+        oled_write_pixel(x+4, y+4, color);
+        oled_draw_v_line(x+1, y+2, 6, color);
     }
     else if (c == 's') {
-        oled_draw_h_line(x+2, y+1, 2, 1);
-        oled_draw_h_line(x+2, y+4, 2, 1);
-        oled_draw_h_line(x+2, y+7, 2, 1);
-        oled_write_pixel(x+1, y+6, 1);
-        oled_write_pixel(x+4, y+2, 1);
-        oled_draw_v_line(x+1, y+2, 2, 1);
-        oled_draw_v_line(x+4, y+5, 2, 1);
+        oled_draw_h_line(x+2, y+1, 2, color);
+        oled_draw_h_line(x+2, y+4, 2, color);
+        oled_draw_h_line(x+2, y+7, 2, color);
+        oled_write_pixel(x+1, y+6, color);
+        oled_write_pixel(x+4, y+2, color);
+        oled_draw_v_line(x+1, y+2, 2, color);
+        oled_draw_v_line(x+4, y+5, 2, color);
     }
     else if (c == 't') {
-        oled_draw_h_line(x, y+2, 4, 1);
-        oled_draw_h_line(x+2, y+7, 2, 1);
-        oled_write_pixel(x+4, y+6, 1);
-        oled_draw_v_line(x+1, y, 7, 1);
+        oled_draw_h_line(x, y+2, 4, color);
+        oled_draw_h_line(x+2, y+7, 2, color);
+        oled_write_pixel(x+4, y+6, color);
+        oled_draw_v_line(x+1, y, 7, color);
     }
     else if (c == 'u') {
-        oled_draw_h_line(x+1, y+6, 4, 1);
-        oled_write_pixel(x+4, y+7, 1);
-        oled_draw_v_line(x, y+2, 4, 1);
-        oled_draw_v_line(x+3, y+2, 4, 1);
+        oled_draw_h_line(x+1, y+6, 4, color);
+        oled_write_pixel(x+4, y+7, color);
+        oled_draw_v_line(x, y+2, 4, color);
+        oled_draw_v_line(x+3, y+2, 4, color);
+    }
+    else if (c == 'v') {
+        oled_draw_v_line(x, y+3, 2, color);
+        oled_draw_v_line(x+4, y+3, 2, color);
+        oled_draw_v_line(x+1, y+5, 2, color);
+        oled_draw_v_line(x+3, y+5, 2, color);
+        oled_write_pixel(x+2, y+7, color);
     }
     else if (c == 'x') {
-        oled_write_pixel(x, y+3, 1);
-        oled_write_pixel(x, y+7, 1);
-        oled_write_pixel(x+1, y+4, 1);
-        oled_write_pixel(x+1, y+6, 1);
-        oled_write_pixel(x+2, y+5, 1);
-        oled_write_pixel(x+3, y+4, 1);
-        oled_write_pixel(x+3, y+6, 1);
-        oled_write_pixel(x+4, y+3, 1);
-        oled_write_pixel(x+4, y+7, 1);
+        oled_write_pixel(x, y+3, color);
+        oled_write_pixel(x, y+7, color);
+        oled_write_pixel(x+1, y+4, color);
+        oled_write_pixel(x+1, y+6, color);
+        oled_write_pixel(x+2, y+5, color);
+        oled_write_pixel(x+3, y+4, color);
+        oled_write_pixel(x+3, y+6, color);
+        oled_write_pixel(x+4, y+3, color);
+        oled_write_pixel(x+4, y+7, color);
     }
     else if (c == 'y') {
-        oled_draw_h_line(x+1, y+4, 2, 1);
-        oled_draw_h_line(x+1, y+7, 2, 1);
-        oled_write_pixel(x, y+6, 1);
-        oled_draw_v_line(x, y+2, 2, 1);
-        oled_draw_v_line(x+3, y+2, 5, 1);
+        oled_draw_h_line(x+1, y+4, 2, color);
+        oled_draw_h_line(x+1, y+7, 2, color);
+        oled_write_pixel(x, y+6, color);
+        oled_draw_v_line(x, y+2, 2, color);
+        oled_draw_v_line(x+3, y+2, 5, color);
+    }
+    else if (c == '0') {
+        oled_draw_h_line(x+1, y, 3, color);
+        oled_draw_h_line(x+1, y+7, 3, color);
+        oled_draw_v_line(x, y+1, 6, color);
+        oled_draw_v_line(x+4, y+1, 6, color);
+        oled_draw_v_line(x+1, y+1, 2, color);
+        oled_draw_v_line(x+2, y+3, 2, color);
+        oled_draw_v_line(x+3, y+5, 2, color);
     }
     else if (c == ':') {
-        oled_write_pixel(x+2, y+2, 1);
-        oled_write_pixel(x+2, y+5, 1);
+        oled_write_pixel(x+2, y+2, color);
+        oled_write_pixel(x+2, y+5, color);
     }
     else if (c == '/') {
-        oled_draw_v_line(x+1, y+5, 2, 1);
-        oled_draw_v_line(x+2, y+3, 2, 1);
-        oled_draw_v_line(x+3, y+1, 2, 1);
+        oled_draw_v_line(x+1, y+5, 2, color);
+        oled_draw_v_line(x+2, y+3, 2, color);
+        oled_draw_v_line(x+3, y+1, 2, color);
     }
     else if (c == '>') {
-        oled_write_pixel(x+1, y+1, 1);
-        oled_write_pixel(x+2, y+2, 1);
-        oled_write_pixel(x+3, y+3, 1);
-        oled_write_pixel(x+2, y+4, 1);
-        oled_write_pixel(x+1, y+5, 1);
+        oled_write_pixel(x+1, y+1, color);
+        oled_write_pixel(x+2, y+2, color);
+        oled_write_pixel(x+3, y+3, color);
+        oled_write_pixel(x+2, y+4, color);
+        oled_write_pixel(x+1, y+5, color);
     }
     else if (c == ' ') {
     }
@@ -439,3 +466,364 @@ void oled_draw_big_text(int x, int y, char* cc, unsigned char color) {
 }
 
 UTIL_C_C_SSD1306_DRAW_TEXT_DONE:
+
+UTIL_C_C_SSD1306_DRAW_TEXT_ALT_START:
+void oled_draw_small_letter_alt(int x, int y, unsigned int w0, unsigned int w1, unsigned char color) {
+    // TODO: Make this more efficient than drawing
+    // pixels one-by-one.
+    int w_iter = 0;
+    int cur_x = x;
+    int cur_y = y;
+    unsigned int aw0 = w0;
+    unsigned int aw1 = w1;
+    if (!color) {
+        aw0 = ~aw0;
+        aw1 = ~aw1;
+    }
+    for (w_iter = 31; w_iter >= 0; --w_iter) {
+        oled_write_pixel(cur_x, cur_y, !(!(aw0 & (1 << w_iter))));
+        cur_y += 1;
+        if (cur_y == y+8) {
+            cur_y = y;
+            cur_x += 1;
+        }
+    }
+    for (w_iter = 15; w_iter >= 0; --w_iter) {
+        oled_write_pixel(cur_x, cur_y, !(!(aw1 & (1 << w_iter))));
+        cur_y += 1;
+        if (cur_y == y+8) {
+            cur_y = y;
+            cur_x += 1;
+        }
+    }
+}
+
+void oled_draw_small_letter_altc(int x, int y, char c, unsigned char color) {
+    unsigned int w0 = 0x00;
+    unsigned int w1 = 0x00;
+    if (c == 'A') {
+        w0 = OLED_CH_A0;
+        w1 = OLED_CH_A1B1 >> 16;
+    }
+    else if (c == 'B') {
+        w0 = OLED_CH_B0;
+        w1 = OLED_CH_A1B1 & 0x0000FFFF;
+    }
+    else if (c == 'C') {
+        w0 = OLED_CH_C0;
+        w1 = OLED_CH_C1D1 >> 16;
+    }
+    else if (c == 'D') {
+        w0 = OLED_CH_D0;
+        w1 = OLED_CH_C1D1 & 0x0000FFFF;
+    }
+    else if (c == 'E') {
+        w0 = OLED_CH_E0;
+        w1 = OLED_CH_E1F1 >> 16;
+    }
+    else if (c == 'F') {
+        w0 = OLED_CH_F0;
+        w1 = OLED_CH_E1F1 & 0x0000FFFF;
+    }
+    else if (c == 'G') {
+        w0 = OLED_CH_G0;
+        w1 = OLED_CH_G1H1 >> 16;
+    }
+    else if (c == 'H') {
+        w0 = OLED_CH_H0;
+        w1 = OLED_CH_G1H1 & 0x0000FFFF;
+    }
+    else if (c == 'I') {
+        w0 = OLED_CH_I0;
+        w1 = OLED_CH_I1J1 >> 16;
+    }
+    else if (c == 'J') {
+        w0 = OLED_CH_J0;
+        w1 = OLED_CH_I1J1 & 0x0000FFFF;
+    }
+    else if (c == 'K') {
+        w0 = OLED_CH_K0;
+        w1 = OLED_CH_K1L1 >> 16;
+    }
+    else if (c == 'L') {
+        w0 = OLED_CH_L0;
+        w1 = OLED_CH_K1L1 & 0x0000FFFF;
+    }
+    else if (c == 'M') {
+        w0 = OLED_CH_M0;
+        w1 = OLED_CH_M1N1 >> 16;
+    }
+    else if (c == 'N') {
+        w0 = OLED_CH_N0;
+        w1 = OLED_CH_M1N1 & 0x0000FFFF;
+    }
+    else if (c == 'O') {
+        w0 = OLED_CH_O0;
+        w1 = OLED_CH_O1P1 >> 16;
+    }
+    else if (c == 'P') {
+        w0 = OLED_CH_P0;
+        w1 = OLED_CH_O1P1 & 0x0000FFFF;
+    }
+    else if (c == 'Q') {
+        w0 = OLED_CH_Q0;
+        w1 = OLED_CH_Q1R1 >> 16;
+    }
+    else if (c == 'R') {
+        w0 = OLED_CH_R0;
+        w1 = OLED_CH_Q1R1 & 0x0000FFFF;
+    }
+    else if (c == 'S') {
+        w0 = OLED_CH_S0;
+        w1 = OLED_CH_S1T1 >> 16;
+    }
+    else if (c == 'T') {
+        w0 = OLED_CH_T0;
+        w1 = OLED_CH_S1T1 & 0x0000FFFF;
+    }
+    else if (c == 'U') {
+        w0 = OLED_CH_U0;
+        w1 = OLED_CH_U1V1 >> 16;
+    }
+    else if (c == 'V') {
+        w0 = OLED_CH_V0;
+        w1 = OLED_CH_U1V1 & 0x0000FFFF;
+    }
+    else if (c == 'W') {
+        w0 = OLED_CH_W0;
+        w1 = OLED_CH_W1X1 >> 16;
+    }
+    else if (c == 'X') {
+        w0 = OLED_CH_X0;
+        w1 = OLED_CH_W1X1 & 0x0000FFFF;
+    }
+    else if (c == 'Y') {
+        w0 = OLED_CH_Y0;
+        w1 = OLED_CH_Y1Z1 >> 16;
+    }
+    else if (c == 'Z') {
+        w0 = OLED_CH_Z0;
+        w1 = OLED_CH_Y1Z1 & 0x0000FFFF;
+    }
+    else if (c == 'a') {
+        w0 = OLED_CH_a0;
+        w1 = OLED_CH_a1b1 >> 16;
+    }
+    else if (c == 'b') {
+        w0 = OLED_CH_b0;
+        w1 = OLED_CH_a1b1 & 0x0000FFFF;
+    }
+    else if (c == 'c') {
+        w0 = OLED_CH_c0;
+        w1 = OLED_CH_c1d1 >> 16;
+    }
+    else if (c == 'd') {
+        w0 = OLED_CH_d0;
+        w1 = OLED_CH_c1d1 & 0x0000FFFF;
+    }
+    else if (c == 'e') {
+        w0 = OLED_CH_e0;
+        w1 = OLED_CH_e1f1 >> 16;
+    }
+    else if (c == 'f') {
+        w0 = OLED_CH_f0;
+        w1 = OLED_CH_e1f1 & 0x0000FFFF;
+    }
+    else if (c == 'g') {
+        w0 = OLED_CH_g0;
+        w1 = OLED_CH_g1h1 >> 16;
+    }
+    else if (c == 'h') {
+        w0 = OLED_CH_h0;
+        w1 = OLED_CH_g1h1 & 0x0000FFFF;
+    }
+    else if (c == 'i') {
+        w0 = OLED_CH_i0;
+        w1 = OLED_CH_i1j1 >> 16;
+    }
+    else if (c == 'j') {
+        w0 = OLED_CH_j0;
+        w1 = OLED_CH_i1j1 & 0x0000FFFF;
+    }
+    else if (c == 'k') {
+        w0 = OLED_CH_k0;
+        w1 = OLED_CH_k1l1 >> 16;
+    }
+    else if (c == 'l') {
+        w0 = OLED_CH_l0;
+        w1 = OLED_CH_k1l1 & 0x0000FFFF;
+    }
+    else if (c == 'm') {
+        w0 = OLED_CH_m0;
+        w1 = OLED_CH_m1n1 >> 16;
+    }
+    else if (c == 'n') {
+        w0 = OLED_CH_n0;
+        w1 = OLED_CH_m1n1 & 0x0000FFFF;
+    }
+    else if (c == 'o') {
+        w0 = OLED_CH_o0;
+        w1 = OLED_CH_o1p1 >> 16;
+    }
+    else if (c == 'p') {
+        w0 = OLED_CH_p0;
+        w1 = OLED_CH_o1p1 & 0x0000FFFF;
+    }
+    else if (c == 'q') {
+        w0 = OLED_CH_q0;
+        w1 = OLED_CH_q1r1 >> 16;
+    }
+    else if (c == 'r') {
+        w0 = OLED_CH_r0;
+        w1 = OLED_CH_q1r1 & 0x0000FFFF;
+    }
+    else if (c == 's') {
+        w0 = OLED_CH_s0;
+        w1 = OLED_CH_s1t1 >> 16;
+    }
+    else if (c == 't') {
+        w0 = OLED_CH_t0;
+        w1 = OLED_CH_s1t1 & 0x0000FFFF;
+    }
+    else if (c == 'u') {
+        w0 = OLED_CH_u0;
+        w1 = OLED_CH_u1v1 >> 16;
+    }
+    else if (c == 'v') {
+        w0 = OLED_CH_v0;
+        w1 = OLED_CH_u1v1 & 0x0000FFFF;
+    }
+    else if (c == 'w') {
+        w0 = OLED_CH_w0;
+        w1 = OLED_CH_w1x1 >> 16;
+    }
+    else if (c == 'x') {
+        w0 = OLED_CH_x0;
+        w1 = OLED_CH_w1x1 & 0x0000FFFF;
+    }
+    else if (c == 'y') {
+        w0 = OLED_CH_y0;
+        w1 = OLED_CH_y1z1 >> 16;
+    }
+    else if (c == 'z') {
+        w0 = OLED_CH_z0;
+        w1 = OLED_CH_y1z1 & 0x0000FFFF;
+    }
+    else if (c == '0') {
+        w0 = OLED_CH_00;
+        w1 = OLED_CH_0111 >> 16;
+    }
+    else if (c == '1') {
+        w0 = OLED_CH_10;
+        w1 = OLED_CH_0111 & 0x0000FFFF;
+    }
+    else if (c == '2') {
+        w0 = OLED_CH_20;
+        w1 = OLED_CH_2131 >> 16;
+    }
+    else if (c == '3') {
+        w0 = OLED_CH_30;
+        w1 = OLED_CH_2131 & 0x0000FFFF;
+    }
+    else if (c == '4') {
+        w0 = OLED_CH_40;
+        w1 = OLED_CH_4151 >> 16;
+    }
+    else if (c == '5') {
+        w0 = OLED_CH_50;
+        w1 = OLED_CH_4151 & 0x0000FFFF;
+    }
+    else if (c == '6') {
+        w0 = OLED_CH_60;
+        w1 = OLED_CH_6171 >> 16;
+    }
+    else if (c == '7') {
+        w0 = OLED_CH_70;
+        w1 = OLED_CH_6171 & 0x0000FFFF;
+    }
+    else if (c == '8') {
+        w0 = OLED_CH_80;
+        w1 = OLED_CH_8191 >> 16;
+    }
+    else if (c == '9') {
+        w0 = OLED_CH_90;
+        w1 = OLED_CH_8191 & 0x0000FFFF;
+    }
+    else if (c == ':') {
+        w0 = OLED_CH_col0;
+        w1 = OLED_CH_col1per1 >> 16;
+    }
+    else if (c == '.') {
+        w0 = OLED_CH_per0;
+        w1 = OLED_CH_col1per1 & 0x0000FFFF;
+    }
+    else if (c == '!') {
+        w0 = OLED_CH_exc0;
+        w1 = OLED_CH_exc1fws1 >> 16;
+    }
+    else if (c == '/') {
+        w0 = OLED_CH_fws0;
+        w1 = OLED_CH_exc1fws1 & 0x0000FFFF;
+    }
+    oled_draw_small_letter_alt(x, y, w0, w1, color);
+}
+
+void oled_draw_small_letter_alti(int x, int y, int ic, unsigned char color) {
+    int magnitude = 1000000000;
+    int cur_x = x;
+    int first_found = 0;
+    int proc_val = ic;
+    for (magnitude = 1000000000; magnitude > 0; magnitude = magnitude / 10) {
+        int m_val = proc_val / magnitude;
+        proc_val -= (m_val * magnitude);
+        if (m_val > 0 || first_found || magnitude == 1) {
+            first_found = 1;
+            char mc = ' ';
+            if (m_val == 0) {
+                mc = '0';
+            }
+            else if (m_val == 1) {
+                mc = '1';
+            }
+            else if (m_val == 2) {
+                mc = '2';
+            }
+            else if (m_val == 3) {
+                mc = '3';
+            }
+            else if (m_val == 4) {
+                mc = '4';
+            }
+            else if (m_val == 5) {
+                mc = '5';
+            }
+            else if (m_val == 6) {
+                mc = '6';
+            }
+            else if (m_val == 7) {
+                mc = '7';
+            }
+            else if (m_val == 8) {
+                mc = '8';
+            }
+            else if (m_val == 9) {
+                mc = '9';
+            }
+            oled_draw_small_letter_altc(cur_x, y, mc, color);
+            cur_x += 6;
+            if (cur_x >= 128) { return; }
+        }
+    }
+}
+
+void oled_draw_small_text_alt(int x, int y, char* cc, unsigned char color) {
+    int i = 0;
+    int offset = 0;
+    while (cc[i] != '\0') {
+        oled_draw_small_letter_altc(x + offset, y, cc[i], color);
+        offset += 6;
+        ++i;
+    }
+}
+
+UTIL_C_C_SSD1306_DRAW_TEXT_ALT_DONE:

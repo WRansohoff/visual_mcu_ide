@@ -15,6 +15,10 @@ var std_opts_tr_tag = function(tag_class) {
   return `<tr class="` + tag_class + `">`;
 };
 
+var std_opts_tr_id_tag = function(tag_class) {
+  return `<tr id="` + tag_class + `_row_tag" class="` + tag_class + `">`;
+};
+
 var std_opts_td_tag = function(tag_class) {
   return `<td class="` + tag_class + `">`;
 };
@@ -722,12 +726,23 @@ var ssd1306_draw_text_options_html = std_opts_table_tag('ssd1306_draw_text_optio
     std_opts_td_tag('ssd1306_draw_text_options_yc_opt') +
       std_opts_input_number_tag('ssd1306_draw_text_options_yc') +
   `</td></tr>` +
-  std_opts_tr_tag('ssd1306_draw_text_options_txt_row') +
+  std_opts_tr_tag('ssd1306_draw_text_options_type_row') +
+    std_opts_td_full_tag('ssd1306_draw_text_options_type_text',
+                         '"Text Source":') +
+    std_opts_td_tag('ssd1306_draw_text_options_type_opt') +
+      std_opts_select_tag('ssd1306_draw_text_options_type') +
+        std_opts_option_tag('ssd1306_draw_text_options_type',
+                            'val', 'Constant Text') +
+        std_opts_option_tag('ssd1306_draw_text_options_type',
+                            'var', 'Variable') +
+  `</select></td></tr>` +
+  std_opts_tr_id_tag('ssd1306_draw_text_options_txt_row') +
     std_opts_td_full_tag('ssd1306_draw_text_options_txt_text',
                          'Display Text:') +
     std_opts_td_tag('ssd1306_draw_text_options_txt_opt') +
       std_opts_input_text_tag('ssd1306_draw_text_options_txt') +
   `</td></tr>` +
+  defined_variables_list_table_row('ssd1306_draw_text_options', 'Variable to Draw:') +
   std_opts_tr_tag('ssd1306_draw_text_options_col_row') +
     std_opts_td_full_tag('ssd1306_draw_text_options_col_text',
                          '"Color":') +
@@ -1601,8 +1616,13 @@ var apply_ssd1306_draw_text_node_options_listeners = function(cur_node) {
   var i2c_channel_tag = document.getElementById('ssd1306_draw_text_options_i2c_channel_select_tag');
   var x_coord_tag = document.getElementById('ssd1306_draw_text_options_xc_tag');
   var y_coord_tag = document.getElementById('ssd1306_draw_text_options_yc_tag');
+  var type_tag = document.getElementById('ssd1306_draw_text_options_type_tag');
+  var txt_row_tag = document.getElementById('ssd1306_draw_text_options_txt_row_row_tag');
   var txt_tag = document.getElementById('ssd1306_draw_text_options_txt_tag');
+  var var_name_row_tag = document.getElementById('ssd1306_draw_text_options_var_list_row_tag');
+  var var_name_tag = document.getElementById('ssd1306_draw_text_options_var_list_tag');
   var color_tag = document.getElementById('ssd1306_draw_text_options_col_tag');
+  populate_defined_vars_dropdown('ssd1306_draw_text_options_var_list_tag', cur_node, cur_node.options.text_var);
   // Set loaded values.
   if (cur_node) {
     if (cur_node.options.i2c_periph_num) {
@@ -1615,6 +1635,20 @@ var apply_ssd1306_draw_text_node_options_listeners = function(cur_node) {
     }
     if (cur_node.options.text_y) {
       y_coord_tag.value = cur_node.options.text_y;
+    }
+    if (cur_node.options.text_type) {
+      type_tag.value = cur_node.options.text_type;
+      if (type_tag.value == 'val') {
+        txt_row_tag.hidden = false;
+        var_name_row_tag.hidden = true;
+      }
+      else if (type_tag.value == 'var') {
+        txt_row_tag.hidden = true;
+        var_name_row_tag.hidden = false;
+      }
+    }
+    if (cur_node.options.text_var) {
+      var_name_tag.value = cur_node.options.text_var;
     }
     if (cur_node.options.text_line) {
       txt_tag.value = cur_node.options.text_line;
@@ -1635,8 +1669,22 @@ var apply_ssd1306_draw_text_node_options_listeners = function(cur_node) {
   y_coord_tag.onchange = function() {
     cur_node.options.text_y = y_coord_tag.value;
   };
+  type_tag.onchange = function() {
+    cur_node.options.text_type = type_tag.value;
+    if (type_tag.value == 'val') {
+      txt_row_tag.hidden = false;
+      var_name_row_tag.hidden = true;
+    }
+    else if (type_tag.value == 'var') {
+      txt_row_tag.hidden = true;
+      var_name_row_tag.hidden = false;
+    }
+  };
   txt_tag.onchange = function() {
     cur_node.options.text_line = txt_tag.value;
+  };
+  var_name_tag.onchange = function() {
+    cur_node.options.text_var = var_name_tag.value;
   };
   color_tag.onchange = function() {
     cur_node.options.text_color = color_tag.value;
