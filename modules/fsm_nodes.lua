@@ -335,6 +335,16 @@ function FSMNodes.process_node(node, node_graph, proj_state)
   elseif node.node_type == 'I2C_Deinit' then
     -- TODO: I2C De-initialization.
     return false
+  elseif node.node_type == 'ADC_Init' then
+    if (FSMNodes.ensure_support_methods_adc_init_node(node, proj_state) and
+        FSMNodes.append_adc_init_node(node, node_graph, proj_state)) then
+      return true
+    end
+  elseif node.node_type == 'ADC_Read' then
+    if (FSMNodes.ensure_support_methods_adc_read_node(node, proj_state) and
+        FSMNodes.append_adc_read_node(node, node_graph, proj_state)) then
+      return true
+    end
   -- (External Device Nodes)
   elseif node.node_type == 'SSD1306_Init' then
     if (FSMNodes.ensure_support_methods_ssd1306_init_node(node, proj_state) and
@@ -791,6 +801,9 @@ function FSMNodes.append_rcc_enable_node(node, node_graph, proj_state)
       node_text = node_text .. '  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOF, ENABLE);\n'
     elseif node.options.periph_clock == 'I2C1' then
       node_text = node_text .. '  RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);\n'
+    elseif node.options.periph_clock == 'ADC1' then
+      node_text = node_text .. '  RCC_ADCCLKConfig(RCC_ADCCLK_PCLK_Div4);\n'
+      node_text = node_text .. '  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);\n'
     else
       return nil
     end
@@ -1024,6 +1037,103 @@ function FSMNodes.append_i2c_init_node(node, node_graph, proj_state)
     return nil
   end
   node_text = node_text .. '  // (End "I2C Initialization" node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Ensure supporting functionality for ADC peripheral initialization.
+function FSMNodes.ensure_support_methods_adc_init_node(node, proj_state)
+  -- TODO
+  return true
+end
+
+-- Append an 'ADC Initialization' node to the current program.
+function FSMNodes.append_adc_init_node(node, node_graph, proj_state)
+  local node_text = '  // ("ADC Initialization" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- ADC Init.
+  local adc_channel = nil
+  if node.options and node.options.adc_channel then
+    adc_channel = 'ADC' .. node.options.adc_channel
+  else
+    return nil
+  end
+  node_text = node_text .. '  ADC_DeInit(' .. adc_channel .. ');\n'
+  node_text = node_text .. '  global_adc_init_struct.ADC_Resolution = ADC_Resolution_12b;\n'
+  node_text = node_text .. '  global_adc_init_struct.ADC_ContinuousConvMode = DISABLE;\n'
+  node_text = node_text .. '  global_adc_init_struct.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;\n'
+  node_text = node_text .. '  global_adc_init_struct.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_TRGO;\n'
+  node_text = node_text .. '  global_adc_init_struct.ADC_DataAlign = ADC_DataAlign_Right;\n'
+  node_text = node_text .. '  global_adc_init_struct.ADC_ScanDirection = ADC_ScanDirection_Upward;\n'
+  node_text = node_text .. '  ADC_Init(&global_adc_init_struct);\n'
+  node_text = node_text .. '  ADC_Cmd(' .. adc_channel .. ');\n'
+  node_text = node_text .. '  while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_ADRDY)){};\n'
+  -- (Done)
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "ADC Initialization" node)\n\n'
+  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                    "/ MAIN_ENTRY:",
+                                    node_text) then
+    return nil
+  end
+  return true
+end
+
+-- Ensure supporting functionality for reading an ADC pin.
+function FSMNodes.ensure_support_methods_adc_read_node(node, proj_state)
+  -- TODO
+  return true
+end
+
+-- Append an 'ADC Read' node to the current program.
+function FSMNodes.append_adc_read_node(node, node_graph, proj_state)
+  local node_text = '  // ("ADC Read Pin" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- ADC Read.
+  -- TODO: More pins.
+  if node.options and node.options.gpio_bank and
+     node.options.gpio_pin and node.options.adc_var and
+     node.options.adc_var ~= '(None)' then
+    local pin_num = tostring(node.options.gpio_pin)
+    local adc_b_conf = nil
+    local adc_ch_conf = nil
+    if node.options.gpio_bank == 'GPIOA' then
+      if pin_num == '1' then
+        adc_b_conf = 'ADC1'
+        adc_ch_conf = 'ADC_Channel_1'
+      end
+    end
+    if adc_b_conf and adc_ch_conf then
+      node_text = node_text .. '  ADC_ChannelConfig(' ..
+                  adc_b_conf .. ', ' .. adc_ch_conf ..
+                  ', ADC_SampleTime_71_5Cycles);\n'
+      node_text = node_text .. '  ADC_StartOfConversion(' ..
+                  adc_b_conf .. ');\n'
+      node_text = node_text .. 'while(ADC_GetFlagStatus(' ..
+                  adc_b_conf .. ', ADC_FLAG_EOSEQ) == RESET){};\n'
+      node_text = node_text .. node.options.adc_var ..
+                  ' = ADC_GetConversionValue(' .. adc_b_conf .. ');\n'
+    else
+      return nil
+    end
+  else
+    return nil
+  end
+  -- (Done)
+  if node.output and node.output.single then
+    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
+  else
+    return nil
+  end
+  node_text = node_text .. '  // (End "ADC Read Pin" node)\n\n'
   if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
                                     "/ MAIN_ENTRY:",
                                     node_text) then

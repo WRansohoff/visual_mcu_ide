@@ -288,20 +288,23 @@ const tool_node_types = [
   node_color: 'green',
   default_options: {
     adc_channel: '1',
+    // TODO: More ADC options. (Resolution, etc)
   },
-  options_listeners: null,
-  options_html: null,
+  options_listeners: apply_adc_init_node_options_listeners,
+  options_html: adc_init_node_options_html,
 },
 {
   base_name: 'ADC_Read',
   menu_name: 'Read ADC Pin',
   node_color: 'blue',
   default_options: {
+    adc_channel: '1',
     gpio_bank: 'GPIOA',
     gpio_pin: '0',
+    adc_var: '(None)',
   },
-  options_listeners: null,
-  options_html: null,
+  options_listeners: apply_adc_read_node_options_listeners,
+  options_html: adc_read_node_options_html,
 },
 {
   base_name: 'SSD1306_Init',

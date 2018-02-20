@@ -331,6 +331,18 @@ var i2c_speed_select_table_row = function(tag_prefix) {
   `;
 };
 
+// ADC Channel selection. Currently only one option.
+var adc_channel_select_table_row = function(tag_prefix) {
+  var cur_tag_prefix = tag_prefix + '_adc_channel_select';
+  return std_opts_tr_tag(cur_tag_prefix) +
+    std_opts_td_full_tag(cur_tag_prefix + '_text', 'ADC Channel:') +
+    std_opts_td_tag(cur_tag_prefix + '_opt') +
+      std_opts_select_tag(cur_tag_prefix) +
+      std_opts_option_tag(cur_tag_prefix, '1', 'ADC1') +
+  `</select></td></tr>
+  `;
+};
+
 /*
  * Node-specific options.
  */
@@ -560,6 +572,22 @@ var i2c_init_node_options_html = std_opts_table_tag('i2c_init_options') +
 // 'Deinitialize I2C Peripheral' options.
 var i2c_deinit_node_options_html = std_opts_table_tag('i2c_deinit_options') +
   i2c_channel_select_table_row('i2c_deinit_options') +
+  `</table>
+`;
+
+// 'Initialize ADC Peripheral' options.
+var adc_init_node_options_html = std_opts_table_tag('adc_init_options') +
+  adc_channel_select_table_row('adc_init_options') +
+  `</table>
+`;
+
+// 'Read ADC Pin' options.
+var adc_read_node_options_html = std_opts_table_tag('adc_read_options') +
+  adc_channel_select_table_row('adc_read_options') +
+  select_gpio_bank_table_row('adc_read_options') +
+  select_gpio_pin_table_row('adc_read_options') +
+  defined_variables_list_table_row('adc_read_options',
+                                   'Read to Variable:') +
   `</table>
 `;
 
@@ -1071,7 +1099,6 @@ var apply_gpio_output_options_listeners = function(cur_node) {
 };
 
 // 'GPIO_Input' node listeners.
-// TODO
 var apply_gpio_input_options_listeners = function(cur_node) {
   var gpio_bank_tag = document.getElementById('read_gpio_in_options_pin_bank_tag');
   var gpio_pin_tag = document.getElementById('read_gpio_in_options_pin_number_tag');
@@ -1393,6 +1420,50 @@ var apply_i2c_init_node_options_listeners = function(cur_node) {
 // 'Deinitialize I2C Peripheral' options listeners.
 // TODO
 var apply_i2c_deinit_node_options_listeners = function(cur_node) {
+};
+
+// 'Initialize ADC Peripheral' options listeners.
+var apply_adc_init_node_options_listeners = function(cur_node) {
+  var adc_channel_tag = document.getElementById('adc_init_options_adc_channel_select_tag');
+  if (cur_node && cur_node.options.adc_periph_num) {
+    adc_channel_tag.value = cur_node.options.adc_channel;
+  }
+  adc_channel_tag.onchange = function() {
+    cur_node.options.adc_channel = adc_channel_tag.value;
+  };
+};
+
+// 'Read ADC Pin' options listeners.
+// TODO
+var apply_adc_read_node_options_listeners = function(cur_node) {
+  var adc_channel_tag = document.getElementById('adc_read_options_adc_channel_select_tag');
+  var gpio_bank_tag = document.getElementById('adc_read_options_pin_bank_tag');
+  var gpio_pin_tag = document.getElementById('adc_read_options_pin_number_tag');
+  var gpio_var_name_tag = document.getElementById('adc_read_options_var_list_tag');
+  // Set values according to node options.
+  if (cur_node && cur_node.options.adc_periph_num) {
+    adc_channel_tag.value = cur_node.options.adc_channel;
+  }
+  if (cur_node.options.gpio_bank) {
+    gpio_bank_tag.value = cur_node.options.gpio_bank;
+  }
+  if (cur_node.options.gpio_pin) {
+    gpio_pin_tag.value = cur_node.options.gpio_pin;
+  }
+  populate_defined_vars_dropdown('adc_read_options_var_list_tag', cur_node, cur_node.options.adc_var);
+  // Set click listener functions.
+  adc_channel_tag.onchange = function() {
+    cur_node.options.adc_channel = adc_channel_tag.value;
+  };
+  gpio_bank_tag.onchange = function() {
+    cur_node.options.gpio_bank = gpio_bank_tag.value;
+  };
+  gpio_pin_tag.onchange = function() {
+    cur_node.options.gpio_pin = gpio_pin_tag.value;
+  };
+  gpio_var_name_tag.onchange = function() {
+    cur_node.options.adc_var = gpio_var_name_tag.value;
+  };
 };
 
 // 'Initialize SSD1306 OLED Screen' options listeners.
