@@ -139,6 +139,11 @@ app:match("/project/:project_id", function(self)
   periphs_i2c_list["Initialize I2C"] = "Node"
   periphs_i2c_list["Deinitialize I2C"] = "Node"
   periphs_list["I2C"] = periphs_i2c_list
+  periphs_adc_list = { }
+  periphs_adc_list["Initialize ADC"] = "Node"
+  periphs_adc_list["Deinitialize ADC"] = "Node"
+  periphs_adc_list["Read ADC Pin"] = "Node"
+  periphs_list["ADC"] = periphs_adc_list
   tool_list["Hardware Peripherals"] = periphs_list
   external_devices_list = { }
   external_devices_ssd1306_list = { }

@@ -61,6 +61,8 @@ var imgs_to_load = {
   // Peripherals:
   I2C_Init:          '/static/fsm_assets/init_i2c_node.png',
   I2C_Deinit:        '/static/fsm_assets/deinit_i2c_node.png',
+  ADC_Init:          '/static/fsm_assets/init_adc_node.png',
+  ADC_Read:          '/static/fsm_assets/read_adc_node.png',
   // External device communications:
   SSD1306_Init:      '/static/fsm_assets/init_oled_screen_node.png',
   SSD1306_Draw_Px:   '/static/fsm_assets/oled_draw_pixel_node.png',
@@ -279,6 +281,27 @@ const tool_node_types = [
   },
   options_listeners: apply_i2c_deinit_node_options_listeners,
   options_html: i2c_deinit_node_options_html,
+},
+{
+  base_name: 'ADC_Init',
+  menu_name: 'Initialize ADC',
+  node_color: 'green',
+  default_options: {
+    adc_channel: '1',
+  },
+  options_listeners: null,
+  options_html: null,
+},
+{
+  base_name: 'ADC_Read',
+  menu_name: 'Read ADC Pin',
+  node_color: 'blue',
+  default_options: {
+    gpio_bank: 'GPIOA',
+    gpio_pin: '0',
+  },
+  options_listeners: null,
+  options_html: null,
 },
 {
   base_name: 'SSD1306_Init',
