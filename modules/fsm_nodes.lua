@@ -3,6 +3,8 @@ local varm_util = require("modules/varm_util")
 -- Include individual node files. As I start to add more nodes,
 -- there's getting to be a lot of copy/pasting. So...modules.
 local boot_node = require("modules/nodes/boot")
+local delay_node = require("modules/nodes/delay")
+local gpio_init_node = require("modules/nodes/gpio_init")
 
 local FSMNodes = {}
 
@@ -290,13 +292,13 @@ function FSMNodes.process_node(node, node_graph, proj_state)
       return true
     end
   elseif node.node_type == 'Delay' then
-    if (FSMNodes.ensure_support_methods_delay_node(node, proj_state) and
-        FSMNodes.append_delay_node(node, node_graph, proj_state)) then
+    if (delay_node.ensure_support_methods(node, proj_state) and
+        delay_node.append_node(node, node_graph, proj_state)) then
       return true
     end
   elseif node.node_type == 'GPIO_Init' then
-    if (FSMNodes.ensure_support_methods_gpio_init_node(node, proj_state) and
-        FSMNodes.append_gpio_init_node(node, node_graph, proj_state)) then
+    if (gpio_init_node.ensure_support_methods(node, proj_state) and
+        gpio_init_node.append_node(node, node_graph, proj_state)) then
       return true
     end
   elseif node.node_type == 'GPIO_Output' then
@@ -399,190 +401,6 @@ function FSMNodes.process_node(node, node_graph, proj_state)
   end
   -- (Unrecognized node type.)
   return nil
-end
-
--- Ensure that all of the supporting methods needed by a 'Delay'
--- node are present, and add any that aren't.
-function FSMNodes.ensure_support_methods_delay_node(node, proj_state)
-  -- The 'Delay' node requires a 'delay' assembly method, depending on
-  -- the chosen units. We want to add the method to the 'util.S' method,
-  -- define it in the 'global.h' file, and ... well I think that's it.
-  -- 'util.S' declares.
-  local util_s_insert_path = 'static/node_code/delay/src/util_S.insert'
-  local global_h_insert_path = 'static/node_code/delay/src/global_h.insert'
-  if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_DELAY_CYCLES_DEC_START:',
-                                        'UTIL_S_DELAY_CYCLES_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
-    return nil
-  end
-  -- 'util.S' defines.
-  if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_DELAY_CYCLES_DEF_START:',
-                                        'UTIL_S_DELAY_CYCLES_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
-    return nil
-  end
-  -- 'global.h' declare.
-  if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_DELAY_CYCLES_START:',
-                                        'GLOBAL_EXTERN_DELAY_CYCLES_DONE:',
-                                        '/ ASM_METHOD_DEFINES:') then
-    return nil
-  end
-  return true
-end
-
--- Append code to the 'main' method for a 'Delay' node.
-function FSMNodes.append_delay_node(node, node_graph, proj_state)
-  local node_text = '  // ("Delay" node)\n'
-  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  -- Get the number of cycles to delay.
-  node_text = node_text .. '  delay_cycles('
-  if node.options and node.options.delay_value then
-    -- TODO: Support differend clock frequencies. For now, assume 48MHz.
-    local delay_scale = 1
-    if node.options.delay_units == 'us' then
-      -- 48,000,000 cycles per second = 48 cycles per microsecond.
-      delay_scale = 48
-    elseif node.options.delay_units == 'ms' then
-      -- 48,000,000 cycles per second = 48,000 cycles per millisecond.
-      delay_scale = 48000
-    elseif node.options.delay_units == 's' then
-      -- 48,000,000 cycles per second.
-      delay_scale = 48000000
-    end
-    local delay_cyc = tonumber(node.options.delay_value) * delay_scale
-    node_text = node_text .. delay_cyc .. ');\n'
-  else
-    node_text = node_text .. '0);\n'
-  end
-  if node.output and node.output.single then
-    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
-  else
-    return nil
-  end
-  node_text = node_text .. '  // (End "Delay" node)\n\n'
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    "/ MAIN_ENTRY:",
-                                    node_text) then
-    return nil
-  end
-  return true
-end
-
--- Ensure that supporting methods for GPIO pin initialization are present.
-function FSMNodes.ensure_support_methods_gpio_init_node(node, proj_state)
-  -- I have an assembly method for STM32F0 GPIO setup, but for the sake
-  -- of simplicity, just use the standard peripheral library. TODO
-  local stdp_s_path = 'static/node_code/gpio_init/src/std_periph/'
-  if not varm_util.import_std_periph_lib('misc', stdp_s_path, proj_state.base_dir) then
-    return nil
-  end
-  if not varm_util.import_std_periph_lib('gpio', stdp_s_path, proj_state.base_dir) then
-    return nil
-  end
-  -- Ensure that a global 'GPIO_InitTypeDef' struct is defined.
-  if not varm_util.copy_block_into_file(
-      'static/node_code/gpio_init/src/global_h.insert',
-      proj_state.base_dir .. 'src/global.h',
-      'SYS_GLOBAL_GPIO_INIT_STRUCT_START:',
-      'SYS_GLOBAL_GPIO_INIT_STRUCT_DONE:',
-      '/ SYS_GLOBAL_VAR_DEFINES:') then
-    return nil
-  end
-  return true
-end
-
--- Append code to the 'main' method for a 'Setup GPIO Pin' node.
-function FSMNodes.append_gpio_init_node(node, node_graph, proj_state)
-  local node_text = '  // ("Setup GPIO Pin" node)\n'
-  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  -- Gather 'GPIO_Init' values.
-  -- (Default values.)
-  local gpio_bank = 'GPIOA'
-  local gpio_pin_num = 0
-  local gpio_func = 'OUT'
-  local gpio_otype = 'PP'
-  local gpio_ospeed = '3'
-  local gpio_pupdr = 'UP'
-  -- Collect values from the node's 'options' hash.
-  if node.options then
-    if node.options.gpio_bank then
-      if node.options.gpio_bank == 'GPIOA' or
-         node.options.gpio_bank == 'GPIOB' or
-         node.options.gpio_bank == 'GPIOC' or
-         node.options.gpio_bank == 'GPIOD' or
-         node.options.gpio_bank == 'GPIOE' or
-         node.options.gpio_bank == 'GPIOF' or
-         node.options.gpio_bank == 'GPIOG' then
-        gpio_bank = node.options.gpio_bank
-      end
-    end
-    if node.options.gpio_pin and tonumber(node.options.gpio_pin) then
-      gpio_pin_num = tonumber(node.options.gpio_pin)
-    end
-    if node.options.gpio_func then
-      if node.options.gpio_func == 'Output' then
-        gpio_func = 'OUT'
-      elseif node.options.gpio_func == 'Input' then
-        gpio_func = 'IN'
-      elseif node.options.gpio_func == 'AF' then
-        gpio_func = 'AF'
-      elseif node.options.gpio_func == 'Analog' then
-        gpio_func = 'AN'
-      end
-    end
-    if node.options.gpio_otype then
-      if node.options.gpio_otype == 'Push-Pull' then
-        gpio_otype = 'PP'
-      elseif node.options.gpio_otype == 'Open-Drain' then
-        gpio_otype = 'OD'
-      end
-    end
-    if node.options.gpio_ospeed then
-      if node.options.gpio_ospeed == 'H' then
-        gpio_ospeed = '3'
-      elseif node.options.gpio_ospeed == 'M' then
-        gpio_ospeed = '2'
-      elseif node.options.gpio_ospeed == 'L' then
-        gpio_ospeed = '1'
-      end
-    end
-    if node.options.gpio_pupdr then
-      if node.options.gpio_pupdr == 'None' then
-        gpio_pupdr = 'NOPULL'
-      elseif node.options.gpio_pupdr == 'PU' then
-        gpio_pupdr = 'UP'
-      elseif node.options.gpio_pudpr == 'PD' then
-        gpio_pupdr = 'DOWN'
-      end
-    end
-  end
-  -- Add GPIO init code.
-  node_text = node_text .. '  global_gpio_init_struct.GPIO_Pin = GPIO_Pin_' .. gpio_pin_num .. ';\n'
-  node_text = node_text .. '  global_gpio_init_struct.GPIO_Mode = GPIO_Mode_' .. gpio_func .. ';\n'
-  node_text = node_text .. '  global_gpio_init_struct.GPIO_OType = GPIO_OType_' .. gpio_otype .. ';\n'
-  node_text = node_text .. '  global_gpio_init_struct.GPIO_Speed = GPIO_Speed_Level_' .. gpio_ospeed .. ';\n'
-  node_text = node_text .. '  global_gpio_init_struct.GPIO_PuPd = GPIO_PuPd_' .. gpio_pupdr .. ';\n'
-  node_text = node_text .. '  GPIO_Init(' .. gpio_bank .. ', &global_gpio_init_struct);\n'
-
-  -- GOTO statement for the next node.
-  if node.output and node.output.single then
-    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
-  else
-    return nil
-  end
-  node_text = node_text .. '  // (End "Setup GPIO Pin" node)\n\n'
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    "/ MAIN_ENTRY:",
-                                    node_text) then
-    return nil
-  end
-  return true
 end
 
 -- Ensure that all necessary supporting functions for GPIO Output exist.
