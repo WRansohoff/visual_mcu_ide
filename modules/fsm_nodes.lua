@@ -8,6 +8,9 @@ local gpio_init_node = require("modules/nodes/gpio_init")
 local gpio_output_node = require("modules/nodes/gpio_output")
 local gpio_input_node = require("modules/nodes/gpio_input")
 local rcc_enable_node = require("modules/nodes/rcc_enable")
+local set_var_node = require("modules/nodes/set_var")
+local set_var_logic_not_node = require("modules/nodes/set_var_logic_not")
+local set_var_addition_node = require("modules/nodes/set_var_addition")
 
 local FSMNodes = {}
 
@@ -321,18 +324,18 @@ function FSMNodes.process_node(node, node_graph, proj_state)
     end
   -- (Variable Nodes)
   elseif node.node_type == 'Set_Variable' then
-    if (FSMNodes.ensure_support_methods_set_var_node(node, proj_state) and
-        FSMNodes.append_set_var_node(node, node_graph, proj_state)) then
+    if (set_var_node.ensure_support_methods(node, proj_state) and
+        set_var_node.append_node(node, node_graph, proj_state)) then
       return true
     end
   elseif node.node_type == 'Set_Var_Logic_Not' then
-    if (FSMNodes.ensure_support_methods_set_var_logic_not_node(node, proj_state) and
-        FSMNodes.append_set_var_logic_not_node(node, node_graph, proj_state)) then
+    if (set_var_logic_not_node.ensure_support_methods(node, proj_state) and
+        set_var_logic_not_node.append_node(node, node_graph, proj_state)) then
       return true
     end
   elseif node.node_type == 'Set_Var_Addition' then
-    if (FSMNodes.ensure_support_methods_set_var_addition_node(node, proj_state) and
-        FSMNodes.append_set_var_addition_node(node, node_graph, proj_state)) then
+    if (set_var_addition_node.ensure_support_methods(node, proj_state) and
+        set_var_addition_node.append_node(node, node_graph, proj_state)) then
       return true
     end
   -- (Hardware Peripheral Nodes)
@@ -404,122 +407,6 @@ function FSMNodes.process_node(node, node_graph, proj_state)
   end
   -- (Unrecognized node type.)
   return nil
-end
-
--- Ensure supporting methods for setting variables.
-function FSMNodes.ensure_support_methods_set_var_node(node, proj_state)
-  -- Only primitive types, so no required includes to check.
-  return true
-end
-
--- Add a 'Set Variable' node to the program.
-function FSMNodes.append_set_var_node(node, node_graph, proj_state)
-  local node_text = '  // ("Set Variable" node)\n'
-  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  -- (The actual variable setting.)
-  local var_c_type = node.options.var_type
-  local var_c_val = tostring(node.options.var_val)
-  if var_c_type == 'bool' then
-    var_c_type = 'unsigned char'
-    if var_c_val == 'false' then
-      var_c_val = '0';
-    elseif var_c_val == 'true' then
-      var_c_val = '1';
-    else
-      -- uh...error? TODO
-      var_c_val = '0';
-    end
-  elseif var_c_type == 'char' then
-    var_c_val = "'" .. var_c_val .. "'"
-  end
-  node_text = node_text .. '  ' .. node.options.var_name .. ' = ' .. var_c_val .. ';\n'
-  -- (Done.)
-  if node.output and node.output.single then
-    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
-  else
-    return nil
-  end
-  node_text = node_text .. '  // (End "Set Variable" node)\n\n'
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    "/ MAIN_ENTRY:",
-                                    node_text) then
-    return nil
-  end
-  return true
-end
-
--- Ensure supporting methods for setting variables: 'A = !B'.
-function FSMNodes.ensure_support_methods_set_var_logic_not_node(node, proj_state)
-  -- Only primitive types, so no required includes to check.
-  return true
-end
-
--- Append a 'set var logic not' (A = !B) node.
-function FSMNodes.append_set_var_logic_not_node(node, node_graph, proj_state)
-  local node_text = '  // ("Set Variable logical-not" node)\n'
-  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  -- (The actual variable setting.)
-  if node.options.var_a_name ~= '(None)' and node.options.var_b_name ~= '(None)' then
-    node_text = node_text .. '  ' .. node.options.var_a_name .. ' = !' .. node.options.var_b_name .. ';\n'
-  else
-    return nil
-  end
-  -- (Done.)
-  if node.output and node.output.single then
-    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
-  else
-    return nil
-  end
-  node_text = node_text .. '  // (End "Set Variable logical-not" node)\n\n'
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    "/ MAIN_ENTRY:",
-                                    node_text) then
-    return nil
-  end
-  return true
-end
-
--- Ensure supporting methods for setting variables: 'A = B + C'.
-function FSMNodes.ensure_support_methods_set_var_addition_node(node, proj_state)
-  -- Only primitive types, so no required includes to check.
-  return true
-end
-
--- Append a 'set var addition' (A = B + C) node.
-function FSMNodes.append_set_var_addition_node(node, node_graph, proj_state)
-  local node_text = '  // ("Set Variable by addition" node)\n'
-  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  -- (The actual variable setting.)
-  -- TODO: type checking/verification? Or do that JS-side?
-  if node.options.var_a_name and node.options.var_b_name then
-    node_text = node_text .. '  ' .. node.options.var_a_name .. ' = ' ..
-                node.options.var_b_name .. ' + '
-    if node.options.add_val_type == 'val' and 
-       (node.options.add_val_val or node.options.add_val_val == 0) then
-      node_text = node_text .. tostring(node.options.add_val_val) .. ';\n'
-    elseif node.options.add_val_type == 'var' then
-      if node.options.add_val_val and node.options.add_val_val ~= '(None)' then
-        node_text = node_text .. node.options.add_val_val .. ';\n'
-      else
-        return nil
-      end
-    else
-      return nil
-    end
-  end
-  -- (Done.)
-  if node.output and node.output.single then
-    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
-  else
-    return nil
-  end
-  node_text = node_text .. '  // (End "Set Variable by addition" node)\n\n'
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    "/ MAIN_ENTRY:",
-                                    node_text) then
-    return nil
-  end
-  return true
 end
 
 -- Ensure supporting functionality for I2C peripheral initialization.
