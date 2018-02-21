@@ -1,0 +1,5 @@
+SYS_GLOBAL_ADC_INIT_STRUCT_START:
+// Define a glocal 'ADC_Init' struct for code autogenerators
+// to use with the ADC standard peripherals library.
+ADC_InitTypeDef global_adc_init_struct;
+SYS_GLOBAL_ADC_INIT_STRUCT_DONE:

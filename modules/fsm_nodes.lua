@@ -1047,7 +1047,25 @@ end
 
 -- Ensure supporting functionality for ADC peripheral initialization.
 function FSMNodes.ensure_support_methods_adc_init_node(node, proj_state)
-  -- TODO
+  -- Import the 'misc' and 'adc' standard peripheral libraries,
+  -- and make sure that there is a global 'ADC_InitTypeDef'
+  -- variable available to the main method.
+  local stdp_s_path = 'static/node_code/adc_init/src/std_periph/'
+  if not varm_util.import_std_periph_lib('misc', stdp_s_path, proj_state.base_dir) then
+    return nil
+  end
+  if not varm_util.import_std_periph_lib('adc', stdp_s_path, proj_state.base_dir) then
+    return nil
+  end
+  -- Ensure that a global 'ADC_InitTypeDef' struct is defined.
+  if not varm_util.copy_block_into_file(
+      'static/node_code/adc_init/src/global_h.insert',
+      proj_state.base_dir .. 'src/global.h',
+      'SYS_GLOBAL_ADC_INIT_STRUCT_START:',
+      'SYS_GLOBAL_ADC_INIT_STRUCT_DONE:',
+      '/ SYS_GLOBAL_VAR_DEFINES:') then
+    return nil
+  end
   return true
 end
 
@@ -1069,8 +1087,8 @@ function FSMNodes.append_adc_init_node(node, node_graph, proj_state)
   node_text = node_text .. '  global_adc_init_struct.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_TRGO;\n'
   node_text = node_text .. '  global_adc_init_struct.ADC_DataAlign = ADC_DataAlign_Right;\n'
   node_text = node_text .. '  global_adc_init_struct.ADC_ScanDirection = ADC_ScanDirection_Upward;\n'
-  node_text = node_text .. '  ADC_Init(&global_adc_init_struct);\n'
-  node_text = node_text .. '  ADC_Cmd(' .. adc_channel .. ');\n'
+  node_text = node_text .. '  ADC_Init(' .. adc_channel .. ', &global_adc_init_struct);\n'
+  node_text = node_text .. '  ADC_Cmd(' .. adc_channel .. ', ENABLE);\n'
   node_text = node_text .. '  while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_ADRDY)){};\n'
   -- (Done)
   if node.output and node.output.single then
@@ -1089,7 +1107,16 @@ end
 
 -- Ensure supporting functionality for reading an ADC pin.
 function FSMNodes.ensure_support_methods_adc_read_node(node, proj_state)
-  -- TODO
+  -- Import the 'misc' and 'adc' standard peripheral libraries,
+  -- and make sure that there is a global 'ADC_InitTypeDef'
+  -- variable available to the main method.
+  local stdp_s_path = 'static/node_code/adc_read/src/std_periph/'
+  if not varm_util.import_std_periph_lib('misc', stdp_s_path, proj_state.base_dir) then
+    return nil
+  end
+  if not varm_util.import_std_periph_lib('adc', stdp_s_path, proj_state.base_dir) then
+    return nil
+  end
   return true
 end
 
