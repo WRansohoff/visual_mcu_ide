@@ -1,3 +1,5 @@
+local varm_util = require("modules/varm_util")
+
 local node_reqs = {}
 
 -- ('' Node)

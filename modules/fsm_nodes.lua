@@ -1,5 +1,9 @@
 local varm_util = require("modules/varm_util")
 
+-- Include individual node files. As I start to add more nodes,
+-- there's getting to be a lot of copy/pasting. So...modules.
+local boot_node = require("modules/nodes/boot")
+
 local FSMNodes = {}
 
 -- Create the initial filesystem structure for the project, using
@@ -281,8 +285,8 @@ function FSMNodes.process_node(node, node_graph, proj_state)
     return nil
   end
   if node.node_type == 'Boot' then
-    if (FSMNodes.ensure_support_methods_boot_node(node, proj_state) and
-        FSMNodes.append_boot_node(node, node_graph, proj_state)) then
+    if (boot_node.ensure_support_methods(node, proj_state) and
+        boot_node.append_node(node, node_graph, proj_state)) then
       return true
     end
   elseif node.node_type == 'Delay' then
@@ -395,37 +399,6 @@ function FSMNodes.process_node(node, node_graph, proj_state)
   end
   -- (Unrecognized node type.)
   return nil
-end
-
--- Ensure that all of the supporting methods needed by the 'Boot'
--- node are present, and add any that aren't.
-function FSMNodes.ensure_support_methods_boot_node(node, proj_state)
-  -- The 'Boot' mode doesn't really need any supporting methods, right now.
-  -- Everything is included in the 'init_project_state' method.
-  return true
-end
-
--- Append code to the 'main' method for the 'Boot' node.
-function FSMNodes.append_boot_node(node, node_graph, proj_state)
-  -- There's no real code needed for the 'Boot' node, but we still have
-  -- to add a label for the node and a GOTO to make sure that the
-  -- program starts with the right node.
-  -- (Start with 'goto Boot', to avoid compiler warnings for an unused label.
-  local node_text = '  // ("Boot" node, program entry point)\n'
-  node_text = node_text .. '  goto NODE_' .. node.node_ind .. ';\n'
-  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  if node.output and node.output.single then
-    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
-  else
-    return nil
-  end
-  node_text = node_text .. '  // (End "Boot" node)\n\n'
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    '/ MAIN_ENTRY:',
-                                    node_text) then
-    return nil
-  end
-  return true
 end
 
 -- Ensure that all of the supporting methods needed by a 'Delay'
