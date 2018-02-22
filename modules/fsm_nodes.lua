@@ -11,6 +11,9 @@ local rcc_enable_node = require("modules/nodes/rcc_enable")
 local set_var_node = require("modules/nodes/set_var")
 local set_var_logic_not_node = require("modules/nodes/set_var_logic_not")
 local set_var_addition_node = require("modules/nodes/set_var_addition")
+local i2c_init_node = require("modules/nodes/i2c_init")
+local adc_init_node = require("modules/nodes/adc_init")
+local adc_read_node = require("modules/nodes/adc_read")
 
 local FSMNodes = {}
 
@@ -340,21 +343,21 @@ function FSMNodes.process_node(node, node_graph, proj_state)
     end
   -- (Hardware Peripheral Nodes)
   elseif node.node_type == 'I2C_Init' then
-    if (FSMNodes.ensure_support_methods_i2c_init_node(node, proj_state) and
-        FSMNodes.append_i2c_init_node(node, node_graph, proj_state)) then
+    if (i2c_init_node.ensure_support_methods(node, proj_state) and
+        i2c_init_node.append_node(node, node_graph, proj_state)) then
       return true
     end
   elseif node.node_type == 'I2C_Deinit' then
     -- TODO: I2C De-initialization.
     return false
   elseif node.node_type == 'ADC_Init' then
-    if (FSMNodes.ensure_support_methods_adc_init_node(node, proj_state) and
-        FSMNodes.append_adc_init_node(node, node_graph, proj_state)) then
+    if (adc_init_node.ensure_support_methods(node, proj_state) and
+        adc_init_node.append_node(node, node_graph, proj_state)) then
       return true
     end
   elseif node.node_type == 'ADC_Read' then
-    if (FSMNodes.ensure_support_methods_adc_read_node(node, proj_state) and
-        FSMNodes.append_adc_read_node(node, node_graph, proj_state)) then
+    if (adc_read_node.ensure_support_methods(node, proj_state) and
+        adc_read_node.append_node(node, node_graph, proj_state)) then
       return true
     end
   -- (External Device Nodes)
@@ -407,235 +410,6 @@ function FSMNodes.process_node(node, node_graph, proj_state)
   end
   -- (Unrecognized node type.)
   return nil
-end
-
--- Ensure supporting functionality for I2C peripheral initialization.
-function FSMNodes.ensure_support_methods_i2c_init_node(node, proj_state)
-  -- This node uses a small assembly method to initialize the
-  -- I2Cx peripheral to a minimal 'master' mode config with a given speed.
-  -- It also uses the GPIO std periph library to set the pin Alt. Func.
-  -- (Standard Peripherals Library imports)
-  local stdp_s_path = 'static/node_code/gpio_init/src/std_periph/'
-  if not varm_util.import_std_periph_lib('misc', stdp_s_path, proj_state.base_dir) then
-    return nil
-  end
-  if not varm_util.import_std_periph_lib('gpio', stdp_s_path, proj_state.base_dir) then
-    return nil
-  end
-  -- (Assembly I2C init method.)
-  local util_s_insert_path = 'static/node_code/i2c_init/src/util_S.insert'
-  local global_h_insert_path = 'static/node_code/i2c_init/src/global_h.insert'
-  -- 'util.S' declares.
-  if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_INIT_DEC_START:',
-                                        'UTIL_S_I2C_INIT_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
-    return nil
-  end
-  -- 'util.S' defines.
-  if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_INIT_DEF_START:',
-                                        'UTIL_S_I2C_INIT_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
-    return nil
-  end
-  -- 'global.h' declare.
-  if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_I2C_INIT_START:',
-                                        'GLOBAL_EXTERN_I2C_INIT_DONE:',
-                                        '/ ASM_METHOD_DEFINES:') then
-    return nil
-  end
-  return true
-end
-
--- Append an 'I2C Initialization' node to the current program.
-function FSMNodes.append_i2c_init_node(node, node_graph, proj_state)
-  local node_text = '  // ("I2C Initialization" node)\n'
-  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  -- Call the I2C Initialization code.
-  if node.options and node.options.i2c_periph_num and
-     node.options.scl_pin and node.options.sda_pin and
-     node.options.gpio_af and node.options.i2c_periph_speed then
-    -- Set Alt. Func. GPIO pin settings.
-    -- A9/A10 I2C1; currently the only supported configuration.
-    local i2c_num = node.options.i2c_periph_num
-    local i2c_base_addr = nil
-    if (i2c_num == '1' or i2c_num == 1) and
-       node.options.scl_pin == 'A9' and node.options.sda_pin == 'A10' then
-      node_text = node_text .. '  GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_' .. node.options.gpio_af .. ');\n'
-      node_text = node_text .. '  GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_' .. node.options.gpio_af .. ');\n'
-      i2c_base_addr = '0x40005400'
-    else
-      return nil
-    end
-    -- Determine the I2C speed settings.
-    -- TODO: Constants in the global.h file? (Ditto for i2c_base_addr)
-    local i2c_speed_val = nil
-    if node.options.i2c_periph_speed == '10KHz' then
-      node_text = node_text .. '  // (10KHz @ 48MHz PLL)\n'
-      i2c_speed_val = '0xB042C3C7'
-    elseif node.options.i2c_periph_speed == '100KHz' then
-      node_text = node_text .. '  // (100KHz @ 48MHz PLL)\n'
-      i2c_speed_val = '0xB0420F13'
-    elseif node.options.i2c_periph_speed == '400KHz' then
-      node_text = node_text .. '  // (400KHz @ 48MHz PLL)\n'
-      i2c_speed_val = '0x50330309'
-    elseif node.options.i2c_periph_speed == '1MHz' then
-      node_text = node_text .. '  // (1MHz @ 48MHz PLL)\n'
-      i2c_speed_val = '0x50100103'
-    else
-      return nil
-    end
-    -- Add the actual I2C initialization call.
-    if i2c_base_addr and i2c_speed_val then
-      node_text = node_text .. '  i2c_periph_init(' .. i2c_base_addr .. ', ' .. i2c_speed_val .. ');\n'
-    else
-      return nil
-    end
-  else
-    return nil
-  end
-  -- (Done)
-  if node.output and node.output.single then
-    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
-  else
-    return nil
-  end
-  node_text = node_text .. '  // (End "I2C Initialization" node)\n\n'
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    "/ MAIN_ENTRY:",
-                                    node_text) then
-    return nil
-  end
-  return true
-end
-
--- Ensure supporting functionality for ADC peripheral initialization.
-function FSMNodes.ensure_support_methods_adc_init_node(node, proj_state)
-  -- Import the 'misc' and 'adc' standard peripheral libraries,
-  -- and make sure that there is a global 'ADC_InitTypeDef'
-  -- variable available to the main method.
-  local stdp_s_path = 'static/node_code/adc_init/src/std_periph/'
-  if not varm_util.import_std_periph_lib('misc', stdp_s_path, proj_state.base_dir) then
-    return nil
-  end
-  if not varm_util.import_std_periph_lib('adc', stdp_s_path, proj_state.base_dir) then
-    return nil
-  end
-  -- Ensure that a global 'ADC_InitTypeDef' struct is defined.
-  if not varm_util.copy_block_into_file(
-      'static/node_code/adc_init/src/global_h.insert',
-      proj_state.base_dir .. 'src/global.h',
-      'SYS_GLOBAL_ADC_INIT_STRUCT_START:',
-      'SYS_GLOBAL_ADC_INIT_STRUCT_DONE:',
-      '/ SYS_GLOBAL_VAR_DEFINES:') then
-    return nil
-  end
-  return true
-end
-
--- Append an 'ADC Initialization' node to the current program.
-function FSMNodes.append_adc_init_node(node, node_graph, proj_state)
-  local node_text = '  // ("ADC Initialization" node)\n'
-  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  -- ADC Init.
-  local adc_channel = nil
-  if node.options and node.options.adc_channel then
-    adc_channel = 'ADC' .. node.options.adc_channel
-  else
-    return nil
-  end
-  node_text = node_text .. '  ADC_DeInit(' .. adc_channel .. ');\n'
-  node_text = node_text .. '  global_adc_init_struct.ADC_Resolution = ADC_Resolution_12b;\n'
-  node_text = node_text .. '  global_adc_init_struct.ADC_ContinuousConvMode = DISABLE;\n'
-  node_text = node_text .. '  global_adc_init_struct.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;\n'
-  node_text = node_text .. '  global_adc_init_struct.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_TRGO;\n'
-  node_text = node_text .. '  global_adc_init_struct.ADC_DataAlign = ADC_DataAlign_Right;\n'
-  node_text = node_text .. '  global_adc_init_struct.ADC_ScanDirection = ADC_ScanDirection_Upward;\n'
-  node_text = node_text .. '  ADC_Init(' .. adc_channel .. ', &global_adc_init_struct);\n'
-  node_text = node_text .. '  ADC_Cmd(' .. adc_channel .. ', ENABLE);\n'
-  node_text = node_text .. '  while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_ADRDY)){};\n'
-  -- (Done)
-  if node.output and node.output.single then
-    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
-  else
-    return nil
-  end
-  node_text = node_text .. '  // (End "ADC Initialization" node)\n\n'
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    "/ MAIN_ENTRY:",
-                                    node_text) then
-    return nil
-  end
-  return true
-end
-
--- Ensure supporting functionality for reading an ADC pin.
-function FSMNodes.ensure_support_methods_adc_read_node(node, proj_state)
-  -- Import the 'misc' and 'adc' standard peripheral libraries,
-  -- and make sure that there is a global 'ADC_InitTypeDef'
-  -- variable available to the main method.
-  local stdp_s_path = 'static/node_code/adc_read/src/std_periph/'
-  if not varm_util.import_std_periph_lib('misc', stdp_s_path, proj_state.base_dir) then
-    return nil
-  end
-  if not varm_util.import_std_periph_lib('adc', stdp_s_path, proj_state.base_dir) then
-    return nil
-  end
-  return true
-end
-
--- Append an 'ADC Read' node to the current program.
-function FSMNodes.append_adc_read_node(node, node_graph, proj_state)
-  local node_text = '  // ("ADC Read Pin" node)\n'
-  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  -- ADC Read.
-  -- TODO: More pins.
-  if node.options and node.options.gpio_bank and
-     node.options.gpio_pin and node.options.adc_var and
-     node.options.adc_var ~= '(None)' then
-    local pin_num = tostring(node.options.gpio_pin)
-    local adc_b_conf = nil
-    local adc_ch_conf = nil
-    if node.options.gpio_bank == 'GPIOA' then
-      if pin_num == '1' then
-        adc_b_conf = 'ADC1'
-        adc_ch_conf = 'ADC_Channel_1'
-      end
-    end
-    if adc_b_conf and adc_ch_conf then
-      node_text = node_text .. '  ADC_ChannelConfig(' ..
-                  adc_b_conf .. ', ' .. adc_ch_conf ..
-                  ', ADC_SampleTime_71_5Cycles);\n'
-      node_text = node_text .. '  ADC_StartOfConversion(' ..
-                  adc_b_conf .. ');\n'
-      node_text = node_text .. 'while(ADC_GetFlagStatus(' ..
-                  adc_b_conf .. ', ADC_FLAG_EOSEQ) == RESET){};\n'
-      node_text = node_text .. node.options.adc_var ..
-                  ' = ADC_GetConversionValue(' .. adc_b_conf .. ');\n'
-    else
-      return nil
-    end
-  else
-    return nil
-  end
-  -- (Done)
-  if node.output and node.output.single then
-    node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
-  else
-    return nil
-  end
-  node_text = node_text .. '  // (End "ADC Read Pin" node)\n\n'
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    "/ MAIN_ENTRY:",
-                                    node_text) then
-    return nil
-  end
-  return true
 end
 
 -- Ensure supporting functionality for SSD1306 OLED screen initialization.
