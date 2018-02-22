@@ -21,6 +21,8 @@ local ssd1306_draw_vline_node = require("modules/nodes/ssd1306_draw_vline")
 local ssd1306_draw_rect_node = require("modules/nodes/ssd1306_draw_rect")
 local ssd1306_draw_text_node = require("modules/nodes/ssd1306_draw_text")
 local ssd1306_refresh_node = require("modules/nodes/ssd1306_refresh")
+local check_truthy_node = require("modules/nodes/check_truthy")
+local check_equals_node = require("modules/nodes/check_equals")
 
 local FSMNodes = {}
 
@@ -405,74 +407,18 @@ function FSMNodes.process_node(node, node_graph, proj_state)
     end
   -- (Branching Nodes)
   elseif node.node_type == 'Check_Truthy' then
-    if (FSMNodes.ensure_support_methods_check_truthy_node(node, proj_state) and
-        FSMNodes.append_check_truthy_node(node, node_graph, proj_state)) then
+    if (check_truthy_node.ensure_support_methods(node, proj_state) and
+        check_truthy_node.append_node(node, node_graph, proj_state)) then
       return true
     end
   elseif node.node_type == 'Check_Equals' then
-    if (FSMNodes.ensure_support_methods_check_equals_node(node, proj_state) and
-        FSMNodes.append_check_equals_node(node, node_graph, proj_state)) then
+    if (check_equals_node.ensure_support_methods(node, proj_state) and
+        check_equals_node.append_node(node, node_graph, proj_state)) then
       return true
     end
   end
   -- (Unrecognized node type.)
   return nil
-end
-
--- Ensure supporting methods for branching 'check truth-y' statement.
-function FSMNodes.ensure_support_methods_check_truthy_node(node, proj_state)
-  -- (No required supporting code)
-  return true
-end
-
--- Append a branching 'check truth-y' node's code.
-function FSMNodes.append_check_truthy_node(node, node_graph, proj_state)
-  local node_text = '  // ("If variable is truth-y" branching node)\n'
-  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  if node.output and node.output.branch_t and node.output.branch_f then
-    -- Branching logic.
-    node_text = node_text .. '  if (' .. node.options.var_name .. ') {\n'
-    node_text = node_text .. '    goto NODE_' .. node.output.branch_t .. ';\n  }\n'
-    node_text = node_text .. '  else {\n    goto NODE_' .. node.output.branch_f .. ';\n  }\n'
-  else
-    return nil
-  end
-  node_text = node_text .. '  // (End "If variable is truth-y" branching node)\n\n'
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    "/ MAIN_ENTRY:",
-                                    node_text) then
-    return nil
-  end
-  return true
-end
-
--- Ensure supporting methods for branching 'are variables equal?' statement.
-function FSMNodes.ensure_support_methods_check_equals_node(node, proj_state)
-  -- (No required supporting code)
-  return true
-end
-
--- Append a branching 'are variables equal?' node's code.
-function FSMNodes.append_check_equals_node(node, node_graph, proj_state)
-  local node_text = '  // ("If variables are equal" branching node)\n'
-  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
-  if node.output and node.output.branch_t and node.output.branch_f and
-     node.options.var_a_name and node.options.var_b_name then
-    -- Branching logic. TODO: Type checking?
-    node_text = node_text .. '  if (' .. node.options.var_a_name ..
-                             ' == ' .. node.options.var_b_name .. ') {\n'
-    node_text = node_text .. '    goto NODE_' .. node.output.branch_t .. ';\n  }\n'
-    node_text = node_text .. '  else {\n    goto NODE_' .. node.output.branch_f .. ';\n  }\n'
-  else
-    return nil
-  end
-  node_text = node_text .. '  // (End "If variables are equal" branching node)\n\n'
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    "/ MAIN_ENTRY:",
-                                    node_text) then
-    return nil
-  end
-  return true
 end
 
 return FSMNodes
