@@ -144,6 +144,13 @@ app:match("/project/:project_id", function(self)
   periphs_adc_list["Deinitialize ADC"] = "Node"
   periphs_adc_list["Read ADC Pin"] = "Node"
   periphs_list["ADC"] = periphs_adc_list
+  periphs_rtc_list = { }
+  periphs_rtc_list["Initialize RTC"] = "Node"
+  periphs_rtc_list["Read RTC Time"] = "Node"
+  periphs_rtc_list["Read RTC Date"] = "Node"
+  periphs_rtc_list["Set RTC Time"] = "Node"
+  periphs_rtc_list["Set RTC Date"] = "Node"
+  periphs_list["RTC"] = periphs_rtc_list
   tool_list["Hardware Peripherals"] = periphs_list
   external_devices_list = { }
   external_devices_ssd1306_list = { }
