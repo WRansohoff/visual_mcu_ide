@@ -46,6 +46,8 @@ function node_reqs.append_node(node, node_graph, proj_state)
     elseif node.options.periph_clock == 'ADC1' then
       node_text = node_text .. '  RCC_ADCCLKConfig(RCC_ADCCLK_PCLK_Div4);\n'
       node_text = node_text .. '  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);\n'
+    elseif node.options.periph_clock == 'PWR' then
+      node_text = node_text .. '  RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);\n'
     else
       return nil
     end

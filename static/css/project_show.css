@@ -145,8 +145,9 @@
 
 .hobb_layout_row {
   width: 100%;
-  height: 80%;
+  height: 75%;
   /*
+  height: 80%;
   height: 60%;
    */
   position: absolute;
@@ -156,9 +157,11 @@
 
 .hobb_options_row {
   width: 100%;
+  height: 25%;
+  transform: translateY(300%);
+  /*
   height: 20%;
   transform: translateY(400%);
-  /*
   height: 40%;
   transform: translateY(150%);
   */
