@@ -1,28 +1,7 @@
 local varm_util = require("modules/varm_util")
 
--- Include individual node files. As I start to add more nodes,
--- there's getting to be a lot of copy/pasting. So...modules.
-local boot_node = require("modules/nodes/boot")
-local delay_node = require("modules/nodes/delay")
-local gpio_init_node = require("modules/nodes/gpio_init")
-local gpio_output_node = require("modules/nodes/gpio_output")
-local gpio_input_node = require("modules/nodes/gpio_input")
-local rcc_enable_node = require("modules/nodes/rcc_enable")
-local set_var_node = require("modules/nodes/set_var")
-local set_var_logic_not_node = require("modules/nodes/set_var_logic_not")
-local set_var_addition_node = require("modules/nodes/set_var_addition")
-local i2c_init_node = require("modules/nodes/i2c_init")
-local adc_init_node = require("modules/nodes/adc_init")
-local adc_read_node = require("modules/nodes/adc_read")
-local ssd1306_init_node = require("modules/nodes/ssd1306_init")
-local ssd1306_draw_px_node = require("modules/nodes/ssd1306_draw_px")
-local ssd1306_draw_hline_node = require("modules/nodes/ssd1306_draw_hline")
-local ssd1306_draw_vline_node = require("modules/nodes/ssd1306_draw_vline")
-local ssd1306_draw_rect_node = require("modules/nodes/ssd1306_draw_rect")
-local ssd1306_draw_text_node = require("modules/nodes/ssd1306_draw_text")
-local ssd1306_refresh_node = require("modules/nodes/ssd1306_refresh")
-local check_truthy_node = require("modules/nodes/check_truthy")
-local check_equals_node = require("modules/nodes/check_equals")
+-- Include individual node definitions and preprocessors.
+local node_types = require("modules/fsm_node_defs")
 
 local FSMNodes = {}
 
@@ -304,120 +283,16 @@ function FSMNodes.process_node(node, node_graph, proj_state)
   if (not node) or (not node.node_type) then
     return nil
   end
-  if node.node_type == 'Boot' then
-    if (boot_node.ensure_support_methods(node, proj_state) and
-        boot_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'Delay' then
-    if (delay_node.ensure_support_methods(node, proj_state) and
-        delay_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'GPIO_Init' then
-    if (gpio_init_node.ensure_support_methods(node, proj_state) and
-        gpio_init_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'GPIO_Output' then
-    if (gpio_output_node.ensure_support_methods(node, proj_state) and
-        gpio_output_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'GPIO_Input' then
-    if (gpio_input_node.ensure_support_methods(node, proj_state) and
-        gpio_input_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'RCC_Enable' then
-    if (rcc_enable_node.ensure_support_methods(node, proj_state) and
-        rcc_enable_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  -- (Variable Nodes)
-  elseif node.node_type == 'Set_Variable' then
-    if (set_var_node.ensure_support_methods(node, proj_state) and
-        set_var_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'Set_Var_Logic_Not' then
-    if (set_var_logic_not_node.ensure_support_methods(node, proj_state) and
-        set_var_logic_not_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'Set_Var_Addition' then
-    if (set_var_addition_node.ensure_support_methods(node, proj_state) and
-        set_var_addition_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  -- (Hardware Peripheral Nodes)
-  elseif node.node_type == 'I2C_Init' then
-    if (i2c_init_node.ensure_support_methods(node, proj_state) and
-        i2c_init_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'I2C_Deinit' then
-    -- TODO: I2C De-initialization.
-    return false
-  elseif node.node_type == 'ADC_Init' then
-    if (adc_init_node.ensure_support_methods(node, proj_state) and
-        adc_init_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'ADC_Read' then
-    if (adc_read_node.ensure_support_methods(node, proj_state) and
-        adc_read_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  -- (External Device Nodes)
-  elseif node.node_type == 'SSD1306_Init' then
-    if (ssd1306_init_node.ensure_support_methods(node, proj_state) and
-        ssd1306_init_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'SSD1306_Draw_Px' then
-    if (ssd1306_draw_px_node.ensure_support_methods(node, proj_state) and
-        ssd1306_draw_px_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'SSD1306_Draw_HL' then
-    if (ssd1306_draw_hline_node.ensure_support_methods(node, proj_state) and
-        ssd1306_draw_hline_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'SSD1306_Draw_VL' then
-    if (ssd1306_draw_vline_node.ensure_support_methods(node, proj_state) and
-        ssd1306_draw_vline_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'SSD1306_Draw_Rect' then
-    if (ssd1306_draw_rect_node.ensure_support_methods(node, proj_state) and
-        ssd1306_draw_rect_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'SSD1306_Draw_Text' then
-    if (ssd1306_draw_text_node.ensure_support_methods(node, proj_state) and
-        ssd1306_draw_text_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'SSD1306_Refresh' then
-    if (ssd1306_refresh_node.ensure_support_methods(node, proj_state) and
-        ssd1306_refresh_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  -- (Branching Nodes)
-  elseif node.node_type == 'Check_Truthy' then
-    if (check_truthy_node.ensure_support_methods(node, proj_state) and
-        check_truthy_node.append_node(node, node_graph, proj_state)) then
-      return true
-    end
-  elseif node.node_type == 'Check_Equals' then
-    if (check_equals_node.ensure_support_methods(node, proj_state) and
-        check_equals_node.append_node(node, node_graph, proj_state)) then
-      return true
+  for k, val in pairs(node_types) do
+    if node.node_type == k then
+      if (val.ensure_support_methods(node, proj_state) and
+          val.append_node(node, node_graph, proj_state)) then
+        return true
+      end
+      break
     end
   end
-  -- (Unrecognized node type.)
+  -- (Unrecognized node type or preprocessing failure.)
   return nil
 end
 
