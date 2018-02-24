@@ -1,0 +1,5 @@
+SYS_GLOBAL_RTC_INIT_STRUCT_START:
+// Define a glocal 'RTC_Init' struct for code autogenerators
+// to use with the RTC standard peripherals library.
+RTC_InitTypeDef global_rtc_init_struct;
+SYS_GLOBAL_RTC_INIT_STRUCT_DONE:

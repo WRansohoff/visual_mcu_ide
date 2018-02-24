@@ -1,0 +1,5 @@
+SYS_GLOBAL_RTC_TIME_STRUCT_START:
+// Define a global 'RTC_Time' struct for code autogenerators
+// to use with the RTC standard peripherals library.
+RTC_TimeTypeDef global_rtc_time_struct;
+SYS_GLOBAL_RTC_TIME_STRUCT_DONE:
