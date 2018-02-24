@@ -336,7 +336,7 @@ redraw_canvas = function() {
   // Next, draw any nodes that are within the current view.
   var grid_min_x = cur_fsm_grid_x - 1;
   var grid_min_y = cur_fsm_grid_y - 1;
-  var grid_max_x = cur_fsm_grid_x + parseInt(canvas.width/64) + 1;
+  var grid_max_x = cur_fsm_grid_x + parseInt(canvas.width/64) + 2;
   var grid_max_y = cur_fsm_grid_y + parseInt(canvas.height/64) + 1;
   for (var node_ind = 0; node_ind < 256; ++node_ind) {
     if (fsm_nodes[node_ind] && fsm_nodes[node_ind].node_status != -1 &&
