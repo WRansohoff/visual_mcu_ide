@@ -6,10 +6,10 @@ ENTRY( reset_handler )
 _estack = 0x20001000;
 
 /* Define minimum heap/stack sizes. */
-/* 2KB Heap */
-_Min_Heap_Size = 0x800;
-/* 1KB Stack */
-_Min_Stack_Size = 0x400;
+/* 1KB Heap */
+_Min_Heap_Size = 0x400;
+/* 512B Stack */
+_Min_Stack_Size = 0x200;
 
 MEMORY
 {
