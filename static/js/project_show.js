@@ -546,6 +546,9 @@ redraw_canvas = function() {
 
 project_show_onload = function() {
   init_fsm_layout_canvas();
+  // Generate 'options' HTML and js listeners
+  gen_options_html_for_types();
+  gen_options_listeners_for_types();
 
   // Calculate number of images to load. Since they're string-keyed.
   for (var key in imgs_to_load) {
@@ -834,7 +837,15 @@ project_show_onload = function() {
               var cur_type = tool_node_types[tn_ind];
               if (cur_type) {
                 if (sel_type == cur_type.base_name) {
-                  selected_node_options_html += cur_type.options_html;
+                  // (TODO: Enable for all nodes)
+                  // For specified nodes, use auto-generated
+                  // attributes instead of hand-written ones.
+                  if (cur_type.base_name == 'Boot') {
+                    selected_node_options_html += cur_type.options_gen_html;
+                  }
+                  else {
+                    selected_node_options_html += cur_type.options_html;
+                  }
                   break;
                 }
               }

@@ -220,12 +220,12 @@ var select_gpio_bank_table_row = function(tag_prefix) {
     std_opts_td_full_tag(tag_prefix + '_pin_bank_text', 'GPIO Pin Bank') +
     std_opts_td_tag(tag_prefix + '_pin_bank_opt') +
       std_opts_select_tag(tag_prefix + '_pin_bank') +
-        std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOA', 'GPIOA') +
-        std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOB', 'GPIOB') +
-        std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOC', 'GPIOC') +
-        std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOD', 'GPIOD') +
-        std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOE', 'GPIOE') +
-        std_opts_option_tag(tag_prefix + '_pink_bank', 'GPIOF', 'GPIOF') +
+        std_opts_option_tag(tag_prefix + '_pin_bank', 'GPIOA', 'GPIOA') +
+        std_opts_option_tag(tag_prefix + '_pin_bank', 'GPIOB', 'GPIOB') +
+        std_opts_option_tag(tag_prefix + '_pin_bank', 'GPIOC', 'GPIOC') +
+        std_opts_option_tag(tag_prefix + '_pin_bank', 'GPIOD', 'GPIOD') +
+        std_opts_option_tag(tag_prefix + '_pin_bank', 'GPIOE', 'GPIOE') +
+        std_opts_option_tag(tag_prefix + '_pin_bank', 'GPIOF', 'GPIOF') +
   `</select></td></tr>`;
 };
 
@@ -341,6 +341,52 @@ var adc_channel_select_table_row = function(tag_prefix) {
       std_opts_option_tag(cur_tag_prefix, '1', 'ADC1') +
   `</select></td></tr>
   `;
+};
+
+/*
+ * Node-specific option HTML generators.
+ */
+var gen_options_html_for_types = function() {
+  for (var tn_ind in tool_node_types) {
+    var cur_type = tool_node_types[tn_ind];
+    var cur_type_prefix = cur_type.base_name + '_options';
+    var cur_type_html = std_opts_table_tag(cur_type_prefix);
+    for (var opt_name in cur_type.options) {
+      var cur_opt = cur_type.options[opt_name];
+      // Add option HTML depending on the type.
+      if (cur_opt.type == 'select') {
+        // A 'select' dropdown.
+        var tag_prefix = cur_type_prefix + '_' + opt_name;
+        var tag_to_add = std_opts_tr_tag(tag_prefix + '_row') +
+          std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
+          std_opts_td_tag(tag_prefix + '_opt') +
+            std_opts_select_tag(tag_prefix);
+        for (var opt_opt_ind in cur_opt.options) {
+          var opt_opt = cur_opt.options[opt_opt_ind];
+          tag_to_add = tag_to_add + std_opts_option_tag(tag_prefix,
+                       opt_opt.value, opt_opt.name);
+        }
+        tag_to_add = tag_to_add + '</select></td></tr>\n';
+        cur_type_html = cur_type_html + tag_to_add;
+      }
+      else if (cur_opt.type == 'rcc_select') {
+      }
+      else if (cur_opt.type == 'input_number') {
+      }
+      else if (cur_opt.type == 'input_text') {
+      }
+      else if (cur_opt.type == 'defined_var_select') {
+      }
+      else if (cur_opt.type == 'defined_label_select') {
+      }
+      else if (cur_opt.type == 'TBD') {
+      }
+      else if (cur_opt.type == 'background') {
+      }
+    }
+    cur_type_html = cur_type_html + `</table>`;
+    tool_node_types[tn_ind].options_gen_html = cur_type_html;
+  }
 };
 
 /*
@@ -831,6 +877,65 @@ var check_equals_node_options_html = `
   ` + defined_variables_list_table_row('check_equals_options_B', 'Variable B:') + `
 </table>
 `;
+
+/*
+ * Node listener function autogenerators.
+ */
+
+var gen_type_listener_func = function(cur_type) {
+  return function(cur_node) {
+    var cur_type_prefix = cur_type.base_name + '_options';
+    var opt_tags = {};
+    // (First pass: fetch all relevant option HTML tags.)
+    // (TODO: Make this a separate method?)
+    for (var opt_name in cur_type.options) {
+      var cur_opt = cur_type.options[opt_name];
+      var tag_prefix = cur_type_prefix + '_' + opt_name;
+      if (cur_opt.type == 'select' ||
+          cur_opt.type == 'rcc_select' ||
+          cur_opt.type == 'input_number' ||
+          cur_opt.type == 'input_text' ||
+          cur_opt.type == 'defined_var_select' ||
+          cur_opt.type == 'defined_label_select') {
+        opt_tags[opt_name] = document.getElementById(tag_prefix + '_tag');
+      }
+    }
+    // (Second pass: Apply listeners to each tag.)
+    for (var opt_name in cur_type.options) {
+      var cur_opt = cur_type.options[opt_name];
+      // Add HTML options listeners depending on the type,
+      // and any other options or node-specific stuff.
+      if (cur_opt.type == 'select' ||
+          cur_opt.type == 'rcc_select' ||
+          cur_opt.type == 'input_number' ||
+          cur_opt.type == 'input_text' ||
+          cur_opt.type == 'defined_var_select' ||
+          cut_opt.type == 'defined_label_select') {
+        if (cur_node.options[opt_name]) {
+          opt_tags[opt_name].value = cur_node.options[opt_name];
+        }
+        opt_tags[opt_name].onchange = function() {
+          cur_node.options[opt_name] = opt_tags[opt_name].value;
+        }
+      }
+      else if (cur_opt.type == 'TBD') {
+        // An input whose type depends on another tag's value.
+        // TODO
+      }
+      else if (cur_opt.type == 'background') {
+        // A 'background' option. Currently, this means that
+        // it should have no input field at all.
+      }
+    }
+  };
+};
+
+var gen_options_listeners_for_types = function() {
+  for (var tn_ind in tool_node_types) {
+    tool_node_types[tn_ind].options_gen_listeners =
+      gen_type_listener_func(tool_node_types[tn_ind]);
+  }
+};
 
 /*
  * Node listener functions.

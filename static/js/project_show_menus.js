@@ -459,7 +459,15 @@ var apply_selected_node_option_listeners = function(type_node) {
     var cur_type = tool_node_types[tn_ind];
     if (cur_type) {
       if (type == cur_type.base_name) {
-        cur_type.options_listeners(type_node);
+        // (TODO: Enable for all nodes)
+        // For specified nodes, use auto-generated
+        // attributes instead of hand-written ones.
+        if (cur_type.base_name == 'Boot') {
+          cur_type.options_gen_listeners(type_node);
+        }
+        else {
+          cur_type.options_listeners(type_node);
+        }
         break;
       }
     }
