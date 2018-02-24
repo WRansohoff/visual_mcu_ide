@@ -108,6 +108,20 @@ const tool_node_types = [
   base_name: 'Boot',
   menu_name: 'Boot',
   node_color: 'green',
+  options: {
+    chip_type: {
+      type: 'select',
+      options: [{
+        name: 'STM32F030F4',
+        value: 'STM32F030F4',
+      },
+      {
+        name: 'STM32F031F6',
+        value: 'STM32F031F6',
+      }],
+      default: 'STM32F030F4',
+    },
+  },
   default_options: {
     chip_type: 'STM32F030F4',
   },
@@ -118,6 +132,32 @@ const tool_node_types = [
   base_name: 'Delay',
   menu_name: 'Delay',
   node_color: 'blue',
+  options: {
+    delay_units: {
+      type: 'select',
+      options: [{
+        name: 'Cycles',
+        value: 'cycles',
+      },
+      {
+        name: 'Microseconds',
+        value: 'us',
+      },
+      {
+        name: 'Milliseconds',
+        value: 'ms',
+      },
+      {
+        name: 'Seconds',
+        value: 's',
+      }],
+      default: 'cycles',
+    },
+    delay_value: {
+      type: 'input_number',
+      default: 0,
+    },
+  },
   default_options: {
     delay_units: 'cycles',
     delay_value: 0,
@@ -129,6 +169,16 @@ const tool_node_types = [
   base_name: 'Label',
   menu_name: 'Label',
   node_color: 'pink',
+  options: {
+    label_name: {
+      type: 'input_text',
+      default: '',
+    },
+    label_display_name: {
+      type: 'input_text',
+      default: '',
+    },
+  },
   default_options: {
     label_name: '',
     label_display_name: '',
@@ -140,6 +190,12 @@ const tool_node_types = [
   base_name: 'Jump',
   menu_name: 'Jump',
   node_color: 'pink',
+  options: {
+    label_name: {
+      type: 'defined_var_select',
+      default: '(None)',
+    }
+  },
   default_options: {
     label_name: '(None)',
   },
@@ -150,6 +206,78 @@ const tool_node_types = [
   base_name: 'GPIO_Init',
   menu_name: 'Setup GPIO Pin',
   node_color: 'green',
+  options: {
+    gpio_bank: {
+      type: 'select',
+      options: [
+        { name: 'GPIOA', value: 'GPIOA', },
+        { name: 'GPIOB', value: 'GPIOB', },
+        { name: 'GPIOC', value: 'GPIOC', },
+        { name: 'GPIOD', value: 'GPIOD', },
+        { name: 'GPIOE', value: 'GPIOE', },
+        { name: 'GPIOF', value: 'GPIOF', },
+      ],
+      default: 'GPIOA',
+    },
+    gpio_pin: {
+      type: 'select',
+      options: [
+        { name: '0', value: '0', },
+        { name: '1', value: '1', },
+        { name: '2', value: '2', },
+        { name: '3', value: '3', },
+        { name: '4', value: '4', },
+        { name: '5', value: '5', },
+        { name: '6', value: '6', },
+        { name: '7', value: '7', },
+        { name: '8', value: '8', },
+        { name: '9', value: '9', },
+        { name: '10', value: '10', },
+        { name: '11', value: '11', },
+        { name: '12', value: '12', },
+        { name: '13', value: '13', },
+        { name: '14', value: '14', },
+        { name: '15', value: '15', },
+      ],
+      default: '0',
+    },
+    gpio_func: {
+      type: 'select',
+      options: [
+        { name: 'Output', value: 'Output', },
+        { name: 'Input', value: 'Input', },
+        { name: 'Analog', value: 'Analog', },
+        { name: 'Alternate Function', value: 'AF', },
+      ],
+      default: 'Output',
+    },
+    gpio_otype: {
+      type: 'select',
+      options: [
+        { name: 'Push-Pull', value: 'Push-Pull', },
+        { name: 'Open-Drain', value: 'Open-Drain', },
+      ],
+      default: 'Push-Pull',
+    },
+    gpio_ospeed: {
+      type: 'select',
+      options: [
+        { name: 'High (50MHz)', value: 'H', },
+        { name: 'Medium (10MHz)', value: 'M', },
+        { name: 'Low (2MHz)', value: 'L', },
+      ],
+      default: 'H',
+    },
+    gpio_pupdr: {
+      type: 'select',
+      options: [
+        { name: 'Enable Pull-up', value: 'PU', },
+        { name: 'Enable Pull-down', value: 'PD', },
+        { name: 'No Pull-up/down', value: 'None', },
+      ],
+      default: 'PU',
+    },
+  },
   default_options: {
     gpio_bank:   'GPIOA',
     gpio_pin:    0,
@@ -165,6 +293,55 @@ const tool_node_types = [
   base_name: 'GPIO_Output',
   menu_name: 'Write Output Pin',
   node_color: 'blue',
+  options: {
+    gpio_bank: {
+      type: 'select',
+      options: [
+        { name: 'GPIOA', value: 'GPIOA', },
+        { name: 'GPIOB', value: 'GPIOB', },
+        { name: 'GPIOC', value: 'GPIOC', },
+        { name: 'GPIOD', value: 'GPIOD', },
+        { name: 'GPIOE', value: 'GPIOE', },
+        { name: 'GPIOF', value: 'GPIOF', },
+      ],
+      default: 'GPIOA',
+    },
+    gpio_pin: {
+      type: 'select',
+      options: [
+        { name: '0', value: '0', },
+        { name: '1', value: '1', },
+        { name: '2', value: '2', },
+        { name: '3', value: '3', },
+        { name: '4', value: '4', },
+        { name: '5', value: '5', },
+        { name: '6', value: '6', },
+        { name: '7', value: '7', },
+        { name: '8', value: '8', },
+        { name: '9', value: '9', },
+        { name: '10', value: '10', },
+        { name: '11', value: '11', },
+        { name: '12', value: '12', },
+        { name: '13', value: '13', },
+        { name: '14', value: '14', },
+        { name: '15', value: '15', },
+      ],
+      default: '0',
+    },
+    gpio_val: {
+      type: 'select',
+      options: [
+        { name: 'On', value: '0', },
+        { name: 'Off', value: '1', },
+        { name: 'Variable', value: 'Var', },
+      ],
+      default: '0',
+    },
+    gpio_var_name: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+  },
   default_options: {
     gpio_bank: 'GPIOA',
     gpio_pin:  0,
@@ -178,6 +355,46 @@ const tool_node_types = [
   base_name: 'GPIO_Input',
   menu_name: 'Read Input Pin',
   node_color: 'blue',
+  options: {
+    gpio_bank: {
+      type: 'select',
+      options: [
+        { name: 'GPIOA', value: 'GPIOA', },
+        { name: 'GPIOB', value: 'GPIOB', },
+        { name: 'GPIOC', value: 'GPIOC', },
+        { name: 'GPIOD', value: 'GPIOD', },
+        { name: 'GPIOE', value: 'GPIOE', },
+        { name: 'GPIOF', value: 'GPIOF', },
+      ],
+      default: 'GPIOA',
+    },
+    gpio_pin: {
+      type: 'select',
+      options: [
+        { name: '0', value: '0', },
+        { name: '1', value: '1', },
+        { name: '2', value: '2', },
+        { name: '3', value: '3', },
+        { name: '4', value: '4', },
+        { name: '5', value: '5', },
+        { name: '6', value: '6', },
+        { name: '7', value: '7', },
+        { name: '8', value: '8', },
+        { name: '9', value: '9', },
+        { name: '10', value: '10', },
+        { name: '11', value: '11', },
+        { name: '12', value: '12', },
+        { name: '13', value: '13', },
+        { name: '14', value: '14', },
+        { name: '15', value: '15', },
+      ],
+      default: '0',
+    },
+    gpio_var_name: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+  },
   default_options: {
     gpio_bank: 'GPIOA',
     gpio_pin:  0,
@@ -190,6 +407,12 @@ const tool_node_types = [
   base_name: 'RCC_Enable',
   menu_name: 'Enable Peripheral Clock',
   node_color: 'green',
+  options: {
+    periph_clock: {
+      type: 'rcc_select',
+      default: 'GPIOA',
+    }
+  },
   default_options: {
     periph_clock: 'GPIOA',
   },
@@ -200,6 +423,12 @@ const tool_node_types = [
   base_name: 'RCC_Disable',
   menu_name: 'Disable Peripheral Clock',
   node_color: 'pink',
+  options: {
+    periph_clock: {
+      type: 'rcc_select',
+      default: 'GPIOA',
+    }
+  },
   default_options: {
     periph_clock: 'GPIOA',
   },
@@ -207,9 +436,35 @@ const tool_node_types = [
   options_html: rcc_disable_node_options_html,
 },
 {
+  // TODO: This should probably be a separate menu, not a node.
   base_name: 'New_Variable',
   menu_name: 'Define Variable',
   node_color: 'green',
+  options: {
+    var_name: {
+      type: 'input_text',
+      default: '',
+    },
+    var_display_name: {
+      type: 'input_text',
+      default: '',
+    },
+    var_type: {
+      type: 'select',
+      options: [
+        { name: 'Integer', value: 'int', },
+        { name: 'Floating-point', value: 'float', },
+        { name: 'Boolean', value: 'bool', },
+        { name: 'Letter', value: 'char', },
+      ],
+      default: 'int',
+    },
+    var_val: {
+      // (This input depends on the value of 'var_type'.)
+      type: 'TBD',
+      default: 'LOL',
+    },
+  },
   default_options: {
     var_name: '',
     var_display_name: '',
@@ -223,6 +478,12 @@ const tool_node_types = [
   base_name: 'Set_Variable',
   menu_name: 'Set Variable',
   node_color: 'blue',
+  options: {
+    var_name: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+  },
   default_options: {
     var_name: '(None)',
   },
@@ -233,6 +494,16 @@ const tool_node_types = [
   base_name: 'Set_Var_Logic_Not',
   menu_name: 'Logical Not',
   node_color: 'blue',
+  options: {
+    var_a_name: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+    var_b_name: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+  },
   default_options: {
     var_a_name: '(None)',
     var_b_name: '(None)',
@@ -244,6 +515,29 @@ const tool_node_types = [
   base_name: 'Set_Var_Addition',
   menu_name: 'Add or Subtract',
   node_color: 'blue',
+  options: {
+    var_a_name: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+    var_b_name: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+    add_val_type: {
+      type: 'select',
+      options: [
+        { name: 'Constant Value', value: 'val', },
+        { name: 'Defined Variable', value: 'var', },
+      ],
+      default: 'val',
+    },
+    add_val_val: {
+      // (This input depends on the value of 'add_val_type'.)
+      type: 'TBD',
+      default: '0',
+    },
+  },
   default_options: {
     var_a_name: '(None)',
     var_b_name: '(None)',
@@ -257,6 +551,8 @@ const tool_node_types = [
   base_name: 'Nop_Node',
   menu_name: 'No-op (Do Nothing)',
   node_color: 'blue',
+  options: {
+  },
   default_options: {
   },
   options_listeners: apply_nop_node_options_listeners,
@@ -266,6 +562,37 @@ const tool_node_types = [
   base_name: 'I2C_Init',
   menu_name: 'Initialize I2C',
   node_color: 'green',
+  options: {
+    i2c_periph_num: {
+      type: 'select',
+      options: [
+        { name: 'I2C (A9/A10)', value: '1', },
+      ],
+      default: '1',
+    },
+    scl_pin: {
+      type: 'background',
+      default: 'A9',
+    },
+    sda_pin: {
+      type: 'background',
+      default: 'A10',
+    },
+    gpio_af: {
+      type: 'background',
+      default: 'AF_4',
+    },
+    i2c_periph_speed: {
+      type: 'select',
+      options: [
+        { name: '10KHz', value: '10KHz', },
+        { name: '100KHz', value: '100KHz', },
+        { name: '400KHz', value: '400KHz', },
+        { name: '1MHz', value: '1MHz', },
+      ],
+      default: '100KHz',
+    },
+  },
   default_options: {
     i2c_periph_num: '1',
     scl_pin: 'A9',
@@ -281,6 +608,15 @@ const tool_node_types = [
   base_name: 'I2C_Deinit',
   menu_name: 'Deinitialize I2C',
   node_color: 'pink',
+  options: {
+    i2c_periph_num: {
+      type: 'select',
+      options: [
+        { name: 'I2C1 (A9/A10)', value: '1', },
+      ],
+      default: '1',
+    }
+  },
   default_options: {
     i2c_periph_num: '1',
   },
@@ -291,6 +627,15 @@ const tool_node_types = [
   base_name: 'ADC_Init',
   menu_name: 'Initialize ADC',
   node_color: 'green',
+  options: {
+    adc_channel: {
+      type: 'select',
+      options: [
+        { name: 'ADC1', value: '1', },
+      ],
+      default: '1',
+    },
+  },
   default_options: {
     adc_channel: '1',
     // TODO: More ADC options. (Resolution, etc)
@@ -302,6 +647,53 @@ const tool_node_types = [
   base_name: 'ADC_Read',
   menu_name: 'Read ADC Pin',
   node_color: 'blue',
+  options: {
+    adc_channel: {
+      type: 'select',
+      options: [
+        { name: 'ADC1', value: '1', },
+      ],
+      default: '1',
+    },
+    gpio_bank: {
+      type: 'select',
+      options: [
+        { name: 'GPIOA', value: 'GPIOA', },
+        { name: 'GPIOB', value: 'GPIOB', },
+        { name: 'GPIOC', value: 'GPIOC', },
+        { name: 'GPIOD', value: 'GPIOD', },
+        { name: 'GPIOE', value: 'GPIOE', },
+        { name: 'GPIOF', value: 'GPIOF', },
+      ],
+      default: 'GPIOA',
+    },
+    gpio_pin: {
+      type: 'select',
+      options: [
+        { name: '0', value: '0', },
+        { name: '1', value: '1', },
+        { name: '2', value: '2', },
+        { name: '3', value: '3', },
+        { name: '4', value: '4', },
+        { name: '5', value: '5', },
+        { name: '6', value: '6', },
+        { name: '7', value: '7', },
+        { name: '8', value: '8', },
+        { name: '9', value: '9', },
+        { name: '10', value: '10', },
+        { name: '11', value: '11', },
+        { name: '12', value: '12', },
+        { name: '13', value: '13', },
+        { name: '14', value: '14', },
+        { name: '15', value: '15', },
+      ],
+      default: '0',
+    },
+    adc_var: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+  },
   default_options: {
     adc_channel: '1',
     gpio_bank: 'GPIOA',
@@ -315,6 +707,16 @@ const tool_node_types = [
   base_name: 'RTC_Init',
   menu_name: 'Initialize RTC',
   node_color: 'green',
+  options: {
+    clock_source: {
+      type: 'select',
+      options: [
+        { name: 'Internal Oscillator ~32KHz', value: 'LSI', },
+        { name: 'External Oscillator @32.768KHz', value: 'LSE', },
+      ],
+      default: 'LSI',
+    },
+  },
   default_options: {
     clock_source: 'LSI',
   },
@@ -325,6 +727,20 @@ const tool_node_types = [
   base_name: 'RTC_Read_Time',
   menu_name: 'Read RTC Time',
   node_color: 'blue',
+  options: {
+    seconds_read_var: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+    minutes_read_var: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+    hours_read_var: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+  },
   default_options: {
     seconds_read_var: '(None)',
     minutes_read_var: '(None)',
@@ -337,6 +753,24 @@ const tool_node_types = [
   base_name: 'RTC_Read_Date',
   menu_name: 'Read RTC Date',
   node_color: 'blue',
+  options: {
+    days_read_var: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+    day_of_week_read_var: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+    month_read_var: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+    year_read_var: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+  },
   default_options: {
     days_read_var: '(None)',
     day_of_week_read_var: '(None)',
@@ -350,6 +784,9 @@ const tool_node_types = [
   base_name: 'RTC_Set_Time',
   menu_name: 'Set RTC Time',
   node_color: 'blue',
+  options: {
+    // TODO
+  },
   default_options: {
     seconds_type: 'val',
     seconds_val: '0',
@@ -368,6 +805,9 @@ const tool_node_types = [
   base_name: 'RTC_Set_Date',
   menu_name: 'Set RTC Date',
   node_color: 'blue',
+  options: {
+    // TODO
+  },
   default_options: {
     days_type: 'val',
     days_val: '1',
@@ -389,6 +829,15 @@ const tool_node_types = [
   base_name: 'SSD1306_Init',
   menu_name: 'Initialize Screen',
   node_color: 'green',
+  options: {
+    i2c_periph_num: {
+      type: 'select',
+      options: [
+        { name: 'I2C1 (A9/A10)', value: '1', },
+      ],
+      default: '1',
+    },
+  },
   default_options: {
     i2c_periph_num: '1',
   },
@@ -399,6 +848,31 @@ const tool_node_types = [
   base_name: 'SSD1306_Draw_Px',
   menu_name: 'Draw Pixel',
   node_color: 'blue',
+  options: {
+    i2c_periph_num: {
+      type: 'select',
+      options: [
+        { name: 'I2C1 (A9/A10)', value: '1', },
+      ],
+      default: '1',
+    },
+    px_x: {
+      type: 'input_number',
+      default: 0
+    },
+    px_y: {
+      type: 'input_number',
+      default: 0
+    },
+    px_color: {
+      type: 'select',
+      options: [
+        { name: 'On', value: 'On', },
+        { name: 'Off', value: 'Off', },
+      ],
+      default: 'On',
+    },
+  },
   default_options: {
     i2c_periph_num: '1',
     px_x: '0',
@@ -412,6 +886,35 @@ const tool_node_types = [
   base_name: 'SSD1306_Draw_HL',
   menu_name: 'Draw Horizontal Line',
   node_color: 'blue',
+  options: {
+    i2c_periph_num: {
+      type: 'select',
+      options: [
+        { name: 'I2C1 (A9/A10)', value: '1', },
+      ],
+      default: '1',
+    },
+    line_x: {
+      type: 'input_number',
+      default: 0
+    },
+    line_y: {
+      type: 'input_number',
+      default: 0
+    },
+    line_length: {
+      type: 'input_number',
+      default: 0
+    },
+    line_color: {
+      type: 'select',
+      options: [
+        { name: 'On', value: 'On', },
+        { name: 'Off', value: 'Off', },
+      ],
+      default: 'On',
+    },
+  },
   default_options: {
     i2c_periph_num: '1',
     line_x: '0',
@@ -426,6 +929,35 @@ const tool_node_types = [
   base_name: 'SSD1306_Draw_VL',
   menu_name: 'Draw Vertical Line',
   node_color: 'blue',
+  options: {
+    i2c_periph_num: {
+      type: 'select',
+      options: [
+        { name: 'I2C1 (A9/A10)', value: '1', },
+      ],
+      default: '1',
+    },
+    line_x: {
+      type: 'input_number',
+      default: 0
+    },
+    line_y: {
+      type: 'input_number',
+      default: 0
+    },
+    line_length: {
+      type: 'input_number',
+      default: 0
+    },
+    line_color: {
+      type: 'select',
+      options: [
+        { name: 'On', value: 'On', },
+        { name: 'Off', value: 'Off', },
+      ],
+      default: 'On',
+    },
+  },
   default_options: {
     i2c_periph_num: '1',
     line_x: '0',
@@ -440,6 +972,51 @@ const tool_node_types = [
   base_name: 'SSD1306_Draw_Rect',
   menu_name: 'Draw Rectangle',
   node_color: 'blue',
+  options: {
+    i2c_periph_num: {
+      type: 'select',
+      options: [
+        { name: 'I2C1 (A9/A10)', value: '1', },
+      ],
+      default: '1',
+    },
+    rect_x: {
+      type: 'input_number',
+      default: 0
+    },
+    rect_y: {
+      type: 'input_number',
+      default: 0
+    },
+    rect_w: {
+      type: 'input_number',
+      default: 0
+    },
+    rect_h: {
+      type: 'input_number',
+      default: 0
+    },
+    rect_color: {
+      type: 'select',
+      options: [
+        { name: 'On', value: 'On', },
+        { name: 'Off', value: 'Off', },
+      ],
+      default: 'On',
+    },
+    rect_style: {
+      type: 'select',
+      options: [
+        { name: 'Fill', value: 'Fill', },
+        { name: 'Outline', value: 'Outline', },
+      ],
+      default: 'Fill',
+    },
+    outline: {
+      type: 'input_number',
+      default: 1
+    },
+  },
   default_options: {
     i2c_periph_num: '1',
     rect_x: '0',
@@ -457,6 +1034,55 @@ const tool_node_types = [
   base_name: 'SSD1306_Draw_Text',
   menu_name: 'Draw Text',
   node_color: 'blue',
+  options: {
+    i2c_periph_num: {
+      type: 'select',
+      options: [
+        { name: 'I2C1 (A9/A10)', value: '1', },
+      ],
+      default: '1',
+    },
+    text_x: {
+      type: 'input_number',
+      default: 0
+    },
+    text_y: {
+      type: 'input_number',
+      default: 0
+    },
+    text_type: {
+      type: 'select',
+      options: [
+        { name: 'Constant Text', value: 'val', },
+        { name: 'Variable', value: 'var', },
+      ],
+      default: 'val',
+    },
+    text_var: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+    text_line: {
+      type: 'input_text',
+      default: '',
+    },
+    text_size: {
+      type: 'select',
+      options: [
+        { name: 'Small (6x8)', value: 'S', },
+        { name: 'Large (12x16)', value: 'L', },
+      ],
+      default: 'S'
+    },
+    text_color: {
+      type: 'select',
+      options: [
+        { name: 'On', value: 'On', },
+        { name: 'Off', value: 'Off', },
+      ],
+      default: 'On',
+    },
+  },
   default_options: {
     i2c_periph_num: '1',
     text_x: '0',
@@ -474,6 +1100,15 @@ const tool_node_types = [
   base_name: 'SSD1306_Refresh',
   menu_name: 'Refresh Display',
   node_color: 'blue',
+  options: {
+    i2c_periph_num: {
+      type: 'select',
+      options: [
+        { name: 'I2C1 (A9/A10)', value: '1', },
+      ],
+      default: '1',
+    },
+  },
   default_options: {
     i2c_periph_num: '1',
   },
@@ -484,6 +1119,12 @@ const tool_node_types = [
   base_name: 'Check_Truthy',
   menu_name: 'Is Variable Truth-y?',
   node_color: 'canary',
+  options: {
+    var_name: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+  },
   default_options: {
     var_name: '(None)',
   },
@@ -494,6 +1135,16 @@ const tool_node_types = [
   base_name: 'Check_Equals',
   menu_name: 'Are Variables Equal?',
   node_color: 'canary',
+  options: {
+    var_a_name: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+    var_b_name: {
+      type: 'defined_var_select',
+      default: '(None)',
+    },
+  },
   default_options: {
     var_a_name: '(None)',
     var_b_name: '(None)',
