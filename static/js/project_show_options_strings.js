@@ -492,13 +492,6 @@ var set_var_node_options_html = std_opts_table_tag('set_var_options') +
   `</td></tr></table>
 `;
 
-// 'Modify Variable: Logic Not' node options.
-var set_var_logic_not_node_options_html = std_opts_table_tag('set_var_logic_not_options') +
-  defined_variables_list_table_row('set_var_logic_not_options_A', 'Variable A:') +
-  defined_variables_list_table_row('set_var_logic_not_options_B', 'Variable B:') +
-  `</table>
-`;
-
 // 'Modify Variable: Addition or Subtraction' node options.
 // TODO: The 'C' in 'A = B + C'
 var set_var_addition_node_options_html = std_opts_table_tag('set_var_addition_options') +
@@ -1224,19 +1217,6 @@ var apply_set_var_node_options_listeners = function(cur_node) {
   };
   // Fire the change tag off once for the initial selection.
   var_name_tag.onchange();
-};
-
-var apply_set_var_logic_not_node_options_listeners = function(cur_node) {
-  var var_a_name_tag = document.getElementById('set_var_logic_not_options_A_var_list_tag');
-  var var_b_name_tag = document.getElementById('set_var_logic_not_options_B_var_list_tag');
-  populate_defined_vars_dropdown('set_var_logic_not_options_A_var_list_tag', cur_node, cur_node.options.var_a_name);
-  populate_defined_vars_dropdown('set_var_logic_not_options_B_var_list_tag', cur_node, cur_node.options.var_b_name);
-  var_a_name_tag.onchange = function() {
-    cur_node.options.var_a_name = var_a_name_tag.value;
-  };
-  var_b_name_tag.onchange = function() {
-    cur_node.options.var_b_name = var_b_name_tag.value;
-  };
 };
 
 // Set options tag listeners for an 'addition' node.

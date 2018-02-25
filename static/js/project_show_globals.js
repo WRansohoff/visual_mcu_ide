@@ -530,8 +530,6 @@ const tool_node_types = [
     var_a_name: '(None)',
     var_b_name: '(None)',
   },
-  options_listeners: apply_set_var_logic_not_node_options_listeners,
-  options_html: set_var_logic_not_node_options_html,
 },
 {
   base_name: 'Set_Var_Addition',
