@@ -413,7 +413,8 @@ var gen_options_html_for_types = function() {
         var tag_prefix = cur_type_prefix + '_' + opt_name;
         cur_type_html = cur_type_html + defined_labels_list_table_row(tag_prefix, cur_opt.label);
       }
-      else if (cur_opt.type == 'TBD') {
+      else if (cur_opt.type == 'TBD' ||
+               cur_opt.type == 'TBD_Var') {
         // Fill out an empty table row for a 'To-Be-Determined'
         // option input tag.
         var tag_prefix = cur_type_prefix + '_' + opt_name;
@@ -422,8 +423,6 @@ var gen_options_html_for_types = function() {
           std_opts_td_id_tag(tag_prefix);
         tbd_empty_row = tbd_empty_row + '</td></tr>';
         cur_type_html = cur_type_html + tbd_empty_row;
-      }
-      else if (cur_opt.type == 'TBD_Var') {
       }
       else if (cur_opt.type == 'background') {
       }
@@ -436,16 +435,6 @@ var gen_options_html_for_types = function() {
 /*
  * Node-specific options.
  */
-// 'Set variable' node options.
-var set_var_node_options_html = std_opts_table_tag('set_var_options') +
-  defined_variables_list_table_row('set_var_options', 'Variable:') +
-  std_opts_tr_tag('set_var_options_var_new_value_row') +
-    std_opts_td_full_tag('set_var_options_var_new_value_text',
-                         'New Value:') +
-    std_opts_td_id_tag('set_var_options_var_new_value') +
-  `</td></tr></table>
-`;
-
 // 'SSD1306 Screen Draw Text' options.
 var ssd1306_draw_text_options_html = std_opts_table_tag('ssd1306_draw_text_options') +
   i2c_channel_select_table_row('ssd1306_draw_text_options') +
@@ -599,6 +588,69 @@ var gen_tag_onchange = function(cur_node, opt_tags, opt_name, opts) {
       }
     }
     else if (cur_opt.determines_var) {
+      var cell_tag = opt_tags[cur_opt.determines_var + '_cell'];
+      if (cell_tag) {
+        // Get the type of variable selected (if any), and
+        // add an appropriate type of input tag.
+        var chosen_var = defined_vars[opt_tags[opt_name].value];
+        var prefix = cur_node.node_type + '_options_' + cur_opt.determines_var;
+        if (chosen_var.type == 'int') {
+          cell_tag.innerHTML = std_opts_input_number_tag(prefix);
+          opt_tags[cur_opt.determines_var] = document.getElementById(prefix + '_tag');
+          if (cur_node.options[opt_name] == opt_tags[opt_name].value) {
+            opt_tags[cur_opt.determines_var].value = cur_node.options[cur_opt.determines_var];
+          }
+          else {
+            opt_tags[cur_opt.determines_var].value = '0';
+          }
+          opt_tags[cur_opt.determines_var].onchange = gen_tag_onchange(cur_node, opt_tags, cur_opt.determines_var, opts);
+          opt_tags[cur_opt.determines_var].onchange();
+        }
+        else if (chosen_var.type == 'float') {
+          cell_tag.innerHTML = std_opts_input_float_tag(prefix);
+          opt_tags[cur_opt.determines_var] = document.getElementById(prefix + '_tag');
+          if (cur_node.options[opt_name] == opt_tags[opt_name].value) {
+            opt_tags[cur_opt.determines_var].value = cur_node.options[cur_opt.determines_var];
+          }
+          else {
+            opt_tags[cur_opt.determines_var].value = '0';
+          }
+          opt_tags[cur_opt.determines_var].onchange = gen_tag_onchange(cur_node, opt_tags, cur_opt.determines_var, opts);
+          opt_tags[cur_opt.determines_var].onchange();
+        }
+        else if (chosen_var.type == 'bool') {
+          var bool_opt_html = std_opts_select_tag(prefix) +
+            std_opts_option_tag(prefix, 'true', 'True') +
+            std_opts_option_tag(prefix, 'false', 'False') +
+          '</select>';
+          cell_tag.innerHTML = bool_opt_html;
+          opt_tags[cur_opt.determines_var] = document.getElementById(prefix + '_tag');
+          if (cur_node.options[opt_name] == opt_tags[opt_name].value) {
+            opt_tags[cur_opt.determines_var].value = cur_node.options[cur_opt.determines_var];
+          }
+          else {
+            opt_tags[cur_opt.determines_var].value = 'true';
+          }
+          opt_tags[cur_opt.determines_var].onchange = gen_tag_onchange(cur_node, opt_tags, cur_opt.determines_var, opts);
+          opt_tags[cur_opt.determines_var].onchange();
+        }
+        else if (chosen_var.type == 'char') {
+          cell_tag.innerHTML = std_opts_input_letter_tag(prefix);
+          opt_tags[cur_opt.determines_var] = document.getElementById(prefix + '_tag');
+          if (cur_node.options[opt_name] == opt_tags[opt_name].value) {
+            opt_tags[cur_opt.determines_var].value = cur_node.options[cur_opt.determines_var];
+          }
+          else {
+            opt_tags[cur_opt.determines_var].value = 'c';
+          }
+          opt_tags[cur_opt.determines_var].onchange = gen_tag_onchange(cur_node, opt_tags, cur_opt.determines_var, opts);
+          opt_tags[cur_opt.determines_var].onchange();
+        }
+        else {
+          // Meh.
+          cell_tag.innerHTML = '';
+        }
+      }
     }
 
     // (Actually change the value.)
@@ -616,7 +668,6 @@ var gen_name_def_tag_onchange = function(cur_node, tag, opt_name, cur_opt) {
       cur_node.options[opt_name] = update_label_names(cur_node.options[opt_name], cur_node.options[cur_opt.def_backup]);
     }
     else if (defs_type == 'variables') {
-      alert('refreshing vars.');
       cur_node.options[opt_name] = update_var_names(cur_node.options[opt_name], cur_node.options[cur_opt.def_backup]);
       refresh_defined_vars();
     }
@@ -750,7 +801,8 @@ var gen_type_listener_func = function(cur_type) {
         opt_tags[opt_name + '_row'] = document.getElementById(tag_prefix + '_var_list_row_tag');
         populate_defined_vars_dropdown(tag_prefix + '_var_list_tag', cur_node, cur_node.options[opt_name]);
       }
-      else if (cur_opt.type == 'TBD') {
+      else if (cur_opt.type == 'TBD' ||
+               cur_opt.type == 'TBD_Var') {
         opt_tags[opt_name + '_row'] = document.getElementById(tag_prefix + '_row_tag');
         opt_tags[opt_name + '_cell'] = document.getElementById(tag_prefix + '_cell');
       }
@@ -791,13 +843,12 @@ var gen_type_listener_func = function(cur_type) {
         opt_tags[opt_name].onchange = gen_name_def_tag_onchange(cur_node, opt_tags[opt_name], opt_name, cur_opt);
         opt_tags[opt_name].onchange();
       }
-      else if (cur_opt.type == 'TBD') {
-        // An input whose type depends on another tag's value.
+      else if (cur_opt.type == 'TBD' ||
+               cur_opt.type == 'TBD_Var') {
+        // An input whose type depends on another tag's value,
+        // or on the type of a selected variable.
         // Its listeners should actually get set up by the
         // linked option.
-      }
-      else if (cur_opt.type == 'TBD_Var') {
-        // An input whose type depends on a variable's type.
       }
       else if (cur_opt.type == 'background') {
         // A 'background' option. Currently, this means that
@@ -817,98 +868,6 @@ var gen_options_listeners_for_types = function() {
 /*
  * Node listener functions.
  */
-// 'Set Variable' node.
-var apply_set_var_node_options_listeners = function(cur_node) {
-  var var_name_tag = document.getElementById('set_var_options_var_list_tag');
-  // (Needs to be created based on var type.)
-  var var_val_tag = null;
-  var var_val_cell = document.getElementById('set_var_options_var_new_value_cell');
-  populate_defined_vars_dropdown('set_var_options_var_list_tag', cur_node, cur_node.options.var_name);
-
-  var_name_tag.onchange = function() {
-    var sel_var = null;
-    // Find the corresponding 'New Variable' node.
-    for (var node_ind in fsm_nodes) {
-      var p_node = fsm_nodes[node_ind];
-      if (p_node && p_node.node_type == 'New_Variable' && p_node.options.var_name == var_name_tag.value) {
-        sel_var = p_node;
-        break;
-      }
-    }
-    if (sel_var) {
-      cur_node.options.var_name = sel_var.options.var_name;
-      if (!cur_node.options.var_val || cur_node.options.var_type != sel_var.options.var_type) {
-        // Defaults.
-        if (sel_var.options.var_type == 'int') {
-          cur_node.options.var_val = 0;
-        }
-        else if (sel_var.options.var_type == 'float') {
-          cur_node.options.var_val = 0.0;
-        }
-        else if (sel_var.options.var_type == 'bool') {
-          cur_node.options.var_val = true;
-        }
-        else if (sel_var.options.var_type == 'char') {
-          cur_node.options.var_val = 'c';
-        }
-      }
-      cur_node.options.var_type = sel_var.options.var_type;
-      var val_input_defined = false;
-      if (cur_node.options.var_type == 'int') {
-        var_val_cell.innerHTML = `
-          <input id="define_var_options_int_tag" class="define_var_options_int_input" type="number" value="` + cur_node.options.var_val + `">
-        `;
-        var var_val_in = document.getElementById('define_var_options_int_tag');
-        var_val_in.onchange = function() {
-          cur_node.options.var_val = var_val_in.value;
-        };
-      }
-      else if (cur_node.options.var_type == 'float') {
-        var_val_cell.innerHTML = `
-          <input id="define_var_options_float_tag" class="define_var_options_float_input" type="number" value="` + cur_node.options.var_val + `" step="0.000001">
-        `;
-        var var_val_in = document.getElementById('define_var_options_float_tag');
-        var_val_in.onchange = function() {
-          cur_node.options.var_val = var_val_in.value;
-        };
-      }
-      else if (cur_node.options.var_type == 'bool') {
-        var is_true_sel = 'selected="true"';
-        var is_false_sel = '';
-        if (!cur_node.options.var_val || cur_node.options.var_val == 'false') {
-          is_false_sel = 'selected="true"';
-          is_true_sel = '';
-        }
-        var_val_cell.innerHTML = `
-          <select id="define_var_options_bool_tag" class="define_var_options_bool_input">
-            <option ` + is_true_sel + ` value="true">True</option>
-            <option ` + is_false_sel + ` value="false">False</option>
-          </select>
-        `;
-        var var_val_in = document.getElementById('define_var_options_bool_tag');
-        var_val_in.onchange = function() {
-          cur_node.options.var_val = var_val_in.value;
-        };
-      }
-      else if (cur_node.options.var_type == 'char') {
-        var_val_cell.innerHTML = `
-          <input id="define_var_options_char_tag" class="define_var_options_char_input" type="text" maxlength="1" value = "` + cur_node.options.var_val + `">
-        `;
-        var var_val_in = document.getElementById('define_var_options_char_tag');
-        var_val_in.onchange = function() {
-          cur_node.options.var_val = var_val_in.value;
-        };
-      }
-    }
-    else if (var_name_tag.value == '(None)') {
-      cur_node.options.var_name = '(None)';
-      var_val_cell.innerHTML = '';
-    }
-  };
-  // Fire the change tag off once for the initial selection.
-  var_name_tag.onchange();
-};
-
 // 'SSD1306 Screen Draw Text' options listeners.
 var apply_ssd1306_draw_text_node_options_listeners = function(cur_node) {
   var i2c_channel_tag = document.getElementById('ssd1306_draw_text_options_i2c_channel_select_tag');
