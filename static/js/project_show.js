@@ -840,7 +840,8 @@ project_show_onload = function() {
                   // (TODO: Enable for all nodes)
                   // For specified nodes, use auto-generated
                   // attributes instead of hand-written ones.
-                  if (cur_type.base_name == 'Boot') {
+                  if (cur_type.base_name == 'Boot' ||
+                      cur_type.base_name == 'Delay') {
                     selected_node_options_html += cur_type.options_gen_html;
                   }
                   else {

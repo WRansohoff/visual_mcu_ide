@@ -370,10 +370,21 @@ var gen_options_html_for_types = function() {
         cur_type_html = cur_type_html + tag_to_add;
       }
       else if (cur_opt.type == 'rcc_select') {
+        // A special sort of 'select' dropdown with available
+        // peripheral clocks depending on the selected chip.
       }
       else if (cur_opt.type == 'input_number') {
+        // A numeric input field.
+        var tag_prefix = cur_type_prefix + '_' + opt_name;
+        var tag_to_add = std_opts_tr_tag(tag_prefix + '_row') +
+          std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
+          std_opts_td_tag(tag_prefix + '_opt') +
+            std_opts_input_number_tag(tag_prefix);
+        tag_to_add = tag_to_add + '</td></tr>\n';
+        cur_type_html = cur_type_html + tag_to_add;
       }
       else if (cur_opt.type == 'input_text') {
+        // A text input field.
       }
       else if (cur_opt.type == 'defined_var_select') {
       }
@@ -881,6 +892,11 @@ var check_equals_node_options_html = `
 /*
  * Node listener function autogenerators.
  */
+var gen_tag_onchange = function(cur_node, tag, opt_name) {
+  return function() {
+    cur_node.options[opt_name] = tag.value;
+  };
+};
 
 var gen_type_listener_func = function(cur_type) {
   return function(cur_node) {
@@ -911,12 +927,11 @@ var gen_type_listener_func = function(cur_type) {
           cur_opt.type == 'input_text' ||
           cur_opt.type == 'defined_var_select' ||
           cut_opt.type == 'defined_label_select') {
+        // For now, just simple 'fetch/save' logic.
         if (cur_node.options[opt_name]) {
           opt_tags[opt_name].value = cur_node.options[opt_name];
         }
-        opt_tags[opt_name].onchange = function() {
-          cur_node.options[opt_name] = opt_tags[opt_name].value;
-        }
+        opt_tags[opt_name].onchange = gen_tag_onchange(cur_node, opt_tags[opt_name], opt_name);
       }
       else if (cur_opt.type == 'TBD') {
         // An input whose type depends on another tag's value.

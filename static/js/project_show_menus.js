@@ -462,7 +462,8 @@ var apply_selected_node_option_listeners = function(type_node) {
         // (TODO: Enable for all nodes)
         // For specified nodes, use auto-generated
         // attributes instead of hand-written ones.
-        if (cur_type.base_name == 'Boot') {
+        if (cur_type.base_name == 'Boot' ||
+            cur_type.base_name == 'Delay') {
           cur_type.options_gen_listeners(type_node);
         }
         else {
