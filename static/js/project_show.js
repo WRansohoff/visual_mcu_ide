@@ -852,7 +852,9 @@ project_show_onload = function() {
                       cur_type.base_name == 'I2C_Init' ||
                       cur_type.base_name == 'I2C_Deinit' ||
                       cur_type.base_name == 'ADC_Init' ||
-                      cur_type.base_name == 'ADC_Read') {
+                      cur_type.base_name == 'ADC_Read' ||
+                      cur_type.base_name == 'RTC_Init' ||
+                      cur_type.base_name == 'RTC_Read_Time') {
                     selected_node_options_html += cur_type.options_gen_html;
                   }
                   else {

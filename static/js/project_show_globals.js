@@ -743,8 +743,6 @@ const tool_node_types = [
   default_options: {
     clock_source: 'LSI',
   },
-  options_listeners: apply_rtc_init_node_options_listeners,
-  options_html: rtc_init_node_options_html,
 },
 {
   base_name: 'RTC_Read_Time',
@@ -772,8 +770,6 @@ const tool_node_types = [
     minutes_read_var: '(None)',
     hours_read_var: '(None)',
   },
-  options_listeners: apply_rtc_read_time_node_options_listeners,
-  options_html: rtc_read_time_options_html,
 },
 {
   base_name: 'RTC_Read_Date',

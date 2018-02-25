@@ -474,7 +474,9 @@ var apply_selected_node_option_listeners = function(type_node) {
             cur_type.base_name == 'I2C_Init' ||
             cur_type.base_name == 'I2C_Deinit' ||
             cur_type.base_name == 'ADC_Init' ||
-            cur_type.base_name == 'ADC_Read') {
+            cur_type.base_name == 'ADC_Read' ||
+            cur_type.base_name == 'RTC_Init' ||
+            cur_type.base_name == 'RTC_Read_Time') {
           cur_type.options_gen_listeners(type_node);
         }
         else {

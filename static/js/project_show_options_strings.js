@@ -501,25 +501,6 @@ var set_var_addition_node_options_html = std_opts_table_tag('set_var_addition_op
   `</td></tr></table>
 `;
 
-// 'Initialize RealTime Clock' options.
-var rtc_init_node_options_html = std_opts_table_tag('rtc_init_options') +
-  std_opts_tr_tag('rtc_init_options_osc') +
-    std_opts_td_full_tag('rtc_init_options_osc_text', 'RTC Oscillator:') +
-    std_opts_td_tag('rtc_init_options_osc_opt') +
-      std_opts_select_tag('rtc_init_options_osc') +
-      std_opts_option_tag('rtc_init_options_osc', 'LSI', 'Internal oscillator ~32KHz') +
-      std_opts_option_tag('rtc_init_options_osc', 'LSE', 'External crystal @32.768KHz') +
-  `</select></td></tr></table>
-`;
-
-// 'Read RTC Time' options.
-var rtc_read_time_options_html = std_opts_table_tag('rtc_read_time_options') +
-  defined_variables_list_table_row('read_rtc_time_options_s', "'Seconds' Variable:") +
-  defined_variables_list_table_row('read_rtc_time_options_m', "'Minutes' Variable:") +
-  defined_variables_list_table_row('read_rtc_time_options_h', "'Hours' Variable:") +
-  `</table>
-`;
-
 // 'Initialize SSD1306 OLED Screen' options.
 var ssd1306_init_node_options_html = std_opts_table_tag('ssd1306_init_options') +
   i2c_channel_select_table_row('ssd1306_init_options') +
@@ -1221,34 +1202,6 @@ var apply_set_var_addition_node_options_listeners = function(cur_node) {
   };
   // Fire the change tag off once to apply initial changes.
   var_c_type_tag.onchange();
-};
-
-var apply_rtc_init_node_options_listeners = function(cur_node) {
-  var rtc_oscillator_tag = document.getElementById('rtc_init_options_osc_tag');
-  if (cur_node && cur_node.options.clock_source) {
-    rtc_oscillator_tag.value = cur_node.options.clock_source;
-  }
-  rtc_oscillator_tag.onchange = function() {
-    cur_node.options.clock_source = rtc_oscillator_tag.value;
-  };
-};
-
-var apply_rtc_read_time_node_options_listeners = function(cur_node) {
-  var sec_var_tag = document.getElementById('read_rtc_time_options_s_var_list_tag');
-  var min_var_tag = document.getElementById('read_rtc_time_options_m_var_list_tag');
-  var hour_var_tag = document.getElementById('read_rtc_time_options_h_var_list_tag');
-  populate_defined_vars_dropdown('read_rtc_time_options_s_var_list_tag', cur_node, cur_node.options.seconds_read_var);
-  populate_defined_vars_dropdown('read_rtc_time_options_m_var_list_tag', cur_node, cur_node.options.minutes_read_var);
-  populate_defined_vars_dropdown('read_rtc_time_options_h_var_list_tag', cur_node, cur_node.options.hours_read_var);
-  sec_var_tag.onchange = function() {
-    cur_node.options.seconds_read_var = sec_var_tag.value;
-  };
-  min_var_tag.onchange = function() {
-    cur_node.options.minutes_read_var = min_var_tag.value;
-  };
-  hour_var_tag.onchange = function() {
-    cur_node.options.hours_read_var = hour_var_tag.value;
-  };
 };
 
 // 'Initialize SSD1306 OLED Screen' options listeners.
