@@ -1172,8 +1172,6 @@ const tool_node_types = [
   default_options: {
     var_name: '(None)',
   },
-  options_listeners: apply_check_truthy_options_listeners,
-  options_html: check_truthy_node_options_html,
 },
 {
   base_name: 'Check_Equals',
@@ -1195,8 +1193,6 @@ const tool_node_types = [
     var_a_name: '(None)',
     var_b_name: '(None)',
   },
-  options_listeners: apply_check_equals_options_listeners,
-  options_html: check_equals_node_options_html,
 },
 /* 9
 {

@@ -860,7 +860,9 @@ project_show_onload = function() {
                 cur_type.base_name == 'SSD1306_Draw_HL' ||
                 cur_type.base_name == 'SSD1306_Draw_VL' ||
                 cur_type.base_name == 'SSD1306_Draw_Rect' ||
-                cur_type.base_name == 'SSD1306_Refresh') {
+                cur_type.base_name == 'SSD1306_Refresh' ||
+                cur_type.base_name == 'Check_Truthy' ||
+                cur_type.base_name == 'Check_Equals') {
                     selected_node_options_html += cur_type.options_gen_html;
                   }
                   else {

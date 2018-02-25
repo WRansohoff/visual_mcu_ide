@@ -554,21 +554,6 @@ var ssd1306_draw_text_options_html = std_opts_table_tag('ssd1306_draw_text_optio
   `</table>
 `;
 
-// 'Is Variable Truth-y?' branching node options.
-var check_truthy_node_options_html = `
-<table class="check_truthy_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + defined_variables_list_table_row('check_truthy_options', 'Variable to check:') + `
-</table>
-`;
-
-// 'Are variables Equal?' branching node options.
-var check_equals_node_options_html = `
-<table class="check_equals_options_table" cellpadding="0" cellspacing="0" border="0">
-  ` + defined_variables_list_table_row('check_equals_options_A', 'Variable A:') + `
-  ` + defined_variables_list_table_row('check_equals_options_B', 'Variable B:') + `
-</table>
-`;
-
 /*
  * Node listener function autogenerators.
  */
@@ -1135,25 +1120,4 @@ var apply_ssd1306_draw_text_node_options_listeners = function(cur_node) {
   size_tag.onchange = function() {
     cur_node.options.text_size = size_tag.value;
   };
-};
-
-var apply_check_truthy_options_listeners = function(cur_node) {
-  var var_name_tag = document.getElementById('check_truthy_options_var_list_tag');
-  populate_defined_vars_dropdown('check_truthy_options_var_list_tag', cur_node, cur_node.options.var_name);
-  var_name_tag.onchange = function() {
-    cur_node.options.var_name = var_name_tag.value;
-  }
-};
-
-var apply_check_equals_options_listeners = function(cur_node) {
-  var var_a_name_tag = document.getElementById('check_equals_options_A_var_list_tag');
-  var var_b_name_tag = document.getElementById('check_equals_options_B_var_list_tag');
-  populate_defined_vars_dropdown('check_equals_options_A_var_list_tag', cur_node, cur_node.options.var_a_name);
-  populate_defined_vars_dropdown('check_equals_options_B_var_list_tag', cur_node, cur_node.options.var_b_name);
-  var_a_name_tag.onchange = function() {
-    cur_node.options.var_a_name = var_a_name_tag.value;
-  }
-  var_b_name_tag.onchange = function() {
-    cur_node.options.var_b_name = var_b_name_tag.value;
-  }
 };
