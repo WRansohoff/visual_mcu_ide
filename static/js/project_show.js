@@ -862,7 +862,8 @@ project_show_onload = function() {
                 cur_type.base_name == 'SSD1306_Draw_Rect' ||
                 cur_type.base_name == 'SSD1306_Refresh' ||
                 cur_type.base_name == 'Check_Truthy' ||
-                cur_type.base_name == 'Check_Equals') {
+                cur_type.base_name == 'Check_Equals' ||
+                cur_type.base_name == 'GPIO_Output') {
                     selected_node_options_html += cur_type.options_gen_html;
                   }
                   else {

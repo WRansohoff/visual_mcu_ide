@@ -260,7 +260,7 @@ var select_gpio_pin_table_row = function(tag_prefix) {
  * List RCC 'peripheral clocks'.
  */
 var rcc_clock_list_table_row = function(tag_prefix) {
-  return std_opts_tr_tag(tag_prefix + '_periph_clocks_row') +
+  return std_opts_tr_id_tag(tag_prefix + '_periph_clocks') +
     std_opts_td_tag(tag_prefix + '_periph_clocks_text', 'Peripheral Clock:') +
     std_opts_td_tag(tag_prefix + '_periph_clocks_opt') +
     std_opts_select_tag(tag_prefix + '_periph_clocks') + `
@@ -289,7 +289,7 @@ var defined_variables_list_table_row = function(tag_prefix, label_text) {
 
 var defined_labels_list_table_row = function(tag_prefix) {
   return `
-  <tr class="` + tag_prefix + `_label_list_row">
+  <tr id="` + tag_prefix + `_label_list_row_tag" class="` + tag_prefix + `_label_list_row">
     <td class="` + tag_prefix + `_label_list_text">
       Label name:
     </td>
@@ -342,7 +342,7 @@ var gen_options_html_for_types = function() {
       if (cur_opt.type == 'select') {
         // A 'select' dropdown.
         var tag_prefix = cur_type_prefix + '_' + opt_name;
-        var tag_to_add = std_opts_tr_tag(tag_prefix + '_row') +
+        var tag_to_add = std_opts_tr_id_tag(tag_prefix + '_row') +
           std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
           std_opts_td_tag(tag_prefix + '_opt') +
             std_opts_select_tag(tag_prefix);
@@ -363,7 +363,7 @@ var gen_options_html_for_types = function() {
       else if (cur_opt.type == 'input_number') {
         // A numeric input field.
         var tag_prefix = cur_type_prefix + '_' + opt_name;
-        var tag_to_add = std_opts_tr_tag(tag_prefix + '_row') +
+        var tag_to_add = std_opts_tr_id_tag(tag_prefix + '_row') +
           std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
           std_opts_td_tag(tag_prefix + '_opt') +
             std_opts_input_number_tag(tag_prefix);
@@ -373,7 +373,7 @@ var gen_options_html_for_types = function() {
       else if (cur_opt.type == 'input_text') {
         // A text input field.
         var tag_prefix = cur_type_prefix + '_' + opt_name;
-        var tag_to_add = std_opts_tr_tag(tag_prefix + '_row') +
+        var tag_to_add = std_opts_tr_id_tag(tag_prefix + '_row') +
           std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
           std_opts_td_tag(tag_prefix + '_opt') +
             std_opts_input_text_tag(tag_prefix);
@@ -385,7 +385,7 @@ var gen_options_html_for_types = function() {
         // unique across a set of nodes' options.
         // TODO: Same HTML as 'input_text'?
         var tag_prefix = cur_type_prefix + '_' + opt_name;
-        var tag_to_add = std_opts_tr_tag(tag_prefix + '_row') +
+        var tag_to_add = std_opts_tr_id_tag(tag_prefix + '_row') +
           std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
           std_opts_td_tag(tag_prefix + '_opt') +
             std_opts_input_text_tag(tag_prefix);
@@ -413,23 +413,6 @@ var gen_options_html_for_types = function() {
 /*
  * Node-specific options.
  */
-// 'Set GPIO Output' node options.
-var set_gpio_out_node_options_html = std_opts_table_tag('set_gpio_out_options') +
-  select_gpio_bank_table_row('set_gpio_out_options') +
-  select_gpio_pin_table_row('set_gpio_out_options') +
-  std_opts_tr_tag('set_gpio_out_options_value_row') +
-    std_opts_td_full_tag('set_gpio_out_options_value_text',
-                         'Output value:') +
-    std_opts_td_tag('set_gpio_out_options_value_opt') +
-      std_opts_select_tag('set_gpio_out_options_value') +
-        std_opts_option_tag('set_gpio_out_options_value', 'On', 'On') +
-        std_opts_option_tag('set_gpio_out_options_value', 'Off', 'Off') +
-        std_opts_option_tag('set_gpio_out_options_value', 'Var', 'Variable') +
-  `</select></td></tr>` +
-  defined_variables_list_table_row('set_gpio_out_options', 'Variable:') +
-  `</table>
-`;
-
 // 'Read GPIO_Input' node options.
 var read_gpio_in_node_options_html = std_opts_table_tag('read_gpio_in_options') +
   select_gpio_bank_table_row('read_gpio_in_options') +
@@ -584,6 +567,50 @@ var gen_name_def_tag_onchange = function(cur_node, tag, opt_name, cur_opt) {
   };
 };
 
+var gen_hide_show_onchange = function(cur_node, opt_tags, opt_name, cur_opt) {
+  return function() {
+    cur_node.options[opt_name] = opt_tags[opt_name].value;
+    var should_hide = false;
+    var should_show = false;
+    // Check the 'hide_on' and 'display_on' arrays for each
+    // 'hides' option.
+    for (var h_opt_ind in cur_opt.hides) {
+      var hide_opt = cur_opt.hides[h_opt_ind];
+      for (var h_ind in hide_opt.hide_on) {
+        if (hide_opt.hide_on[h_ind] == opt_tags[opt_name].value) {
+          should_hide = true;
+        }
+      }
+      for (var h_ind in hide_opt.display_on) {
+        if (hide_opt.display_on[h_ind] == opt_tags[opt_name].value) {
+          should_show = true;
+        }
+      }
+      if (should_hide && !should_show) {
+        // Hide the referenced opt.
+        if (opt_tags[hide_opt.opt + '_row']) {
+          opt_tags[hide_opt.opt + '_row'].hidden = true;
+        }
+        else {
+          opt_tags[hide_opt.opt].hidden = true;
+        }
+      }
+      else if (should_show && !should_hide) {
+        // Show the referenced opt.
+        if (opt_tags[hide_opt.opt + '_row']) {
+          opt_tags[hide_opt.opt + '_row'].hidden = false;
+        }
+        else {
+          opt_tags[hide_opt.opt].hidden = false;
+        }
+      }
+      else {
+        // Bad state; do nothing?
+      }
+    }
+  };
+};
+
 var gen_type_listener_func = function(cur_type) {
   return function(cur_node) {
     var cur_type_prefix = cur_type.base_name + '_options';
@@ -598,10 +625,13 @@ var gen_type_listener_func = function(cur_type) {
           cur_opt.type == 'input_text' ||
           cur_opt.type == 'input_text_def') {
         opt_tags[opt_name] = document.getElementById(tag_prefix + '_tag');
+        opt_tags[opt_name + '_row'] = document.getElementById(tag_prefix + '_row_tag');
       }
       else if (cur_opt.type == 'rcc_select') {
         opt_tags[opt_name] = document.getElementById(tag_prefix + '_periph_clocks_tag');
+        opt_tags[opt_name + '_row'] = document.getElementById(tag_prefix + '_periph_clocks_row_tag');
         // Figure out what chip type is being used.
+        // TODO: Move to its own method?
         var chip_type = null;
         for (var fsm_ind in fsm_nodes) {
           var c_node = fsm_nodes[fsm_ind];
@@ -624,6 +654,7 @@ var gen_type_listener_func = function(cur_type) {
       }
       else if (cur_opt.type == 'defined_label_select') {
         opt_tags[opt_name] = document.getElementById(tag_prefix + '_label_list_tag');
+        opt_tags[opt_name + '_row'] = document.getElementById(tag_prefix + '_label_list_row_tag');
         // Populate the dropdown select menu with currently-defined label names. TODO: New method?
         var sel_html_opts = '';
         for (var index in fsm_nodes) {
@@ -655,6 +686,7 @@ var gen_type_listener_func = function(cur_type) {
       }
       else if (cur_opt.type == 'defined_var_select') {
         opt_tags[opt_name] = document.getElementById(tag_prefix + '_var_list_tag');
+        opt_tags[opt_name + '_row'] = document.getElementById(tag_prefix + '_var_list_row_tag');
         populate_defined_vars_dropdown(tag_prefix + '_var_list_tag', cur_node, cur_node.options[opt_name]);
       }
     }
@@ -673,7 +705,13 @@ var gen_type_listener_func = function(cur_type) {
         if (cur_node.options[opt_name]) {
           opt_tags[opt_name].value = cur_node.options[opt_name];
         }
-        opt_tags[opt_name].onchange = gen_tag_onchange(cur_node, opt_tags[opt_name], opt_name);
+        if (cur_opt.hides) {
+          opt_tags[opt_name].onchange = gen_hide_show_onchange(cur_node, opt_tags, opt_name, cur_opt);
+          opt_tags[opt_name].onchange();
+        }
+        else {
+          opt_tags[opt_name].onchange = gen_tag_onchange(cur_node, opt_tags[opt_name], opt_name);
+        }
       }
       else if (cur_opt.type == 'input_text_def') {
         // An input whose value represents a unique identifier.
@@ -708,61 +746,6 @@ var gen_options_listeners_for_types = function() {
 /*
  * Node listener functions.
  */
-// 'GPIO_Output' node listeners.
-var apply_gpio_output_options_listeners = function(cur_node) {
-  var gpio_bank_tag = document.getElementById('set_gpio_out_options_pin_bank_tag');
-  var gpio_pin_tag = document.getElementById('set_gpio_out_options_pin_number_tag');
-  var gpio_value_tag = document.getElementById('set_gpio_out_options_value_tag');
-  var gpio_var_row_tag = document.getElementById('set_gpio_out_options_var_list_row_tag');
-  gpio_var_row_tag.hidden = true;
-  var gpio_var_name_tag = document.getElementById('set_gpio_out_options_var_list_tag');
-
-  // Set values according to node options.
-  if (cur_node.options.gpio_bank) {
-    gpio_bank_tag.value = cur_node.options.gpio_bank;
-  }
-  if (cur_node.options.gpio_pin) {
-    gpio_pin_tag.value = cur_node.options.gpio_pin;
-  }
-  if (cur_node.options.gpio_val == 1 || cur_node.options.gpio_val == '1') {
-    gpio_value_tag.value = 'On';
-  }
-  else if (cur_node.options.gpio_val == 'variable') {
-    gpio_value_tag.value = 'Var';
-    gpio_var_row_tag.hidden = false;
-    populate_defined_vars_dropdown('set_gpio_out_options_var_list_tag', cur_node, cur_node.options.gpio_var_name);
-  }
-  else {
-    gpio_value_tag.value = 'Off';
-  }
-
-  // Set click listener functions.
-  gpio_bank_tag.onchange = function() {
-    cur_node.options.gpio_bank = gpio_bank_tag.value;
-  };
-  gpio_pin_tag.onchange = function() {
-    cur_node.options.gpio_pin = gpio_pin_tag.value;
-  };
-  gpio_value_tag.onchange = function() {
-    if (gpio_value_tag.value == 'On') {
-      cur_node.options.gpio_val = 1;
-      gpio_var_row_tag.hidden = true;
-    }
-    else if (gpio_value_tag.value == 'Var') {
-      cur_node.options.gpio_val = 'variable';
-      gpio_var_row_tag.hidden = false;
-      populate_defined_vars_dropdown('set_gpio_out_options_var_list_tag', cur_node, cur_node.options.gpio_var_name);
-      gpio_var_name_tag.onchange = function() {
-        cur_node.options.gpio_var_name = gpio_var_name_tag.value;
-      };
-    }
-    else {
-      cur_node.options.gpio_val = 0;
-      gpio_var_row_tag.hidden = true;
-    }
-  };
-};
-
 // 'GPIO_Input' node listeners.
 var apply_gpio_input_options_listeners = function(cur_node) {
   var gpio_bank_tag = document.getElementById('read_gpio_in_options_pin_bank_tag');

@@ -335,6 +335,18 @@ const tool_node_types = [
     },
     gpio_val: {
       type: 'select',
+      hides: [
+        {
+          opt: 'gpio_var_name',
+          hide_on: [
+            '0',
+            '1',
+          ],
+          display_on: [
+            'Var',
+          ],
+        },
+      ],
       label: 'Output Value:',
       options: [
         { name: 'On', value: '0', },
@@ -355,8 +367,6 @@ const tool_node_types = [
     gpio_val:  0,
     gpio_var_name: '(None)',
   },
-  options_listeners: apply_gpio_output_options_listeners,
-  options_html: set_gpio_out_node_options_html,
 },
 {
   base_name: 'GPIO_Input',
