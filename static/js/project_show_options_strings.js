@@ -344,7 +344,7 @@ var adc_channel_select_table_row = function(tag_prefix) {
 };
 
 /*
- * Node-specific option HTML generators.
+ * Node-specific option HTML autogenerators.
  */
 var gen_options_html_for_types = function() {
   for (var tn_ind in tool_node_types) {
@@ -385,10 +385,31 @@ var gen_options_html_for_types = function() {
       }
       else if (cur_opt.type == 'input_text') {
         // A text input field.
+        var tag_prefix = cur_type_prefix + '_' + opt_name;
+        var tag_to_add = std_opts_tr_tag(tag_prefix + '_row') +
+          std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
+          std_opts_td_tag(tag_prefix + '_opt') +
+            std_opts_input_text_tag(tag_prefix);
+        tag_to_add = tag_to_add + '</td></tr>\n';
+        cur_type_html = cur_type_html + tag_to_add;
+      }
+      else if (cur_opt.type == 'input_text_def') {
+        // A text input field that verifies its input is
+        // unique across a set of nodes' options.
+        // TODO: Same HTML as 'input_text'?
+        var tag_prefix = cur_type_prefix + '_' + opt_name;
+        var tag_to_add = std_opts_tr_tag(tag_prefix + '_row') +
+          std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
+          std_opts_td_tag(tag_prefix + '_opt') +
+            std_opts_input_text_tag(tag_prefix);
+        tag_to_add = tag_to_add + '</td></tr>\n';
+        cur_type_html = cur_type_html + tag_to_add;
       }
       else if (cur_opt.type == 'defined_var_select') {
       }
       else if (cur_opt.type == 'defined_label_select') {
+        var tag_prefix = cur_type_prefix + '_' + opt_name;
+        cur_type_html = cur_type_html + defined_labels_list_table_row(tag_prefix);
       }
       else if (cur_opt.type == 'TBD') {
       }
@@ -861,6 +882,27 @@ var gen_tag_onchange = function(cur_node, tag, opt_name) {
   };
 };
 
+// Generate the 'onchange' function for a text input which
+// should update a uniquely-named field.
+var gen_name_def_tag_onchange = function(cur_node, tag, opt_name, cur_opt) {
+  return function() {
+    cur_node.options[cur_opt.def_backup] = tag.value;
+    var defs_type = cur_opt.def_type;
+    if (defs_type == 'labels') {
+      cur_node.options[opt_name] = update_label_names(cur_node.options[opt_name], cur_node.options[cur_opt.def_backup]);
+    }
+    else if (defs_type == 'variables') {
+      cur_node.options[opt_name] = update_var_names(cur_node.options[opt_name], cur_node.options[cur_opt.def_backup]);
+      refresh_defined_vars();
+    }
+    else {
+      // Eh, screw it.
+      console.log("Warning: unsure of what is being defined with " + opt_name + ".\n");
+      cur_node.options[opt_name] = tag.value;
+    }
+  };
+};
+
 var gen_type_listener_func = function(cur_type) {
   return function(cur_node) {
     var cur_type_prefix = cur_type.base_name + '_options';
@@ -874,9 +916,42 @@ var gen_type_listener_func = function(cur_type) {
           cur_opt.type == 'rcc_select' ||
           cur_opt.type == 'input_number' ||
           cur_opt.type == 'input_text' ||
-          cur_opt.type == 'defined_var_select' ||
-          cur_opt.type == 'defined_label_select') {
+          cur_opt.type == 'input_text_def') {
         opt_tags[opt_name] = document.getElementById(tag_prefix + '_tag');
+      }
+      else if (cur_opt.type == 'defined_label_select') {
+        opt_tags[opt_name] = document.getElementById(tag_prefix + '_label_list_tag');
+        // Populate the dropdown select menu with currently-defined label names. TODO: New method?
+        var sel_html_opts = '';
+        for (var index in fsm_nodes) {
+          var p_node = fsm_nodes[index];
+          if (p_node && p_node.options && p_node.node_type == 'Label') {
+            var sel_text = '';
+            var any_selected = false;
+            if (p_node.options.label_name && p_node.options.label_name != '') {
+              if (cur_node.options && cur_node.options[opt_name] == p_node.options.label_name) {
+                sel_text = 'selected="true"';
+                any_selected = true;
+              }
+              sel_html_opts += `
+                <option ` + sel_text + ` value="` + p_node.options.label_name + `" id="jump_options_label_list_` + p_node.options.label_name + `" class="jump_options_label_list_option">
+                  ` + p_node.options.label_name + `
+                </option>
+              `;
+            }
+          }
+        }
+        if (any_selected) { sel_text = ''; }
+        else { sel_text = 'selected="true"'; }
+        sel_html_opts = `
+          <option value="(None)" ` + sel_text + ` id="jump_options_label_list_n/a" class="jump_options_label_list_option">
+            (None defined)
+          </option>
+        ` + sel_html_opts;
+        opt_tags[opt_name].innerHTML = sel_html_opts;
+      }
+      else if (cur_opt.type == 'defined_var_select') {
+        // TODO
       }
     }
     // (Second pass: Apply listeners to each tag.)
@@ -889,12 +964,23 @@ var gen_type_listener_func = function(cur_type) {
           cur_opt.type == 'input_number' ||
           cur_opt.type == 'input_text' ||
           cur_opt.type == 'defined_var_select' ||
-          cut_opt.type == 'defined_label_select') {
+          cur_opt.type == 'defined_label_select') {
         // For now, just simple 'fetch/save' logic.
         if (cur_node.options[opt_name]) {
           opt_tags[opt_name].value = cur_node.options[opt_name];
         }
         opt_tags[opt_name].onchange = gen_tag_onchange(cur_node, opt_tags[opt_name], opt_name);
+      }
+      else if (cur_opt.type == 'input_text_def') {
+        // An input whose value represents a unique identifier.
+        // It should not save or apply a new value if the string
+        // is already used by another node, and it should
+        // update references pointing to it when its
+        // name is successfully changed.
+        if (cur_node.options[opt_name]) {
+          opt_tags[opt_name].value = cur_node.options[opt_name];
+        }
+        opt_tags[opt_name].onchange = gen_name_def_tag_onchange(cur_node, opt_tags[opt_name], opt_name, cur_opt);
       }
       else if (cur_opt.type == 'TBD') {
         // An input whose type depends on another tag's value.
@@ -918,7 +1004,6 @@ var gen_options_listeners_for_types = function() {
 /*
  * Node listener functions.
  */
-
 // Apply option input listeners for a 'Label' node.
 var apply_label_node_options_listeners = function(cur_node) {
   var label_name_tag = document.getElementById('define_label_options_label_name_tag');

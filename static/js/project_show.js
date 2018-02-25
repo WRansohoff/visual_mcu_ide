@@ -841,7 +841,9 @@ project_show_onload = function() {
                   // For specified nodes, use auto-generated
                   // attributes instead of hand-written ones.
                   if (cur_type.base_name == 'Boot' ||
-                      cur_type.base_name == 'Delay') {
+                      cur_type.base_name == 'Delay' ||
+                      cur_type.base_name == 'Label' ||
+                      cur_type.base_name == 'Jump') {
                     selected_node_options_html += cur_type.options_gen_html;
                   }
                   else {

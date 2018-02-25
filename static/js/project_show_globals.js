@@ -170,7 +170,9 @@ const tool_node_types = [
   node_color: 'pink',
   options: {
     label_name: {
-      type: 'input_text',
+      type: 'input_text_def',
+      def_type: 'labels',
+      def_backup: 'label_display_name',
       label: 'Label Name:',
       default: '',
     },
@@ -458,7 +460,8 @@ const tool_node_types = [
   node_color: 'green',
   options: {
     var_name: {
-      type: 'input_text',
+      type: 'input_text_def',
+      def_type: 'variables',
       label: 'Variable Name:',
       default: '',
     },

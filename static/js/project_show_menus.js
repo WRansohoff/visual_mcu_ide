@@ -463,7 +463,9 @@ var apply_selected_node_option_listeners = function(type_node) {
         // For specified nodes, use auto-generated
         // attributes instead of hand-written ones.
         if (cur_type.base_name == 'Boot' ||
-            cur_type.base_name == 'Delay') {
+            cur_type.base_name == 'Delay' ||
+            cur_type.base_name == 'Label' ||
+            cur_type.base_name == 'Jump') {
           cur_type.options_gen_listeners(type_node);
         }
         else {
