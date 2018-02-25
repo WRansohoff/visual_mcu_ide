@@ -625,8 +625,6 @@ const tool_node_types = [
     i2c_periph_speed: '100KHz',
     // TODO: More I2C options.
   },
-  options_listeners: apply_i2c_init_node_options_listeners,
-  options_html: i2c_init_node_options_html,
 },
 {
   base_name: 'I2C_Deinit',
@@ -645,8 +643,6 @@ const tool_node_types = [
   default_options: {
     i2c_periph_num: '1',
   },
-  options_listeners: apply_i2c_deinit_node_options_listeners,
-  options_html: i2c_deinit_node_options_html,
 },
 {
   base_name: 'ADC_Init',

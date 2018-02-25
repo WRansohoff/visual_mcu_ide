@@ -470,7 +470,9 @@ var apply_selected_node_option_listeners = function(type_node) {
             cur_type.base_name == 'RCC_Disable' ||
             cur_type.base_name == 'GPIO_Init' ||
             cur_type.base_name == 'Set_Var_Logic_Not' ||
-            cur_type.base_name == 'Nop_Node') {
+            cur_type.base_name == 'Nop_Node' ||
+            cur_type.base_name == 'I2C_Init' ||
+            cur_type.base_name == 'I2C_Deinit') {
           cur_type.options_gen_listeners(type_node);
         }
         else {
