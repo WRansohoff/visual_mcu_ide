@@ -45,8 +45,16 @@ var std_opts_input_text_tag = function(tag_prefix) {
   return `<input type="text" id="` + tag_prefix + `_tag" class="` + tag_prefix + `_input">`;
 };
 
+var std_opts_input_letter_tag = function(tag_prefix) {
+  return `<input type="text" maxlength="1" id="` + tag_prefix + `_tag" class="` + tag_prefix + `_input">`;
+};
+
 var std_opts_input_number_tag = function(tag_prefix) {
   return `<input type="number" value="0" id="` + tag_prefix + `_tag" class="` + tag_prefix + `_input">`;
+};
+
+var std_opts_input_float_tag = function(tag_prefix) {
+  return `<input type="number" value="0" id="` + tag_prefix + `_tag" class="` + tag_prefix + `_input" step="0.000001">`;
 };
 
 /*
@@ -275,7 +283,13 @@ var defined_variables_list_table_row = function(tag_prefix, label_text) {
   <tr id="` + tag_prefix + `_var_list_row_tag" class="` + tag_prefix + `_var_list_row">
     <td class="` + tag_prefix + `_var_list_text">
       ` + label_text + `
-    </td>
+    </td>` +
+      defined_variables_list_table_cell(tag_prefix, label_text) +
+  `</tr>`;
+};
+
+var defined_variables_list_table_cell = function(tag_prefix, label_text) {
+  return `
     <td class="` + tag_prefix + `_var_list_opt">
       <select id="` + tag_prefix + `_var_list_tag" class="` + tag_prefix + `_var_list_select">
         <option selected="true" value="(None)" id="` + tag_prefix + `_var_list_n/a" class="` + tag_prefix + `_var_list_option">
@@ -283,7 +297,6 @@ var defined_variables_list_table_row = function(tag_prefix, label_text) {
         </option>
       </select>
     </td>
-  </tr>
   `;
 };
 
@@ -342,7 +355,7 @@ var gen_options_html_for_types = function() {
       if (cur_opt.type == 'select') {
         // A 'select' dropdown.
         var tag_prefix = cur_type_prefix + '_' + opt_name;
-        var tag_to_add = std_opts_tr_id_tag(tag_prefix + '_row') +
+        var tag_to_add = std_opts_tr_id_tag(tag_prefix) +
           std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
           std_opts_td_tag(tag_prefix + '_opt') +
             std_opts_select_tag(tag_prefix);
@@ -363,7 +376,7 @@ var gen_options_html_for_types = function() {
       else if (cur_opt.type == 'input_number') {
         // A numeric input field.
         var tag_prefix = cur_type_prefix + '_' + opt_name;
-        var tag_to_add = std_opts_tr_id_tag(tag_prefix + '_row') +
+        var tag_to_add = std_opts_tr_id_tag(tag_prefix) +
           std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
           std_opts_td_tag(tag_prefix + '_opt') +
             std_opts_input_number_tag(tag_prefix);
@@ -373,7 +386,7 @@ var gen_options_html_for_types = function() {
       else if (cur_opt.type == 'input_text') {
         // A text input field.
         var tag_prefix = cur_type_prefix + '_' + opt_name;
-        var tag_to_add = std_opts_tr_id_tag(tag_prefix + '_row') +
+        var tag_to_add = std_opts_tr_id_tag(tag_prefix) +
           std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
           std_opts_td_tag(tag_prefix + '_opt') +
             std_opts_input_text_tag(tag_prefix);
@@ -385,7 +398,7 @@ var gen_options_html_for_types = function() {
         // unique across a set of nodes' options.
         // TODO: Same HTML as 'input_text'?
         var tag_prefix = cur_type_prefix + '_' + opt_name;
-        var tag_to_add = std_opts_tr_id_tag(tag_prefix + '_row') +
+        var tag_to_add = std_opts_tr_id_tag(tag_prefix) +
           std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
           std_opts_td_tag(tag_prefix + '_opt') +
             std_opts_input_text_tag(tag_prefix);
@@ -401,6 +414,16 @@ var gen_options_html_for_types = function() {
         cur_type_html = cur_type_html + defined_labels_list_table_row(tag_prefix, cur_opt.label);
       }
       else if (cur_opt.type == 'TBD') {
+        // Fill out an empty table row for a 'To-Be-Determined'
+        // option input tag.
+        var tag_prefix = cur_type_prefix + '_' + opt_name;
+        var tbd_empty_row = std_opts_tr_id_tag(tag_prefix) +
+          std_opts_td_full_tag(tag_prefix + '_text', cur_opt.label) +
+          std_opts_td_id_tag(tag_prefix);
+        tbd_empty_row = tbd_empty_row + '</td></tr>';
+        cur_type_html = cur_type_html + tbd_empty_row;
+      }
+      else if (cur_opt.type == 'TBD_Var') {
       }
       else if (cur_opt.type == 'background') {
       }
@@ -413,35 +436,6 @@ var gen_options_html_for_types = function() {
 /*
  * Node-specific options.
  */
-// 'Define variable' node options.
-var define_var_node_options_html = std_opts_table_tag('define_var_options') +
-  std_opts_tr_tag('define_var_options_var_name_row') +
-    std_opts_td_full_tag('define_var_options_var_name_text',
-                       'Variable Name:') +
-    std_opts_td_tag('define_var_options_var_name_opt') +
-      std_opts_input_text_tag('define_var_options_var_name') +
-  `</td></tr>` +
-  std_opts_tr_tag('define_var_options_var_type_row') +
-    std_opts_td_full_tag('define_var_options_var_type_text',
-                       'Variable Type:') +
-    std_opts_td_tag('define_var_options_var_type_opt') +
-      std_opts_select_tag('define_var_options_var_type') +
-        std_opts_option_tag('define_var_options_var_type',
-                            'int', 'Integer') +
-        std_opts_option_tag('define_var_options_var_type',
-                            'float', 'Floating-point') +
-        std_opts_option_tag('define_var_options_var_type',
-                            'bool', 'Boolean') +
-        std_opts_option_tag('define_var_options_var_type',
-                            'char', 'Letter') +
-  `</select></td></tr>` +
-  std_opts_tr_tag('define_var_options_var_val_row') +
-    std_opts_td_full_tag('define_var_options_var_val_text',
-                         'Starting Value:') +
-    std_opts_td_id_tag('define_var_options_var_val') +
-  `</td></tr></table>
-`;
-
 // 'Set variable' node options.
 var set_var_node_options_html = std_opts_table_tag('set_var_options') +
   defined_variables_list_table_row('set_var_options', 'Variable:') +
@@ -449,30 +443,6 @@ var set_var_node_options_html = std_opts_table_tag('set_var_options') +
     std_opts_td_full_tag('set_var_options_var_new_value_text',
                          'New Value:') +
     std_opts_td_id_tag('set_var_options_var_new_value') +
-  `</td></tr></table>
-`;
-
-// 'Modify Variable: Addition or Subtraction' node options.
-// TODO: The 'C' in 'A = B + C'
-var set_var_addition_node_options_html = std_opts_table_tag('set_var_addition_options') +
-  defined_variables_list_table_row('set_var_addition_options_A',
-                                   'Variable A:') +
-  defined_variables_list_table_row('set_var_addition_options_B',
-                                   'Variable B:') +
-  std_opts_tr_tag('set_var_addition_options_C_type_row') +
-    std_opts_td_full_tag('set_var_addition_options_C_type_text',
-                         "'C' Variable Type:") +
-    std_opts_td_id_tag('set_var_addition_options_C_type') +
-      std_opts_select_tag('set_var_addition_options_C_type') +
-        std_opts_option_tag('set_var_addition_options_C_type',
-                            'val', 'Constant Value') +
-        std_opts_option_tag('set_var_addition_options_C_type',
-                            'var', 'Defined Variable') +
-  `</select></td></tr>` +
-  std_opts_tr_tag('set_var_addition_options_C_val_row') +
-    std_opts_td_full_tag('set_var_addition_options_C_val_text',
-                         "'C' Variable Value:") +
-    std_opts_td_id_tag('set_var_addition_options_C_val') +
   `</td></tr></table>
 `;
 
@@ -532,9 +502,107 @@ var ssd1306_draw_text_options_html = std_opts_table_tag('ssd1306_draw_text_optio
 /*
  * Node listener function autogenerators.
  */
-var gen_tag_onchange = function(cur_node, tag, opt_name) {
+var gen_tag_onchange = function(cur_node, opt_tags, opt_name, opts) {
+  var cur_opt = opts[opt_name];
   return function() {
-    cur_node.options[opt_name] = tag.value;
+    // (Apply linked 'TBD' option settings.)
+    if (cur_opt.determines) {
+      var cell_tag = opt_tags[cur_opt.determines + '_cell'];
+      if (cell_tag) {
+        for (var o_ind in opts) {
+          if (o_ind == cur_opt.determines) {
+            var mod_opt = opts[o_ind];
+            for (var t_ind in mod_opt.types) {
+              var m_type = mod_opt.types[t_ind];
+              if (m_type.val == opt_tags[opt_name].value) {
+                // Set the cell's option tag HTML and listener.
+                // TODO: Support all option types, and reduce
+                // code re-use across the if/elses.
+                if (m_type.type == 'select') {
+                  var prefix = cur_node.node_type + '_options_' + o_ind;
+                  var new_inner_html = std_opts_select_tag(prefix);
+                  for (var opt_ind in m_type.options) {
+                    var optopt = m_type.options[opt_ind];
+                    new_inner_html = new_inner_html +
+                      std_opts_option_tag(prefix, optopt.value, optopt.name);
+                  }
+                  new_inner_html = new_inner_html + '</select>';
+                  cell_tag.innerHTML = new_inner_html;
+                  opt_tags[cur_opt.determines] = document.getElementById(prefix + '_tag');
+                  if (cur_node.options[opt_name] == m_type.val) {
+                    opt_tags[cur_opt.determines].value = cur_node.options[o_ind];
+                  }
+                  else {
+                    opt_tags[cur_opt.determines].value = m_type.default;
+                  }
+                  opt_tags[cur_opt.determines].onchange = gen_tag_onchange(cur_node, opt_tags, o_ind, opts);
+                  opt_tags[cur_opt.determines].onchange();
+                }
+                else if (m_type.type == 'defined_var_select') {
+                  var prefix = cur_node.node_type + '_options_' + o_ind;
+                  cell_tag.innerHTML = defined_variables_list_table_cell(prefix, opts[cur_opt.determines].label);
+                  opt_tags[cur_opt.determines] = document.getElementById(prefix + '_var_list_tag');
+                  populate_defined_vars_dropdown(prefix + '_var_list_tag', cur_node, cur_node.options[opt_ind]);
+                  if (cur_node.options[opt_name] == m_type.val) {
+                    opt_tags[cur_opt.determines].value = cur_node.options[o_ind];
+                  }
+                  else {
+                    opt_tags[cur_opt.determines].value = m_type.default;
+                  }
+                  opt_tags[cur_opt.determines].onchange = gen_tag_onchange(cur_node, opt_tags, o_ind, opts);
+                  opt_tags[cur_opt.determines].onchange();
+                }
+                else if (m_type.type == 'input_number') {
+                  var prefix = cur_node.node_type + '_options_' + o_ind;
+                  cell_tag.innerHTML = std_opts_input_number_tag(prefix);
+                  opt_tags[cur_opt.determines] = document.getElementById(prefix + '_tag');
+                  if (cur_node.options[opt_name] == m_type.val) {
+                    opt_tags[cur_opt.determines].value = cur_node.options[o_ind];
+                  }
+                  else {
+                    opt_tags[cur_opt.determines].value = m_type.default;
+                  }
+                  opt_tags[cur_opt.determines].onchange = gen_tag_onchange(cur_node, opt_tags, o_ind, opts);
+                  opt_tags[cur_opt.determines].onchange();
+                }
+                else if (m_type.type == 'input_float') {
+                  var prefix = cur_node.node_type + '_options_' + o_ind;
+                  cell_tag.innerHTML = std_opts_input_float_tag(prefix);
+                  opt_tags[cur_opt.determines] = document.getElementById(prefix + '_tag');
+                  if (cur_node.options[opt_name] == m_type.val) {
+                    opt_tags[cur_opt.determines].value = cur_node.options[o_ind];
+                  }
+                  else {
+                    opt_tags[cur_opt.determines].value = m_type.default;
+                  }
+                  opt_tags[cur_opt.determines].onchange = gen_tag_onchange(cur_node, opt_tags, o_ind, opts);
+                  opt_tags[cur_opt.determines].onchange();
+                }
+                else if (m_type.type == 'input_letter') {
+                  var prefix = cur_node.node_type + '_options_' + o_ind;
+                  cell_tag.innerHTML = std_opts_input_letter_tag(prefix);
+                  opt_tags[cur_opt.determines] = document.getElementById(prefix + '_tag');
+                  if (cur_node.options[opt_name] == m_type.val) {
+                    opt_tags[cur_opt.determines].value = cur_node.options[o_ind];
+                  }
+                  else {
+                    opt_tags[cur_opt.determines].value = m_type.default;
+                  }
+                  opt_tags[cur_opt.determines].onchange = gen_tag_onchange(cur_node, opt_tags, o_ind, opts);
+                  opt_tags[cur_opt.determines].onchange();
+                }
+              }
+            }
+            break;
+          }
+        }
+      }
+    }
+    else if (cur_opt.determines_var) {
+    }
+
+    // (Actually change the value.)
+    cur_node.options[opt_name] = opt_tags[opt_name].value;
   };
 };
 
@@ -548,6 +616,7 @@ var gen_name_def_tag_onchange = function(cur_node, tag, opt_name, cur_opt) {
       cur_node.options[opt_name] = update_label_names(cur_node.options[opt_name], cur_node.options[cur_opt.def_backup]);
     }
     else if (defs_type == 'variables') {
+      alert('refreshing vars.');
       cur_node.options[opt_name] = update_var_names(cur_node.options[opt_name], cur_node.options[cur_opt.def_backup]);
       refresh_defined_vars();
     }
@@ -681,6 +750,10 @@ var gen_type_listener_func = function(cur_type) {
         opt_tags[opt_name + '_row'] = document.getElementById(tag_prefix + '_var_list_row_tag');
         populate_defined_vars_dropdown(tag_prefix + '_var_list_tag', cur_node, cur_node.options[opt_name]);
       }
+      else if (cur_opt.type == 'TBD') {
+        opt_tags[opt_name + '_row'] = document.getElementById(tag_prefix + '_row_tag');
+        opt_tags[opt_name + '_cell'] = document.getElementById(tag_prefix + '_cell');
+      }
     }
     // (Second pass: Apply listeners to each tag.)
     for (var opt_name in cur_type.options) {
@@ -702,7 +775,8 @@ var gen_type_listener_func = function(cur_type) {
           opt_tags[opt_name].onchange();
         }
         else {
-          opt_tags[opt_name].onchange = gen_tag_onchange(cur_node, opt_tags[opt_name], opt_name);
+          opt_tags[opt_name].onchange = gen_tag_onchange(cur_node, opt_tags, opt_name, cur_type.options);
+          opt_tags[opt_name].onchange();
         }
       }
       else if (cur_opt.type == 'input_text_def') {
@@ -715,10 +789,15 @@ var gen_type_listener_func = function(cur_type) {
           opt_tags[opt_name].value = cur_node.options[opt_name];
         }
         opt_tags[opt_name].onchange = gen_name_def_tag_onchange(cur_node, opt_tags[opt_name], opt_name, cur_opt);
+        opt_tags[opt_name].onchange();
       }
       else if (cur_opt.type == 'TBD') {
         // An input whose type depends on another tag's value.
-        // TODO
+        // Its listeners should actually get set up by the
+        // linked option.
+      }
+      else if (cur_opt.type == 'TBD_Var') {
+        // An input whose type depends on a variable's type.
       }
       else if (cur_opt.type == 'background') {
         // A 'background' option. Currently, this means that
@@ -738,106 +817,6 @@ var gen_options_listeners_for_types = function() {
 /*
  * Node listener functions.
  */
-// 'Define New Variable' Global node.
-var apply_new_var_node_options_listeners = function(cur_node) {
-  var var_name_tag = document.getElementById('define_var_options_var_name_tag');
-  var var_type_tag = document.getElementById('define_var_options_var_type_tag');
-  var var_val_cell = document.getElementById('define_var_options_var_val_cell');
-
-  // Set values according to node options.
-  if (cur_node.options.var_name) {
-    var_name_tag.value = cur_node.options.var_name;
-  }
-  if (cur_node.options.var_type) {
-    var_type_tag.value = cur_node.options.var_type;
-  }
-
-  // Fill 'var value' cell based on current type.
-  var var_val_tag = null;
-  if (var_type_tag.value == 'int') {
-    var_val_cell.innerHTML = `
-      <input id="define_var_options_int_tag" class="define_var_options_int_input" type="number" value="` + cur_node.options.var_val + `">
-    `;
-    var_val_tag = document.getElementById('define_var_options_int_tag');
-  }
-  else if (var_type_tag.value == 'float') {
-    var_val_cell.innerHTML = `
-      <input id="define_var_options_float_tag" class="define_var_options_float_input" type="number" value="` + cur_node.options.var_val + `" step="0.000001">
-    `;
-    var_val_tag = document.getElementById('define_var_options_float_tag');
-  }
-  else if (var_type_tag.value == 'bool') {
-    var is_true_opts = 'selected="true"';
-    var is_false_opts = '';
-    if (!cur_node.options.var_val || cur_node.options.var_val == 'false') {
-      is_false_opts = 'selected="true"';
-      is_true_opts = '';
-    }
-    var_val_cell.innerHTML = `
-      <select id="define_var_options_bool_tag" class="define_var_options_bool_input">
-        <option ` + is_true_opts + ` value="true">True</option>
-        <option ` + is_false_opts + ` value="false">False</option>
-      </select>
-    `;
-    var_val_tag = document.getElementById('define_var_options_bool_tag');
-  }
-  else if (var_type_tag.value == 'char') {
-    var_val_cell.innerHTML = `
-      <input id="define_var_options_char_tag" class="define_var_options_char_input" type="text" maxlength="1" value="` + cur_node.options.var_val + `">
-    `;
-    var_val_tag = document.getElementById('define_var_options_char_tag');
-  }
-
-  // Set 'var value' type according to node option.
-  if (cur_node.options.var_val && var_val_tag) {
-    var_val_tag.value = cur_node.options.var_val;
-  }
-
-  // Set listener functions.
-  var_name_tag.oninput = function() {
-    cur_node.options.var_display_name = var_name_tag.value;
-    cur_node.options.var_name = update_var_names(cur_node.options.var_name, cur_node.options.var_display_name);
-    refresh_defined_vars();
-  };
-  var_type_tag.onchange = function() {
-    cur_node.options.var_type = var_type_tag.value;
-    var var_val_tag = null;
-    if (var_type_tag.value == 'int') {
-      var_val_cell.innerHTML = `
-        <input id="define_var_options_int_tag" class="define_var_options_int_input" type="number" value="0">
-      `;
-      var_val_tag = document.getElementById('define_var_options_int_tag');
-      var_val_tag.value = 0;
-    }
-    else if (var_type_tag.value == 'float') {
-      var_val_cell.innerHTML = `
-        <input id="define_var_options_float_tag" class="define_var_options_float_input" type="number" value="0" step="0.000001">
-      `;
-      var_val_tag = document.getElementById('define_var_options_float_tag');
-      var_val_tag.value = 0.0;
-    }
-    else if (var_type_tag.value == 'bool') {
-      var_val_cell.innerHTML = `
-        <select id="define_var_options_bool_tag" class="define_var_options_bool_input">
-          <option selected="true" value="true">True</option>
-          <option value="false">False</option>
-        </select>
-      `;
-      var_val_tag = document.getElementById('define_var_options_bool_tag');
-    }
-    else if (var_type_tag.value == 'char') {
-      var_val_cell.innerHTML = `
-        <input id="define_var_options_char_tag" class="define_var_options_char_input" type="text" maxlength="1">
-      `;
-      var_val_tag = document.getElementById('define_var_options_char_tag');
-      var_val_tag.value = 'c';
-    }
-  };
-  var_val_tag.onchange = function() {
-    cur_node.options.var_val = var_val_tag.value;
-  };
-};
-
 // 'Set Variable' node.
 var apply_set_var_node_options_listeners = function(cur_node) {
   var var_name_tag = document.getElementById('set_var_options_var_list_tag');
@@ -928,59 +907,6 @@ var apply_set_var_node_options_listeners = function(cur_node) {
   };
   // Fire the change tag off once for the initial selection.
   var_name_tag.onchange();
-};
-
-// Set options tag listeners for an 'addition' node.
-// TODO: The 'C' in 'A = B + C'
-var apply_set_var_addition_node_options_listeners = function(cur_node) {
-  var var_a_name_tag = document.getElementById('set_var_addition_options_A_var_list_tag');
-  var var_b_name_tag = document.getElementById('set_var_addition_options_B_var_list_tag');
-  var var_c_type_tag = document.getElementById('set_var_addition_options_C_type_tag');
-  var var_c_val_cell_tag = document.getElementById('set_var_addition_options_C_val_cell');
-  var var_c_val_tag = null;
-  populate_defined_vars_dropdown('set_var_addition_options_A_var_list_tag', cur_node, cur_node.options.var_a_name);
-  populate_defined_vars_dropdown('set_var_addition_options_B_var_list_tag', cur_node, cur_node.options.var_b_name);
-  // Populate the 'C' variable's type.
-  var_c_type_tag.value = cur_node.options.add_val_type;
-  var_a_name_tag.onchange = function() {
-    cur_node.options.var_a_name = var_a_name_tag.value;
-  };
-  var_b_name_tag.onchange = function() {
-    cur_node.options.var_b_name = var_b_name_tag.value;
-  };
-  var_c_type_tag.onchange = function() {
-    var type_changed = false;
-    var old_type = cur_node.options.add_val_type;
-    cur_node.options.add_val_type = var_c_type_tag.value;
-    if (cur_node.options.add_val_type != old_type) {
-      type_changed = true;
-    }
-    // TODO: Type checking/matching.
-    if (cur_node.options.add_val_type == 'val') {
-      // Constant value; set/populate an input tag.
-      if (type_changed) { cur_node.options.add_val_val = '0'; }
-      var_c_val_cell_tag.innerHTML = `
-        <input id="set_var_addition_options_C_val_tag" class="define_var_options_int_input" type="number" value="` + cur_node.options.add_val_val + `">
-      `;
-      var_c_val_tag = document.getElementById('set_var_addition_options_C_val_tag');
-    }
-    else if (cur_node.options.add_val_type == 'var') {
-      if (type_changed) { cur_node.options.add_val_val = '(None)'; }
-      // Variable value; set/populate a variable selection tag.
-      var_c_val_cell_tag.innerHTML = `
-        <select id="set_var_addition_options_C_var_list_tag" class="set_var_addition_options_C_var_list_select">
-        </select>
-      `;
-      populate_defined_vars_dropdown('set_var_addition_options_C_var_list_tag', cur_node, cur_node.options.add_val_val);
-      var_c_val_tag = document.getElementById('set_var_addition_options_C_var_list_tag');
-    }
-    // Set the new tag's listener.
-    var_c_val_tag.onchange = function() {
-      cur_node.options.add_val_val = var_c_val_tag.value;
-    };
-  };
-  // Fire the change tag off once to apply initial changes.
-  var_c_type_tag.onchange();
 };
 
 // 'SSD1306 Screen Draw Text' options listeners.

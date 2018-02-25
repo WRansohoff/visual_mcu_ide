@@ -81,6 +81,9 @@ var update_var_names = function(old_name, new_name) {
   }
   // If the name can change, rename any other nodes that were using
   // the old variable name.
+  // Uh...yeah no, this does not work anymore. TODO: Fixit!
+  // (More nodes than just 'Set_Variable' use variable names now,
+  // often more than one variable per node.)
   for (var index in fsm_nodes) {
     var cur_node = fsm_nodes[index];
     if (cur_node) {

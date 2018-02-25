@@ -471,6 +471,7 @@ const tool_node_types = [
     var_type: {
       type: 'select',
       label: 'Variable Type:',
+      determines: 'var_val',
       options: [
         { name: 'Integer', value: 'int', },
         { name: 'Floating-point', value: 'float', },
@@ -483,7 +484,34 @@ const tool_node_types = [
       // (This input depends on the value of 'var_type'.)
       type: 'TBD',
       label: 'Starting Value:',
-      default: 'LOL',
+      depends_on: 'var_type',
+      types: [
+        {
+          val: 'int',
+          type: 'input_number',
+          default: '0',
+        },
+        {
+          val: 'float',
+          type: 'input_float',
+          default: '0',
+        },
+        {
+          val: 'bool',
+          type: 'select',
+          options: [
+            { name: 'True', value: 1, },
+            { name: 'False', value: 0, },
+          ],
+          default: 1,
+        },
+        {
+          val: 'char',
+          type: 'input_letter',
+          default: 'c',
+        },
+      ],
+      default: '0',
     },
   },
   default_options: {
@@ -492,8 +520,6 @@ const tool_node_types = [
     var_type: 'int',
     var_val: 0,
   },
-  options_listeners: apply_new_var_node_options_listeners,
-  options_html: define_var_node_options_html,
 },
 {
   base_name: 'Set_Variable',
@@ -503,11 +529,13 @@ const tool_node_types = [
     var_name: {
       type: 'defined_var_select',
       label: 'Variable:',
+      determines_var: 'var_val',
       default: '(None)',
     },
     var_val: {
-      type: 'TBD',
+      type: 'TBD_Var',
       label: 'New Value:',
+      depends_on: 'var_name',
       default: '0',
     }
   },
@@ -557,6 +585,7 @@ const tool_node_types = [
     add_val_type: {
       type: 'select',
       label: "'C' Variable Type:",
+      determines: 'add_val_val',
       options: [
         { name: 'Constant Value', value: 'val', },
         { name: 'Defined Variable', value: 'var', },
@@ -567,6 +596,19 @@ const tool_node_types = [
       // (This input depends on the value of 'add_val_type'.)
       type: 'TBD',
       label: "'C' Variable Value:",
+      depends_on: 'add_val_type',
+      types: [
+        {
+          val: 'val',
+          type: 'input_number',
+          default: '0',
+        },
+        {
+          val: 'var',
+          type: 'defined_var_select',
+          default: '(None)',
+        },
+      ],
       default: '0',
     },
   },
@@ -576,8 +618,6 @@ const tool_node_types = [
     add_val_type: 'val',
     add_val_val: '0',
   },
-  options_listeners: apply_set_var_addition_node_options_listeners,
-  options_html: set_var_addition_node_options_html,
 },
 {
   base_name: 'Nop_Node',

@@ -864,7 +864,9 @@ project_show_onload = function() {
                 cur_type.base_name == 'Check_Truthy' ||
                 cur_type.base_name == 'Check_Equals' ||
                 cur_type.base_name == 'GPIO_Output' ||
-                cur_type.base_name == 'GPIO_Input') {
+                cur_type.base_name == 'GPIO_Input' ||
+                cur_type.base_name == 'New_Variable' ||
+                cur_type.base_name == 'Set_Var_Addition') {
                     selected_node_options_html += cur_type.options_gen_html;
                   }
                   else {
