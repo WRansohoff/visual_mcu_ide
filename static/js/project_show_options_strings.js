@@ -424,20 +424,6 @@ var gen_options_html_for_types = function() {
 /*
  * Node-specific options.
  */
-// 'Label' node options.
-var label_node_options_html = std_opts_table_tag('define_label_options') +
-  std_opts_tr_tag('define_label_options_label_name_row') +
-    std_opts_td_full_tag('define_label_options_label_name_text',
-                         'Label name:') +
-    std_opts_td_tag('define_label_options_label_name_opt') +
-      std_opts_input_text_tag('define_label_options_label_name') +
-  `</td></tr></table>
-`;
-
-// 'Jump' node options.
-var jump_node_options_html = `
-  ` + defined_labels_list_table_row('jump_options') + `
-`;
 
 // 'Setup GPIO Pin' node options.
 var init_gpio_node_options_html = std_opts_table_tag('init_gpio_options') +
@@ -1004,59 +990,6 @@ var gen_options_listeners_for_types = function() {
 /*
  * Node listener functions.
  */
-// Apply option input listeners for a 'Label' node.
-var apply_label_node_options_listeners = function(cur_node) {
-  var label_name_tag = document.getElementById('define_label_options_label_name_tag');
-
-  // Set to current node options.
-  if (cur_node.options.label_name) {
-    label_name_tag.value = cur_node.options.label_name;
-  }
-
-  // Set listener functions.
-  label_name_tag.oninput = function() {
-    cur_node.options.label_display_name = label_name_tag.value;
-    cur_node.options.label_name = update_label_names(cur_node.options.label_name, cur_node.options.label_display_name);
-  };
-};
-
-// Apply option input listeners for a 'Jump' node.
-var apply_jump_node_options_listeners = function(cur_node) {
-  var label_name_tag = document.getElementById('jump_options_label_list_tag');
-  // Populate the dropdown select menu with currently-defined label names.
-  var sel_html_opts = '';
-  for (var index in fsm_nodes) {
-    var p_node = fsm_nodes[index];
-    if (p_node && p_node.options && p_node.node_type == 'Label') {
-      var sel_text = '';
-      var any_selected = false;
-      if (p_node.options.label_name && p_node.options.label_name != '') {
-        if (cur_node.options && cur_node.options.label_name == p_node.options.label_name) {
-          sel_text = 'selected="true"';
-          any_selected = true;
-        }
-        sel_html_opts += `
-          <option ` + sel_text + ` value="` + p_node.options.label_name + `" id="jump_options_label_list_` + p_node.options.label_name + `" class="jump_options_label_list_option">
-            ` + p_node.options.label_name + `
-          </option>
-        `;
-      }
-    }
-  }
-  if (any_selected) { sel_text = ''; }
-  else { sel_text = 'selected="true"'; }
-  sel_html_opts = `
-    <option value="(None)" ` + sel_text + ` id="jump_options_label_list_n/a" class="jump_options_label_list_option">
-      (None defined)
-    </option>
-  ` + sel_html_opts;
-  label_name_tag.innerHTML = sel_html_opts;
-
-  label_name_tag.onchange = function() {
-    cur_node.options.label_name = label_name_tag.value;
-  };
-};
-
 // 'Enable RCC Peripheral Clock' node options.
 var apply_rcc_enable_node_options_listeners = function (cur_node) {
   // Here, we need to set the options based on what is available in the

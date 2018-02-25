@@ -185,8 +185,6 @@ const tool_node_types = [
     label_name: '',
     label_display_name: '',
   },
-  options_listeners: apply_label_node_options_listeners,
-  options_html: label_node_options_html,
 },
 {
   base_name: 'Jump',
@@ -202,8 +200,6 @@ const tool_node_types = [
   default_options: {
     label_name: '(None)',
   },
-  options_listeners: apply_jump_node_options_listeners,
-  options_html: jump_node_options_html,
 },
 {
   base_name: 'GPIO_Init',
