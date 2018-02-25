@@ -429,8 +429,6 @@ const tool_node_types = [
   default_options: {
     periph_clock: 'GPIOA',
   },
-  options_listeners: apply_rcc_enable_node_options_listeners,
-  options_html: rcc_enable_node_options_html,
 },
 {
   base_name: 'RCC_Disable',
@@ -446,8 +444,6 @@ const tool_node_types = [
   default_options: {
     periph_clock: 'GPIOA',
   },
-  options_listeners: apply_rcc_disable_node_options_listeners,
-  options_html: rcc_disable_node_options_html,
 },
 {
   // TODO: This should probably be a separate menu, not a node.

@@ -843,7 +843,9 @@ project_show_onload = function() {
                   if (cur_type.base_name == 'Boot' ||
                       cur_type.base_name == 'Delay' ||
                       cur_type.base_name == 'Label' ||
-                      cur_type.base_name == 'Jump') {
+                      cur_type.base_name == 'Jump' ||
+                      cur_type.base_name == 'RCC_Enable' ||
+                      cur_type.base_name == 'RCC_Disable') {
                     selected_node_options_html += cur_type.options_gen_html;
                   }
                   else {

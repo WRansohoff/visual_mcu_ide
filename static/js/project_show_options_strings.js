@@ -372,6 +372,8 @@ var gen_options_html_for_types = function() {
       else if (cur_opt.type == 'rcc_select') {
         // A special sort of 'select' dropdown with available
         // peripheral clocks depending on the selected chip.
+        var tag_prefix = cur_type_prefix + '_' + opt_name;
+        cur_type_html = cur_type_html + rcc_clock_list_table_row(tag_prefix);
       }
       else if (cur_opt.type == 'input_number') {
         // A numeric input field.
@@ -499,18 +501,6 @@ var read_gpio_in_node_options_html = std_opts_table_tag('read_gpio_in_options') 
   select_gpio_bank_table_row('read_gpio_in_options') +
   select_gpio_pin_table_row('read_gpio_in_options') +
   defined_variables_list_table_row('read_gpio_in_options', 'Store in Variable:') +
-  `</table>
-`;
-
-// 'Enable peripheral clock' node options.
-var rcc_enable_node_options_html = std_opts_table_tag('rcc_enable_options') +
-  rcc_clock_list_table_row('rcc_enable_options') +
-  `</table>
-`;
-
-// 'Disable peripheral clock' node options.
-var rcc_disable_node_options_html = std_opts_table_tag('rcc_disable_options') +
-  rcc_clock_list_table_row('rcc_disable_options') +
   `</table>
 `;
 
@@ -899,11 +889,33 @@ var gen_type_listener_func = function(cur_type) {
       var cur_opt = cur_type.options[opt_name];
       var tag_prefix = cur_type_prefix + '_' + opt_name;
       if (cur_opt.type == 'select' ||
-          cur_opt.type == 'rcc_select' ||
           cur_opt.type == 'input_number' ||
           cur_opt.type == 'input_text' ||
           cur_opt.type == 'input_text_def') {
         opt_tags[opt_name] = document.getElementById(tag_prefix + '_tag');
+      }
+      else if (cur_opt.type == 'rcc_select') {
+        opt_tags[opt_name] = document.getElementById(tag_prefix + '_periph_clocks_tag');
+        // Figure out what chip type is being used.
+        var chip_type = null;
+        for (var fsm_ind in fsm_nodes) {
+          var c_node = fsm_nodes[fsm_ind];
+          if (c_node && c_node.node_type == 'Boot') {
+            chip_type = c_node.options.chip_type;
+            break;
+          }
+        }
+        var periph_clocks = {};
+        if (chip_type == 'STM32F030F4' || chip_type == 'STM32F031F6') {
+          periph_clocks = rcc_opts.STM32F03xFx;
+          var select_tag_html = '';
+          for (var periph_val in periph_clocks) {
+            select_tag_html += `
+              <option value="` + periph_val + `" class="` + tag_prefix + `_periph_clocks_option">` + periph_clocks[periph_val] + `</option>
+            `;
+          }
+          opt_tags[opt_name].innerHTML = select_tag_html;
+        }
       }
       else if (cur_opt.type == 'defined_label_select') {
         opt_tags[opt_name] = document.getElementById(tag_prefix + '_label_list_tag');
@@ -990,61 +1002,6 @@ var gen_options_listeners_for_types = function() {
 /*
  * Node listener functions.
  */
-// 'Enable RCC Peripheral Clock' node options.
-var apply_rcc_enable_node_options_listeners = function (cur_node) {
-  // Here, we need to set the options based on what is available in the
-  // target MCU chip. From an RCC perspective, the 'F03xFx' chips look identical.
-  var rcc_en_dropdown_tag = document.getElementById('rcc_enable_options_periph_clocks_tag');
-  var periph_clocks = {};
-  if (mcu_chip == 'STM32F030F4' || mcu_chip == 'STM32F031F6') {
-    periph_clocks = rcc_opts.STM32F03xFx;
-    var select_tag_html = '';
-    for (var periph_val in periph_clocks) {
-      select_tag_html += `
-        <option value="` + periph_val + `" class="rcc_enable_options_periph_clocks_option">` + periph_clocks[periph_val] + `</option>
-      `;
-    }
-    rcc_en_dropdown_tag.innerHTML = select_tag_html;
-  }
-
-  // Set selected value based on options, if applicable.
-  if (cur_node.options.periph_clock && cur_node.options.periph_clock != '') {
-    rcc_en_dropdown_tag.value = cur_node.options.periph_clock;
-  }
-
-  // Set click listener functions for each available clock.
-  rcc_en_dropdown_tag.onchange = function() {
-    cur_node.options.periph_clock = rcc_en_dropdown_tag.value;
-  };
-};
-
-// 'Disable RCC Peripheral Clock' node options. Similar to 'Enable'
-var apply_rcc_disable_node_options_listeners = function (cur_node) {
-  // Here, we need to set the options based on what is available in the
-  // target MCU chip. From an RCC perspective, the 'F03xFx' chips look identical.
-  var rcc_dis_dropdown_tag = document.getElementById('rcc_disable_options_periph_clocks_tag');
-  var periph_clocks = {};
-  if (mcu_chip == 'STM32F030F4' || mcu_chip == 'STM32F031F6') {
-    periph_clocks = rcc_opts.STM32F03xFx;
-    var select_tag_html = '';
-    for (var periph_val in periph_clocks) {
-      select_tag_html += `
-        <option value="` + periph_val + `" class="rcc_disable_options_periph_clocks_option">` + periph_clocks[periph_val] + `</option>
-      `;
-    }
-    rcc_dis_dropdown_tag.innerHTML = select_tag_html;
-  }
-
-  // Set selected value based on options, if applicable.
-  if (cur_node.options.periph_clock && cur_node.options.periph_clock != '') {
-    rcc_dis_dropdown_tag.value = cur_node.options.periph_clock;
-  }
-
-  // Set click listener functions for each available clock.
-  rcc_dis_dropdown_tag.onchange = function() {
-    cur_node.options.periph_clock = rcc_dis_dropdown_tag.value;
-  };
-};
 
 var apply_gpio_init_options_listeners = function(cur_node) {
   var gpio_bank_tag = document.getElementById('init_gpio_options_pin_bank_tag');
