@@ -476,7 +476,13 @@ var apply_selected_node_option_listeners = function(type_node) {
             cur_type.base_name == 'ADC_Init' ||
             cur_type.base_name == 'ADC_Read' ||
             cur_type.base_name == 'RTC_Init' ||
-            cur_type.base_name == 'RTC_Read_Time') {
+            cur_type.base_name == 'RTC_Read_Time' ||
+            cur_type.base_name == 'SSD1306_Init' ||
+            cur_type.base_name == 'SSD1306_Draw_Px' ||
+            cur_type.base_name == 'SSD1306_Draw_HL' ||
+            cur_type.base_name == 'SSD1306_Draw_VL' ||
+            cur_type.base_name == 'SSD1306_Draw_Rect' ||
+            cur_type.base_name == 'SSD1306_Refresh') {
           cur_type.options_gen_listeners(type_node);
         }
         else {

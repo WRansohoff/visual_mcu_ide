@@ -865,8 +865,6 @@ const tool_node_types = [
   default_options: {
     i2c_periph_num: '1',
   },
-  options_listeners: apply_ssd1306_init_node_options_listeners,
-  options_html: ssd1306_init_node_options_html,
 },
 {
   base_name: 'SSD1306_Draw_Px',
@@ -907,8 +905,6 @@ const tool_node_types = [
     px_y: '0',
     px_color: 'On',
   },
-  options_listeners: apply_ssd1306_draw_pixel_node_options_listeners,
-  options_html: ssd1306_draw_pixel_node_options_html,
 },
 {
   base_name: 'SSD1306_Draw_HL',
@@ -955,8 +951,6 @@ const tool_node_types = [
     line_length: '0',
     line_color: 'On',
   },
-  options_listeners: apply_ssd1306_draw_horiz_line_node_options_listeners,
-  options_html: ssd1306_draw_horiz_line_options_html,
 },
 {
   base_name: 'SSD1306_Draw_VL',
@@ -1003,8 +997,6 @@ const tool_node_types = [
     line_length: '0',
     line_color: 'On',
   },
-  options_listeners: apply_ssd1306_draw_vert_line_node_options_listeners,
-  options_html: ssd1306_draw_vert_line_options_html,
 },
 {
   base_name: 'SSD1306_Draw_Rect',
@@ -1073,8 +1065,6 @@ const tool_node_types = [
     rect_style: 'Fill',
     outline: '1',
   },
-  options_listeners: apply_ssd1306_draw_rect_node_options_listeners,
-  options_html: ssd1306_draw_rect_node_options_html,
 },
 {
   base_name: 'SSD1306_Draw_Text',
@@ -1167,8 +1157,6 @@ const tool_node_types = [
   default_options: {
     i2c_periph_num: '1',
   },
-  options_listeners: apply_ssd1306_refresh_node_options_listeners,
-  options_html: ssd1306_refresh_options_html,
 },
 {
   base_name: 'Check_Truthy',
