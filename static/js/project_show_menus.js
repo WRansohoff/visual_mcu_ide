@@ -489,7 +489,8 @@ var apply_selected_node_option_listeners = function(type_node) {
             cur_type.base_name == 'GPIO_Input' ||
             cur_type.base_name == 'New_Variable' ||
             cur_type.base_name == 'Set_Var_Addition' ||
-            cur_type.base_name == 'Set_Variable') {
+            cur_type.base_name == 'Set_Variable' ||
+            cur_type.base_name == 'SSD1306_Draw_Text') {
           cur_type.options_gen_listeners(type_node);
         }
         else {

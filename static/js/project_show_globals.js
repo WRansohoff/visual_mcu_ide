@@ -335,6 +335,7 @@ const tool_node_types = [
     },
     gpio_val: {
       type: 'select',
+      label: 'Output Value:',
       hides: [
         {
           opt: 'gpio_var_name',
@@ -347,7 +348,6 @@ const tool_node_types = [
           ],
         },
       ],
-      label: 'Output Value:',
       options: [
         { name: 'On', value: '0', },
         { name: 'Off', value: '1', },
@@ -1138,6 +1138,26 @@ const tool_node_types = [
     text_type: {
       type: 'select',
       label: '"Text Source":',
+      hides: [
+        {
+          opt: 'text_var',
+          hide_on: [
+            'val',
+          ],
+          display_on: [
+            'var',
+          ],
+        },
+        {
+          opt: 'text_line',
+          hide_on: [
+            'var',
+          ],
+          display_on: [
+            'val',
+          ],
+        },
+      ],
       options: [
         { name: 'Constant Text', value: 'val', },
         { name: 'Variable', value: 'var', },
@@ -1183,8 +1203,6 @@ const tool_node_types = [
     text_size: 'S',
     text_color: 'On',
   },
-  options_listeners: apply_ssd1306_draw_text_node_options_listeners,
-  options_html: ssd1306_draw_text_options_html,
 },
 {
   base_name: 'SSD1306_Refresh',

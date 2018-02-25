@@ -433,62 +433,6 @@ var gen_options_html_for_types = function() {
 };
 
 /*
- * Node-specific options.
- */
-// 'SSD1306 Screen Draw Text' options.
-var ssd1306_draw_text_options_html = std_opts_table_tag('ssd1306_draw_text_options') +
-  i2c_channel_select_table_row('ssd1306_draw_text_options') +
-  std_opts_tr_tag('ssd1306_draw_text_options_xc_row') +
-    std_opts_td_full_tag('ssd1306_draw_text_options_xc_text',
-                         'X-Coordinate:') +
-    std_opts_td_tag('ssd1306_draw_text_options_xc_opt') +
-      std_opts_input_number_tag('ssd1306_draw_text_options_xc') +
-  `</td></tr>` +
-  std_opts_tr_tag('ssd1306_draw_text_options_yc_row') +
-    std_opts_td_full_tag('ssd1306_draw_text_options_yc_text',
-                         'Y-Coordinate:') +
-    std_opts_td_tag('ssd1306_draw_text_options_yc_opt') +
-      std_opts_input_number_tag('ssd1306_draw_text_options_yc') +
-  `</td></tr>` +
-  std_opts_tr_tag('ssd1306_draw_text_options_type_row') +
-    std_opts_td_full_tag('ssd1306_draw_text_options_type_text',
-                         '"Text Source":') +
-    std_opts_td_tag('ssd1306_draw_text_options_type_opt') +
-      std_opts_select_tag('ssd1306_draw_text_options_type') +
-        std_opts_option_tag('ssd1306_draw_text_options_type',
-                            'val', 'Constant Text') +
-        std_opts_option_tag('ssd1306_draw_text_options_type',
-                            'var', 'Variable') +
-  `</select></td></tr>` +
-  std_opts_tr_id_tag('ssd1306_draw_text_options_txt_row') +
-    std_opts_td_full_tag('ssd1306_draw_text_options_txt_text',
-                         'Display Text:') +
-    std_opts_td_tag('ssd1306_draw_text_options_txt_opt') +
-      std_opts_input_text_tag('ssd1306_draw_text_options_txt') +
-  `</td></tr>` +
-  defined_variables_list_table_row('ssd1306_draw_text_options', 'Variable to Draw:') +
-  std_opts_tr_tag('ssd1306_draw_text_options_col_row') +
-    std_opts_td_full_tag('ssd1306_draw_text_options_col_text',
-                         '"Color":') +
-    std_opts_td_tag('ssd1306_draw_text_options_col_opt') +
-      std_opts_select_tag('ssd1306_draw_text_options_col') +
-        std_opts_option_tag('ssd1306_draw_text_options_col', 'On', 'On') +
-        std_opts_option_tag('ssd1306_draw_text_options_col', 'Off', 'Off') +
-  `</select></td></tr>` +
-  std_opts_tr_tag('ssd1306_draw_text_options_size_row') +
-    std_opts_td_full_tag('ssd1306_draw_text_options_size_text',
-                         'Text Size:') +
-    std_opts_td_tag('ssd1306_draw_text_options_size_opt') +
-      std_opts_select_tag('ssd1306_draw_text_options_size') +
-        std_opts_option_tag('ssd1306_draw_text_options_size',
-                            'S', 'Small (6x8)') +
-        std_opts_option_tag('ssd1306_draw_text_options_size',
-                            'L', 'Large (12x16)') +
-  `</select></td></tr>` +
-  `</table>
-`;
-
-/*
  * Node listener function autogenerators.
  */
 var gen_tag_onchange = function(cur_node, opt_tags, opt_name, opts) {
@@ -682,11 +626,11 @@ var gen_name_def_tag_onchange = function(cur_node, tag, opt_name, cur_opt) {
 var gen_hide_show_onchange = function(cur_node, opt_tags, opt_name, cur_opt) {
   return function() {
     cur_node.options[opt_name] = opt_tags[opt_name].value;
-    var should_hide = false;
-    var should_show = false;
     // Check the 'hide_on' and 'display_on' arrays for each
     // 'hides' option.
     for (var h_opt_ind in cur_opt.hides) {
+      var should_hide = false;
+      var should_show = false;
       var hide_opt = cur_opt.hides[h_opt_ind];
       for (var h_ind in hide_opt.hide_on) {
         if (hide_opt.hide_on[h_ind] == opt_tags[opt_name].value) {
@@ -863,94 +807,4 @@ var gen_options_listeners_for_types = function() {
     tool_node_types[tn_ind].options_gen_listeners =
       gen_type_listener_func(tool_node_types[tn_ind]);
   }
-};
-
-/*
- * Node listener functions.
- */
-// 'SSD1306 Screen Draw Text' options listeners.
-var apply_ssd1306_draw_text_node_options_listeners = function(cur_node) {
-  var i2c_channel_tag = document.getElementById('ssd1306_draw_text_options_i2c_channel_select_tag');
-  var x_coord_tag = document.getElementById('ssd1306_draw_text_options_xc_tag');
-  var y_coord_tag = document.getElementById('ssd1306_draw_text_options_yc_tag');
-  var type_tag = document.getElementById('ssd1306_draw_text_options_type_tag');
-  var txt_row_tag = document.getElementById('ssd1306_draw_text_options_txt_row_row_tag');
-  var txt_tag = document.getElementById('ssd1306_draw_text_options_txt_tag');
-  var var_name_row_tag = document.getElementById('ssd1306_draw_text_options_var_list_row_tag');
-  var var_name_tag = document.getElementById('ssd1306_draw_text_options_var_list_tag');
-  var color_tag = document.getElementById('ssd1306_draw_text_options_col_tag');
-  var size_tag = document.getElementById('ssd1306_draw_text_options_size_tag');
-  populate_defined_vars_dropdown('ssd1306_draw_text_options_var_list_tag', cur_node, cur_node.options.text_var);
-  // Set loaded values.
-  if (cur_node) {
-    if (cur_node.options.i2c_periph_num) {
-      if (cur_node.options.i2c_periph_num == '1') {
-        i2c_channel_tag.value = 'I2C1_A9A10';
-      }
-    }
-    if (cur_node.options.text_x) {
-      x_coord_tag.value = cur_node.options.text_x;
-    }
-    if (cur_node.options.text_y) {
-      y_coord_tag.value = cur_node.options.text_y;
-    }
-    if (cur_node.options.text_type) {
-      type_tag.value = cur_node.options.text_type;
-      if (type_tag.value == 'val') {
-        txt_row_tag.hidden = false;
-        var_name_row_tag.hidden = true;
-      }
-      else if (type_tag.value == 'var') {
-        txt_row_tag.hidden = true;
-        var_name_row_tag.hidden = false;
-      }
-    }
-    if (cur_node.options.text_var) {
-      var_name_tag.value = cur_node.options.text_var;
-    }
-    if (cur_node.options.text_line) {
-      txt_tag.value = cur_node.options.text_line;
-    }
-    if (cur_node.options.text_color) {
-      color_tag.value = cur_node.options.text_color;
-    }
-    if (cur_node.options.text_size) {
-      size_tag.value = cur_node.options.text_size;
-    }
-  }
-  // Set listeners.
-  i2c_channel_tag.onchange = function() {
-    if (i2c_channel_tag.value == 'I2C1_A9A10') {
-      cur_node.options.i2c_periph_num = '1';
-    }
-  };
-  x_coord_tag.onchange = function() {
-    cur_node.options.text_x = x_coord_tag.value;
-  };
-  y_coord_tag.onchange = function() {
-    cur_node.options.text_y = y_coord_tag.value;
-  };
-  type_tag.onchange = function() {
-    cur_node.options.text_type = type_tag.value;
-    if (type_tag.value == 'val') {
-      txt_row_tag.hidden = false;
-      var_name_row_tag.hidden = true;
-    }
-    else if (type_tag.value == 'var') {
-      txt_row_tag.hidden = true;
-      var_name_row_tag.hidden = false;
-    }
-  };
-  txt_tag.onchange = function() {
-    cur_node.options.text_line = txt_tag.value;
-  };
-  var_name_tag.onchange = function() {
-    cur_node.options.text_var = var_name_tag.value;
-  };
-  color_tag.onchange = function() {
-    cur_node.options.text_color = color_tag.value;
-  };
-  size_tag.onchange = function() {
-    cur_node.options.text_size = size_tag.value;
-  };
 };
