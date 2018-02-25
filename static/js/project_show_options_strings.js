@@ -403,22 +403,6 @@ var gen_options_html_for_types = function() {
 /*
  * Node-specific options.
  */
-// 'Boot' node options.
-var boot_node_options_html = std_opts_table_tag('boot_options') +
-  std_opts_tr_tag('boot_options_mcu_chip_row') +
-    std_opts_td_full_tag('boot_options_mcu_chip_text',
-                         'Microcontroller chip type:') +
-    std_opts_td_tag('boot_options_mcu_chip_opt') +
-      std_opts_select_tag('boot_options_mcu_chip') +
-        std_opts_option_tag('boot_options_mcu_chip',
-                            'STM32F030F4',
-                            'STM32F030F4') +
-        std_opts_option_tag('boot_options_mcu_chip',
-                            'STM32F031F6',
-                            'STM32F031F6') +
-  `</select></td></tr></table>
-`;
-
 // 'Label' node options.
 var label_node_options_html = std_opts_table_tag('define_label_options') +
   std_opts_tr_tag('define_label_options_label_name_row') +
@@ -432,27 +416,6 @@ var label_node_options_html = std_opts_table_tag('define_label_options') +
 // 'Jump' node options.
 var jump_node_options_html = `
   ` + defined_labels_list_table_row('jump_options') + `
-`;
-
-// 'Delay' node options.
-var delay_node_options_html = std_opts_table_tag('delay_options') +
-  std_opts_tr_tag('delay_options_unit_row') +
-    std_opts_td_full_tag('delay_options_unit_text', 'Delay units:') +
-    std_opts_td_tag('delay_options_unit_opt') +
-      std_opts_select_tag('delay_options_unit') +
-        std_opts_option_tag('delay_options_unit', 'Cycles', 'Cycles') +
-        std_opts_option_tag('delay_options_unit',
-                            'Microseconds', 'Microseconds') +
-        std_opts_option_tag('delay_options_unit',
-                            'Milliseconds', 'Milliseconds') +
-        std_opts_option_tag('delay_options_unit',
-                            'Seconds', 'Seconds') +
-  `</select></td></tr>` +
-  std_opts_tr_tag('delay_options_value_row') +
-    std_opts_td_full_tag('delay_options_value_text', 'Units to delay:') +
-    std_opts_td_tag('delay_options_value_opt') +
-      std_opts_input_number_tag('delay_options_value') +
-  `</td></tr></table>
 `;
 
 // 'Setup GPIO Pin' node options.
@@ -955,74 +918,6 @@ var gen_options_listeners_for_types = function() {
 /*
  * Node listener functions.
  */
-var apply_boot_node_options_listeners = function(cur_node) {
-  var chip_sel_tag = document.getElementById("boot_options_mcu_chip_tag");
-  if (cur_node.options && cur_node.options.chip_type == 'STM32F030F4') {
-    chip_sel_tag.value = 'STM32F030F4';
-    cur_node.options.chip_type = 'STM32F030F4';
-  }
-  else if (cur_node.options && cur_node.options.chip_type == 'STM32F031F6') {
-    chip_sel_tag.value = 'STM32F031F6';
-    cur_node.options.chip_type = 'STM32F031F6';
-  }
-  else {
-    // Set a default value.
-    chip_sel_tag.value = 'STM32F030F4';
-    cur_node.options.chip_type = 'STM32F030F4';
-  }
-  // 'MCU Chip Type' selection listener.
-  chip_sel_tag.onchange = function() {
-    mcu_chip = chip_sel_tag.value;
-    cur_node.options.chip_type = chip_sel_tag.value;
-  };
-};
-
-var apply_delay_node_options_listeners = function(cur_node) {
-  var delay_units_tag = document.getElementById('delay_options_unit_tag');
-  var delay_value_tag = document.getElementById('delay_options_value_tag');
-  if (cur_node.options) {
-    // Set values according to previously-selected options.
-    if (cur_node.options.delay_units && cur_node.options.delay_units != '') {
-      if (cur_node.options.delay_units == 'cycles') {
-        delay_units_tag.value = 'Cycles';
-      }
-      else if (cur_node.options.delay_units == 'us') {
-        delay_units_tag.value = 'Microseconds';
-      }
-      else if (cur_node.options.delay_units == 'ms') {
-        delay_units_tag.value = 'Milliseconds';
-      }
-      else if (cur_node.options.delay_units == 's') {
-        delay_units_tag.value = 'Seconds';
-      }
-    }
-    if (cur_node.options.delay_value) {
-      delay_value_tag.value = parseInt(cur_node.options.delay_value);
-    }
-  }
-  // Listeners to set option values.
-  delay_units_tag.onchange = function() {
-    var new_delay_type = delay_units_tag.value;
-    if (new_delay_type == 'Cycles') {
-      cur_node.options.delay_units = 'cycles';
-    }
-    else if (new_delay_type == 'Microseconds') {
-      cur_node.options.delay_units = 'us';
-    }
-    else if (new_delay_type == 'Milliseconds') {
-      cur_node.options.delay_units = 'ms';
-    }
-    else if (new_delay_type == 'Seconds') {
-      cur_node.options.delay_units = 's';
-    }
-  };
-  delay_value_tag.onchange = function() {
-    var new_delay_value = parseInt(delay_value_tag.value);
-    if (new_delay_value >= 0) {
-      cur_node.options.delay_value = new_delay_value;
-    }
-  };
-};
 
 // Apply option input listeners for a 'Label' node.
 var apply_label_node_options_listeners = function(cur_node) {

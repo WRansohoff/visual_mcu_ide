@@ -126,8 +126,6 @@ const tool_node_types = [
   default_options: {
     chip_type: 'STM32F030F4',
   },
-  //options_listeners: apply_boot_node_options_listeners,
-  //options_html: boot_node_options_html,
 },
 {
   base_name: 'Delay',
@@ -165,8 +163,6 @@ const tool_node_types = [
     delay_units: 'cycles',
     delay_value: 0,
   },
-  //options_listeners: apply_delay_node_options_listeners,
-  //options_html: delay_node_options_html,
 },
 {
   base_name: 'Label',
