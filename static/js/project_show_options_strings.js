@@ -408,10 +408,12 @@ var gen_options_html_for_types = function() {
         cur_type_html = cur_type_html + tag_to_add;
       }
       else if (cur_opt.type == 'defined_var_select') {
+        var tag_prefix = cur_type_prefix + '_' + opt_name;
+        cur_type_html = cur_type_html + defined_variables_list_table_row(tag_prefix, cur_opt.label);
       }
       else if (cur_opt.type == 'defined_label_select') {
         var tag_prefix = cur_type_prefix + '_' + opt_name;
-        cur_type_html = cur_type_html + defined_labels_list_table_row(tag_prefix);
+        cur_type_html = cur_type_html + defined_labels_list_table_row(tag_prefix, cur_opt.label);
       }
       else if (cur_opt.type == 'TBD') {
       }
@@ -896,7 +898,8 @@ var gen_type_listener_func = function(cur_type) {
         opt_tags[opt_name].innerHTML = sel_html_opts;
       }
       else if (cur_opt.type == 'defined_var_select') {
-        // TODO
+        opt_tags[opt_name] = document.getElementById(tag_prefix + '_var_list_tag');
+        populate_defined_vars_dropdown(tag_prefix + '_var_list_tag', cur_node, cur_node.options[opt_name]);
       }
     }
     // (Second pass: Apply listeners to each tag.)

@@ -452,6 +452,7 @@ const tool_node_types = [
     var_name: {
       type: 'input_text_def',
       def_type: 'variables',
+      def_backup: 'var_display_name',
       label: 'Variable Name:',
       default: '',
     },
