@@ -516,11 +516,6 @@ var set_var_addition_node_options_html = std_opts_table_tag('set_var_addition_op
   `</td></tr></table>
 `;
 
-// 'No-op' node options.
-// Currently there are none, besides the input/output connections table.
-var nop_node_options_html = `
-`;
-
 // 'Initialize I2C Peripheral' options.
 var i2c_init_node_options_html = std_opts_table_tag('i2c_init_options') +
   i2c_channel_select_table_row('i2c_init_options') +
@@ -1270,11 +1265,6 @@ var apply_set_var_addition_node_options_listeners = function(cur_node) {
   };
   // Fire the change tag off once to apply initial changes.
   var_c_type_tag.onchange();
-};
-
-// No-op node - currently no options, sort of by definition...
-var apply_nop_node_options_listeners = function(cur_node) {
-  // Currently none.
 };
 
 // 'Initialize I2C Peripheral' options listeners.

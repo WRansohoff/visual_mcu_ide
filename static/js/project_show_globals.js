@@ -579,8 +579,6 @@ const tool_node_types = [
   },
   default_options: {
   },
-  options_listeners: apply_nop_node_options_listeners,
-  options_html: nop_node_options_html,
 },
 {
   base_name: 'I2C_Init',
