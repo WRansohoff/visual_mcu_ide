@@ -850,7 +850,9 @@ project_show_onload = function() {
                       cur_type.base_name == 'Set_Var_Logic_Not' ||
                       cur_type.base_name == 'Nop_Node' ||
                       cur_type.base_name == 'I2C_Init' ||
-                      cur_type.base_name == 'I2C_Deinit') {
+                      cur_type.base_name == 'I2C_Deinit' ||
+                      cur_type.base_name == 'ADC_Init' ||
+                      cur_type.base_name == 'ADC_Read') {
                     selected_node_options_html += cur_type.options_gen_html;
                   }
                   else {

@@ -662,8 +662,6 @@ const tool_node_types = [
     adc_channel: '1',
     // TODO: More ADC options. (Resolution, etc)
   },
-  options_listeners: apply_adc_init_node_options_listeners,
-  options_html: adc_init_node_options_html,
 },
 {
   base_name: 'ADC_Read',
@@ -726,8 +724,6 @@ const tool_node_types = [
     gpio_pin: '0',
     adc_var: '(None)',
   },
-  options_listeners: apply_adc_read_node_options_listeners,
-  options_html: adc_read_node_options_html,
 },
 {
   base_name: 'RTC_Init',

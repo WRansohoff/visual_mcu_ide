@@ -501,22 +501,6 @@ var set_var_addition_node_options_html = std_opts_table_tag('set_var_addition_op
   `</td></tr></table>
 `;
 
-// 'Initialize ADC Peripheral' options.
-var adc_init_node_options_html = std_opts_table_tag('adc_init_options') +
-  adc_channel_select_table_row('adc_init_options') +
-  `</table>
-`;
-
-// 'Read ADC Pin' options.
-var adc_read_node_options_html = std_opts_table_tag('adc_read_options') +
-  adc_channel_select_table_row('adc_read_options') +
-  select_gpio_bank_table_row('adc_read_options') +
-  select_gpio_pin_table_row('adc_read_options') +
-  defined_variables_list_table_row('adc_read_options',
-                                   'Read to Variable:') +
-  `</table>
-`;
-
 // 'Initialize RealTime Clock' options.
 var rtc_init_node_options_html = std_opts_table_tag('rtc_init_options') +
   std_opts_tr_tag('rtc_init_options_osc') +
@@ -1237,49 +1221,6 @@ var apply_set_var_addition_node_options_listeners = function(cur_node) {
   };
   // Fire the change tag off once to apply initial changes.
   var_c_type_tag.onchange();
-};
-
-// 'Initialize ADC Peripheral' options listeners.
-var apply_adc_init_node_options_listeners = function(cur_node) {
-  var adc_channel_tag = document.getElementById('adc_init_options_adc_channel_select_tag');
-  if (cur_node && cur_node.options.adc_periph_num) {
-    adc_channel_tag.value = cur_node.options.adc_channel;
-  }
-  adc_channel_tag.onchange = function() {
-    cur_node.options.adc_channel = adc_channel_tag.value;
-  };
-};
-
-// 'Read ADC Pin' options listeners.
-var apply_adc_read_node_options_listeners = function(cur_node) {
-  var adc_channel_tag = document.getElementById('adc_read_options_adc_channel_select_tag');
-  var gpio_bank_tag = document.getElementById('adc_read_options_pin_bank_tag');
-  var gpio_pin_tag = document.getElementById('adc_read_options_pin_number_tag');
-  var gpio_var_name_tag = document.getElementById('adc_read_options_var_list_tag');
-  // Set values according to node options.
-  if (cur_node && cur_node.options.adc_periph_num) {
-    adc_channel_tag.value = cur_node.options.adc_channel;
-  }
-  if (cur_node.options.gpio_bank) {
-    gpio_bank_tag.value = cur_node.options.gpio_bank;
-  }
-  if (cur_node.options.gpio_pin) {
-    gpio_pin_tag.value = cur_node.options.gpio_pin;
-  }
-  populate_defined_vars_dropdown('adc_read_options_var_list_tag', cur_node, cur_node.options.adc_var);
-  // Set click listener functions.
-  adc_channel_tag.onchange = function() {
-    cur_node.options.adc_channel = adc_channel_tag.value;
-  };
-  gpio_bank_tag.onchange = function() {
-    cur_node.options.gpio_bank = gpio_bank_tag.value;
-  };
-  gpio_pin_tag.onchange = function() {
-    cur_node.options.gpio_pin = gpio_pin_tag.value;
-  };
-  gpio_var_name_tag.onchange = function() {
-    cur_node.options.adc_var = gpio_var_name_tag.value;
-  };
 };
 
 var apply_rtc_init_node_options_listeners = function(cur_node) {
