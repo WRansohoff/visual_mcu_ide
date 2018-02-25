@@ -291,8 +291,6 @@ const tool_node_types = [
     gpio_ospeed: 'H',
     gpio_pupdr:  'PU',
   },
-  options_listeners: apply_gpio_init_options_listeners,
-  options_html: init_gpio_node_options_html,
 },
 {
   base_name: 'GPIO_Output',

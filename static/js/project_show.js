@@ -845,7 +845,8 @@ project_show_onload = function() {
                       cur_type.base_name == 'Label' ||
                       cur_type.base_name == 'Jump' ||
                       cur_type.base_name == 'RCC_Enable' ||
-                      cur_type.base_name == 'RCC_Disable') {
+                      cur_type.base_name == 'RCC_Disable' ||
+                      cur_type.base_name == 'GPIO_Init') {
                     selected_node_options_html += cur_type.options_gen_html;
                   }
                   else {

@@ -426,59 +426,6 @@ var gen_options_html_for_types = function() {
 /*
  * Node-specific options.
  */
-
-// 'Setup GPIO Pin' node options.
-var init_gpio_node_options_html = std_opts_table_tag('init_gpio_options') +
-  select_gpio_bank_table_row('init_gpio_options') +
-  select_gpio_pin_table_row('init_gpio_options') +
-  std_opts_tr_tag('init_gpio_options_pin_func_row') +
-    std_opts_td_full_tag('init_gpio_options_pin_func_text',
-                         'Pin Function:') +
-    std_opts_td_tag('init_gpio_options_pin_func_opt') +
-      std_opts_select_tag('init_gpio_options_pin_func') +
-        std_opts_option_tag('init_gpio_options_pin_func',
-                            'Output', 'Output') +
-        std_opts_option_tag('init_gpio_options_pin_func',
-                            'Input', 'Input') +
-        std_opts_option_tag('init_gpio_options_pin_func',
-                            'Analog', 'Analog') +
-        std_opts_option_tag('init_gpio_options_pin_func',
-                            'AF', 'Alternate Function') +
-  `</select></td></tr>` +
-  std_opts_tr_tag('init_gpio_options_otype_row') +
-    std_opts_td_full_tag('init_gpio_options_otype_text', 'Output Type:') +
-    std_opts_td_tag('init_gpio_options_otype_opt') +
-      std_opts_select_tag('init_gpio_options_otype') +
-        std_opts_option_tag('init_gpio_options_otype',
-                            'Push-Pull', 'Push-Pull') +
-        std_opts_option_tag('init_gpio_options_otype',
-                            'Open-Drain', 'Open-Drain') +
-  `</select></td></tr>` +
-  std_opts_tr_tag('init_gpio_options_ospeed_row') +
-    std_opts_td_full_tag('init_gpio_options_ospeed_text', 'Output Speed:') +
-    std_opts_td_tag('init_gpio_options_ospeed_opt') +
-      std_opts_select_tag('init_gpio_options_ospeed') +
-        std_opts_option_tag('init_gpio_options_ospeed',
-                            'H', 'High (50MHz)') +
-        std_opts_option_tag('init_gpio_options_ospeed',
-                            'M', 'Medium (10MHz)') +
-        std_opts_option_tag('init_gpio_options_ospeed',
-                            'L', 'Low (2MHz)') +
-  `</select></td></tr>` +
-  std_opts_tr_tag('init_gpio_options_pupdr_row') +
-    std_opts_td_full_tag('init_gpio_options_pupdr_text',
-                         'Pull-up / Pull-down') +
-    std_opts_td_tag('init_gpio_options_pupdr_opt') +
-      std_opts_select_tag('init_gpio_options_pupdr') +
-        std_opts_option_tag('init_gpio_options_pupdr',
-                            'PU', 'Enable Pull-up') +
-        std_opts_option_tag('init_gpio_options_pupdr',
-                            'PD', 'Enable Pull-down') +
-        std_opts_option_tag('init_gpio_options_pupdr',
-                            'None', 'No Pull-up/down') +
-  `</select></td></tr></table>
-`;
-
 // 'Set GPIO Output' node options.
 var set_gpio_out_node_options_html = std_opts_table_tag('set_gpio_out_options') +
   select_gpio_bank_table_row('set_gpio_out_options') +
@@ -1002,56 +949,6 @@ var gen_options_listeners_for_types = function() {
 /*
  * Node listener functions.
  */
-
-var apply_gpio_init_options_listeners = function(cur_node) {
-  var gpio_bank_tag = document.getElementById('init_gpio_options_pin_bank_tag');
-  var gpio_pin_tag = document.getElementById('init_gpio_options_pin_number_tag');
-  var gpio_func_tag = document.getElementById('init_gpio_options_pin_func_tag');
-  var gpio_otype_tag = document.getElementById('init_gpio_options_otype_tag');
-  var gpio_ospeed_tag = document.getElementById('init_gpio_options_ospeed_tag');
-  var gpio_pupdr_tag = document.getElementById('init_gpio_options_pupdr_tag');
-
-  // Set values according to node options.
-  if (cur_node.options.gpio_bank) {
-    gpio_bank_tag.value = cur_node.options.gpio_bank;
-  }
-  if (cur_node.options.gpio_pin) {
-    gpio_pin_tag.value = cur_node.options.gpio_pin;
-  }
-  if (cur_node.options.gpio_func) {
-    gpio_func_tag.value = cur_node.options.gpio_func;
-  }
-  if (cur_node.options.gpio_otype) {
-    gpio_otype_tag.value = cur_node.options.gpio_otype;
-  }
-  if (cur_node.options.gpio_ospeed) {
-    gpio_ospeed_tag.value = cur_node.options.gpio_ospeed;
-  }
-  if (cur_node.options.gpio_pupdr) {
-    gpio_pupdr_tag.value = cur_node.options.gpio_pupdr;
-  }
-
-  // Set click listener functions.
-  gpio_bank_tag.onchange = function() {
-    cur_node.options.gpio_bank = gpio_bank_tag.value;
-  };
-  gpio_pin_tag.onchange = function() {
-    cur_node.options.gpio_pin = gpio_pin_tag.value;
-  };
-  gpio_func_tag.onchange = function() {
-    cur_node.options.gpio_func = gpio_func_tag.value;
-  };
-  gpio_otype_tag.onchange = function() {
-    cur_node.options.gpio_otype = gpio_otype_tag.value;
-  };
-  gpio_ospeed_tag.onchange = function() {
-    cur_node.options.gpio_ospeed = gpio_ospeed_tag.value;
-  };
-  gpio_pupdr_tag.onchange = function() {
-    cur_node.options.gpio_pupdr = gpio_pupdr_tag.value;
-  };
-};
-
 // 'GPIO_Output' node listeners.
 var apply_gpio_output_options_listeners = function(cur_node) {
   var gpio_bank_tag = document.getElementById('set_gpio_out_options_pin_bank_tag');
