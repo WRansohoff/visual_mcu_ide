@@ -420,8 +420,6 @@ const tool_node_types = [
     gpio_pin:  0,
     gpio_var_name: '(None)',
   },
-  options_listeners: apply_gpio_input_options_listeners,
-  options_html: read_gpio_in_node_options_html,
 },
 {
   base_name: 'RCC_Enable',
