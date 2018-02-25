@@ -837,43 +837,7 @@ project_show_onload = function() {
               var cur_type = tool_node_types[tn_ind];
               if (cur_type) {
                 if (sel_type == cur_type.base_name) {
-                  // (TODO: Enable for all nodes)
-                  // For specified nodes, use auto-generated
-                  // attributes instead of hand-written ones.
-                  if (cur_type.base_name == 'Boot' ||
-                cur_type.base_name == 'Delay' ||
-                cur_type.base_name == 'Label' ||
-                cur_type.base_name == 'Jump' ||
-                cur_type.base_name == 'RCC_Enable' ||
-                cur_type.base_name == 'RCC_Disable' ||
-                cur_type.base_name == 'GPIO_Init' ||
-                cur_type.base_name == 'Set_Var_Logic_Not' ||
-                cur_type.base_name == 'Nop_Node' ||
-                cur_type.base_name == 'I2C_Init' ||
-                cur_type.base_name == 'I2C_Deinit' ||
-                cur_type.base_name == 'ADC_Init' ||
-                cur_type.base_name == 'ADC_Read' ||
-                cur_type.base_name == 'RTC_Init' ||
-                cur_type.base_name == 'RTC_Read_Time' ||
-                cur_type.base_name == 'SSD1306_Init' ||
-                cur_type.base_name == 'SSD1306_Draw_Px' ||
-                cur_type.base_name == 'SSD1306_Draw_HL' ||
-                cur_type.base_name == 'SSD1306_Draw_VL' ||
-                cur_type.base_name == 'SSD1306_Draw_Rect' ||
-                cur_type.base_name == 'SSD1306_Refresh' ||
-                cur_type.base_name == 'Check_Truthy' ||
-                cur_type.base_name == 'Check_Equals' ||
-                cur_type.base_name == 'GPIO_Output' ||
-                cur_type.base_name == 'GPIO_Input' ||
-                cur_type.base_name == 'New_Variable' ||
-                cur_type.base_name == 'Set_Var_Addition' ||
-                cur_type.base_name == 'Set_Variable' ||
-                cur_type.base_name == 'SSD1306_Draw_Text') {
-                    selected_node_options_html += cur_type.options_gen_html;
-                  }
-                  else {
-                    selected_node_options_html += cur_type.options_html;
-                  }
+                  selected_node_options_html += cur_type.options_gen_html;
                   break;
                 }
               }

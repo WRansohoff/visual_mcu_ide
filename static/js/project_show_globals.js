@@ -846,8 +846,6 @@ const tool_node_types = [
     month_read_var: '(None)',
     year_read_var: '(None)',
   },
-  options_listeners: function(){},
-  options_html: '',
 },
 {
   base_name: 'RTC_Set_Time',
@@ -867,8 +865,6 @@ const tool_node_types = [
     hours_val: '0',
     hours_var: '(None)',
   },
-  options_listeners: function(){},
-  options_html: '',
 },
 {
   base_name: 'RTC_Set_Date',
@@ -891,8 +887,6 @@ const tool_node_types = [
     year_val: '1',
     year_var: '(None)',
   },
-  options_listeners: function(){},
-  options_html: '',
 },
 {
   base_name: 'SSD1306_Init',
@@ -1263,10 +1257,10 @@ const tool_node_types = [
   base_name: 'Delay',
   menu_name: 'Delay',
   node_color: 'blue',
+  options: {
+  },
   default_options: {
   },
-  options_listeners: null,
-  options_html: null,
 },
 */
 ];
