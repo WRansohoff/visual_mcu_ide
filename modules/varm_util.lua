@@ -270,8 +270,10 @@ end
 -- Returns true if the library has already been imported, or if it did
 -- not previously exist but was successfully imported.
 function varm_util.import_std_periph_lib(which_lib, from_dir, proj_base_dir)
-  local from_c = from_dir .. 'stm32f0xx_' .. which_lib .. '.c'
-  local from_h = from_dir .. 'stm32f0xx_' .. which_lib .. '.h'
+  --local from_c = from_dir .. 'stm32f0xx_' .. which_lib .. '.c'
+  --local from_h = from_dir .. 'stm32f0xx_' .. which_lib .. '.h'
+  local from_c = 'static/node_code/stm32f0_std_periph_libs/stm32f0xx_' .. which_lib .. '.c'
+  local from_h = 'static/node_code/stm32f0_std_periph_libs/stm32f0xx_' .. which_lib .. '.h'
   local to_c = proj_base_dir .. 'src/std_periph/stm32f0xx_' .. which_lib .. '.c'
   local to_h = proj_base_dir .. 'src/std_periph/stm32f0xx_' .. which_lib .. '.h'
   if varm_util.path_exists(to_c) and varm_util.path_exists(to_h) then

@@ -1162,20 +1162,24 @@ var precompile_project = function() {
   // visited node.
   // Process 'Define variable' nodes first - for now, variable
   // initialization is all in a 'global' scope.
-  // TODO: Branching nodes, like if/else.
   // Failure happens if/when:
   //   - No 'Boot' node.
   //   - An 'output' arrow points to grid node without an 'input' arrow.
   //   - A node has no 'output' arrow (except with special node types).
-  //   - Multiple 'input' arrows lead away fron the grid coordinate
+  //   - Multiple 'input' arrows lead away from the grid coordinate
   //     pointed to by an 'output' arrow.
   //   - More than one variable with the same name is defined.
+  //   - Hardware interrupts' program flows mix with each other or
+  //     the main program. Without scoping, they must remain separate.
   // Produce warning messages if/when (TODO):
   //   - A node will never be reached.
   //   - A defined variable is never used.
   // Otherwise, each 'node' begins with a label, and can be branched to
   // with 'GOTO'. I know that's bad practice for human coders, but it
   // should work for now with simple single-scope auto-generated code.
+  // With the addition of segmented hardware interrupts, however, this is
+  // beginning to feel complicated. I'd like to look into user-defined
+  // nodes which use separate 'grids' and pages/editors. TODO.
   var boot_node = null;
   // TODO: Maybe update/use existing 'defined_vars' variable?
   var global_vars = [];
