@@ -125,9 +125,6 @@ const tool_node_types = [
       default: 'STM32F030F4',
     },
   },
-  default_options: {
-    chip_type: 'STM32F030F4',
-  },
 },
 {
   base_name: 'Delay',
@@ -161,10 +158,6 @@ const tool_node_types = [
       default: 0,
     },
   },
-  default_options: {
-    delay_units: 'cycles',
-    delay_value: 0,
-  },
 },
 {
   base_name: 'Label',
@@ -183,10 +176,6 @@ const tool_node_types = [
       default: '',
     },
   },
-  default_options: {
-    label_name: '',
-    label_display_name: '',
-  },
 },
 {
   base_name: 'Jump',
@@ -199,9 +188,6 @@ const tool_node_types = [
       default: '(None)',
     }
   },
-  default_options: {
-    label_name: '(None)',
-  },
 },
 {
   base_name: 'Interrupt',
@@ -210,8 +196,6 @@ const tool_node_types = [
   options: {
     // TODO
   },
-  default_options: {
-  },
 },
 {
   base_name: 'Interrupt_End',
@@ -219,8 +203,6 @@ const tool_node_types = [
   node_color: 'pink',
   options: {
     // TODO
-  },
-  default_options: {
   },
 },
 {
@@ -305,14 +287,6 @@ const tool_node_types = [
       default: 'PU',
     },
   },
-  default_options: {
-    gpio_bank:   'GPIOA',
-    gpio_pin:    0,
-    gpio_func:   'Output',
-    gpio_otype:  'Push-Pull',
-    gpio_ospeed: 'H',
-    gpio_pupdr:  'PU',
-  },
 },
 {
   base_name: 'GPIO_Output',
@@ -383,12 +357,6 @@ const tool_node_types = [
       default: '(None)',
     },
   },
-  default_options: {
-    gpio_bank: 'GPIOA',
-    gpio_pin:  0,
-    gpio_val:  0,
-    gpio_var_name: '(None)',
-  },
 },
 {
   base_name: 'GPIO_Input',
@@ -437,11 +405,6 @@ const tool_node_types = [
       default: '(None)',
     },
   },
-  default_options: {
-    gpio_bank: 'GPIOA',
-    gpio_pin:  0,
-    gpio_var_name: '(None)',
-  },
 },
 {
   base_name: 'RCC_Enable',
@@ -454,9 +417,6 @@ const tool_node_types = [
       default: 'GPIOA',
     }
   },
-  default_options: {
-    periph_clock: 'GPIOA',
-  },
 },
 {
   base_name: 'RCC_Disable',
@@ -468,9 +428,6 @@ const tool_node_types = [
       label: 'Peripheral Clock:',
       default: 'GPIOA',
     }
-  },
-  default_options: {
-    periph_clock: 'GPIOA',
   },
 },
 {
@@ -536,12 +493,6 @@ const tool_node_types = [
       default: '0',
     },
   },
-  default_options: {
-    var_name: '',
-    var_display_name: '',
-    var_type: 'int',
-    var_val: 0,
-  },
 },
 {
   base_name: 'Set_Variable',
@@ -561,10 +512,6 @@ const tool_node_types = [
       default: '0',
     }
   },
-  default_options: {
-    var_name: '(None)',
-    var_val: '0',
-  },
 },
 {
   base_name: 'Set_Var_Logic_Not',
@@ -581,10 +528,6 @@ const tool_node_types = [
       label: 'Variable B:',
       default: '(None)',
     },
-  },
-  default_options: {
-    var_a_name: '(None)',
-    var_b_name: '(None)',
   },
 },
 {
@@ -632,20 +575,12 @@ const tool_node_types = [
       default: '0',
     },
   },
-  default_options: {
-    var_a_name: '(None)',
-    var_b_name: '(None)',
-    add_val_type: 'val',
-    add_val_val: '0',
-  },
 },
 {
   base_name: 'Nop_Node',
   menu_name: 'No-op (Do Nothing)',
   node_color: 'blue',
   options: {
-  },
-  default_options: {
   },
 },
 {
@@ -685,14 +620,6 @@ const tool_node_types = [
       default: '100KHz',
     },
   },
-  default_options: {
-    i2c_periph_num: '1',
-    scl_pin: 'A9',
-    sda_pin: 'A10',
-    gpio_af: 'AF_4',
-    i2c_periph_speed: '100KHz',
-    // TODO: More I2C options.
-  },
 },
 {
   base_name: 'I2C_Deinit',
@@ -708,9 +635,6 @@ const tool_node_types = [
       default: '1',
     }
   },
-  default_options: {
-    i2c_periph_num: '1',
-  },
 },
 {
   base_name: 'ADC_Init',
@@ -725,10 +649,6 @@ const tool_node_types = [
       ],
       default: '1',
     },
-  },
-  default_options: {
-    adc_channel: '1',
-    // TODO: More ADC options. (Resolution, etc)
   },
 },
 {
@@ -786,12 +706,6 @@ const tool_node_types = [
       default: '(None)',
     },
   },
-  default_options: {
-    adc_channel: '1',
-    gpio_bank: 'GPIOA',
-    gpio_pin: '0',
-    adc_var: '(None)',
-  },
 },
 {
   base_name: 'RTC_Init',
@@ -807,9 +721,6 @@ const tool_node_types = [
       ],
       default: 'LSI',
     },
-  },
-  default_options: {
-    clock_source: 'LSI',
   },
 },
 {
@@ -832,11 +743,6 @@ const tool_node_types = [
       label: "'Hours' Variable:",
       default: '(None)',
     },
-  },
-  default_options: {
-    seconds_read_var: '(None)',
-    minutes_read_var: '(None)',
-    hours_read_var: '(None)',
   },
 },
 {
@@ -861,12 +767,6 @@ const tool_node_types = [
       type: 'defined_var_select',
       default: '(None)',
     },
-  },
-  default_options: {
-    days_read_var: '(None)',
-    day_of_week_read_var: '(None)',
-    month_read_var: '(None)',
-    year_read_var: '(None)',
   },
 },
 {
@@ -924,9 +824,6 @@ const tool_node_types = [
       default: '1',
     },
   },
-  default_options: {
-    i2c_periph_num: '1',
-  },
 },
 {
   base_name: 'SSD1306_Draw_Px',
@@ -960,12 +857,6 @@ const tool_node_types = [
       ],
       default: 'On',
     },
-  },
-  default_options: {
-    i2c_periph_num: '1',
-    px_x: '0',
-    px_y: '0',
-    px_color: 'On',
   },
 },
 {
@@ -1006,13 +897,6 @@ const tool_node_types = [
       default: 'On',
     },
   },
-  default_options: {
-    i2c_periph_num: '1',
-    line_x: '0',
-    line_y: '0',
-    line_length: '0',
-    line_color: 'On',
-  },
 },
 {
   base_name: 'SSD1306_Draw_VL',
@@ -1051,13 +935,6 @@ const tool_node_types = [
       ],
       default: 'On',
     },
-  },
-  default_options: {
-    i2c_periph_num: '1',
-    line_x: '0',
-    line_y: '0',
-    line_length: '0',
-    line_color: 'On',
   },
 },
 {
@@ -1127,16 +1004,6 @@ const tool_node_types = [
       label: 'Outline Pixels:',
       default: 1
     },
-  },
-  default_options: {
-    i2c_periph_num: '1',
-    rect_x: '0',
-    rect_y: '0',
-    rect_w: '1',
-    rect_h: '1',
-    rect_color: 'On',
-    rect_style: 'Fill',
-    outline: '1',
   },
 },
 {
@@ -1220,16 +1087,6 @@ const tool_node_types = [
       default: 'On',
     },
   },
-  default_options: {
-    i2c_periph_num: '1',
-    text_x: '0',
-    text_y: '0',
-    text_type: 'val',
-    text_var: '(None)',
-    text_line: '',
-    text_size: 'S',
-    text_color: 'On',
-  },
 },
 {
   base_name: 'SSD1306_Refresh',
@@ -1245,9 +1102,6 @@ const tool_node_types = [
       default: '1',
     },
   },
-  default_options: {
-    i2c_periph_num: '1',
-  },
 },
 {
   base_name: 'Check_Truthy',
@@ -1259,9 +1113,6 @@ const tool_node_types = [
       label: 'Variable to Check:',
       default: '(None)',
     },
-  },
-  default_options: {
-    var_name: '(None)',
   },
 },
 {
@@ -1280,10 +1131,6 @@ const tool_node_types = [
       default: '(None)',
     },
   },
-  default_options: {
-    var_a_name: '(None)',
-    var_b_name: '(None)',
-  },
 },
 /* 9
 {
@@ -1291,8 +1138,6 @@ const tool_node_types = [
   menu_name: 'Delay',
   node_color: 'blue',
   options: {
-  },
-  default_options: {
   },
 },
 */
@@ -1334,5 +1179,15 @@ const rcc_opts = {
     I2C2:    'Inter-IC Communication 2',
     PWR:     'Power Controller',
     // TODO: CRS, CEC, DAC are on F031, but not F030.
+  },
+};
+
+// (Available NVIC/EXTI interrupt channels/lines.)
+const interrupt_opts = {
+  STM32F03xFx: {
+    // (TODO: Other interrupts.)
+    EXTI0_1:       'EXTI Lines 0-1 (GPIOx 0-1)',
+    EXTI2_3:       'EXTI Lines 2-3 (GPIOx 2-3)',
+    EXTI4_15:      'EXTI Lines 4-15 (GPIOx 4-15)',
   },
 };
