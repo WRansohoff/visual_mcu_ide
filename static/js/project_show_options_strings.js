@@ -278,7 +278,7 @@ var rcc_clock_list_table_row = function(tag_prefix) {
 // List NVIC 'interrupt channels'.
 var nvic_chan_list_table_row = function(tag_prefix) {
   return std_opts_tr_id_tag(tag_prefix + '_interrupts') +
-    std_opts_td_tag(tag_prefix + '_interrupts_text', 'Interrupt Channel:') +
+    std_opts_td_full_tag(tag_prefix + '_interrupts_text', 'Interrupt Channel:') +
     std_opts_td_tag(tag_prefix + '_interrupts_opt') +
     std_opts_select_tag(tag_prefix + '_interrupts') + `
       </select>

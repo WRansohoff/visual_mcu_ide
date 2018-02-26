@@ -48,6 +48,7 @@ var imgs_to_load = {
   Delay:             '/static/fsm_assets/delay_node.png',
   Label:             '/static/fsm_assets/label_node.png',
   Jump:              '/static/fsm_assets/jump_node.png',
+  Interrupt_Enable:  '/static/fsm_assets/enable_interrupt_node.png',
   Interrupt:         '/static/fsm_assets/interrupt_node.png',
   Interrupt_End:     '/static/fsm_assets/interrupt_end_node.png',
   GPIO_Init:         '/static/fsm_assets/init_gpio_node.png',
@@ -190,6 +191,57 @@ const tool_node_types = [
   },
 },
 {
+  base_name: 'Interrupt_Enable',
+  menu_name: 'Enable Hardware Interrupt',
+  node_color: 'green',
+  options: {
+    interrupt_chan: {
+      type: 'nvic_select',
+      label: 'Interrupt Channel:',
+      default: 'EXTI0',
+      hides: [
+        {
+          opt: 'exti_gpio_bank',
+          hide_on: [
+            // TODO: Pending non-gpio interrupt lines.
+          ],
+          display_on: [
+            'EXTI0',
+            'EXTI1',
+            'EXTI2',
+            'EXTI3',
+            'EXTI4',
+            'EXTI5',
+            'EXTI6',
+            'EXTI7',
+            'EXTI8',
+            'EXTI9',
+            'EXTI10',
+            'EXTI11',
+            'EXTI12',
+            'EXTI13',
+            'EXTI14',
+            'EXTI15',
+          ],
+        },
+      ],
+    },
+    exti_gpio_bank: {
+      type: 'select',
+      label: 'Interrupt GPIO Bank:',
+      options: [
+        { name: 'GPIOA', value: 'GPIOA', },
+        { name: 'GPIOB', value: 'GPIOB', },
+        { name: 'GPIOC', value: 'GPIOC', },
+        { name: 'GPIOD', value: 'GPIOD', },
+        { name: 'GPIOE', value: 'GPIOE', },
+        { name: 'GPIOF', value: 'GPIOF', },
+      ],
+      default: 'GPIOA',
+    },
+  },
+},
+{
   base_name: 'Interrupt',
   menu_name: 'Hardware Interrupt (Start)',
   node_color: 'green',
@@ -197,7 +249,7 @@ const tool_node_types = [
     interrupt_chan: {
       type: 'nvic_select',
       label: 'Interrupt Channel:',
-      default: 'EXTI0_1',
+      default: 'EXTI0',
     },
   },
 },
@@ -1189,8 +1241,24 @@ const rcc_opts = {
 const interrupt_opts = {
   STM32F03xFx: {
     // (TODO: Other interrupts.)
-    EXTI0_1:       'EXTI Lines 0-1 (GPIOx 0-1)',
-    EXTI2_3:       'EXTI Lines 2-3 (GPIOx 2-3)',
-    EXTI4_15:      'EXTI Lines 4-15 (GPIOx 4-15)',
+    // (EXTI0_1)
+    EXTI0:         'EXTI Line 0 (GPIOx pin 0)',
+    EXTI1:         'EXTI Line 1 (GPIOx pin 1)',
+    // (EXTI2_3)
+    EXTI2:         'EXTI Line 2 (GPIOx pin 2)',
+    EXTI3:         'EXTI Line 3 (GPIOx pin 3)',
+    // (EXTI4_15)
+    EXTI4:         'EXTI Line 4 (GPIOx pin 4)',
+    EXTI5:         'EXTI Line 5 (GPIOx pin 5)',
+    EXTI6:         'EXTI Line 6 (GPIOx pin 6)',
+    EXTI7:         'EXTI Line 7 (GPIOx pin 7)',
+    EXTI8:         'EXTI Line 8 (GPIOx pin 8)',
+    EXTI9:         'EXTI Line 9 (GPIOx pin 9)',
+    EXTI10:         'EXTI Line 10 (GPIOx pin 10)',
+    EXTI11:         'EXTI Line 11 (GPIOx pin 11)',
+    EXTI12:         'EXTI Line 12 (GPIOx pin 12)',
+    EXTI13:         'EXTI Line 13 (GPIOx pin 13)',
+    EXTI14:         'EXTI Line 14 (GPIOx pin 14)',
+    EXTI15:         'EXTI Line 15 (GPIOx pin 15)',
   },
 };
