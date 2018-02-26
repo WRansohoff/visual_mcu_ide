@@ -194,7 +194,11 @@ const tool_node_types = [
   menu_name: 'Hardware Interrupt (Start)',
   node_color: 'green',
   options: {
-    // TODO
+    interrupt_chan: {
+      type: 'nvic_select',
+      label: 'Interrupt Channel:',
+      default: 'EXTI0_1',
+    },
   },
 },
 {
@@ -202,7 +206,6 @@ const tool_node_types = [
   menu_name: 'Hardware Interrupt (Finish)',
   node_color: 'pink',
   options: {
-    // TODO
   },
 },
 {

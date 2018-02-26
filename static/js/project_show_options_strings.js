@@ -264,9 +264,7 @@ var select_gpio_pin_table_row = function(tag_prefix) {
   `;
 };
 
-/*
- * List RCC 'peripheral clocks'.
- */
+// List RCC 'peripheral clocks'.
 var rcc_clock_list_table_row = function(tag_prefix) {
   return std_opts_tr_id_tag(tag_prefix + '_periph_clocks') +
     std_opts_td_tag(tag_prefix + '_periph_clocks_text', 'Peripheral Clock:') +
@@ -274,8 +272,18 @@ var rcc_clock_list_table_row = function(tag_prefix) {
     std_opts_select_tag(tag_prefix + '_periph_clocks') + `
       </select>
     </td>
-  </tr>
-  `;
+  </tr>`;
+};
+
+// List NVIC 'interrupt channels'.
+var nvic_chan_list_table_row = function(tag_prefix) {
+  return std_opts_tr_id_tag(tag_prefix + '_interrupts') +
+    std_opts_td_tag(tag_prefix + '_interrupts_text', 'Interrupt Channel:') +
+    std_opts_td_tag(tag_prefix + '_interrupts_opt') +
+    std_opts_select_tag(tag_prefix + '_interrupts') + `
+      </select>
+    </td>
+  </tr>`;
 };
 
 var defined_variables_list_table_row = function(tag_prefix, label_text) {
@@ -372,6 +380,12 @@ var gen_options_html_for_types = function() {
         // peripheral clocks depending on the selected chip.
         var tag_prefix = cur_type_prefix + '_' + opt_name;
         cur_type_html = cur_type_html + rcc_clock_list_table_row(tag_prefix);
+      }
+      else if (cur_opt.type == 'nvic_select') {
+        // A special sort of 'select' dropdown with available
+        // interrupt channels depending on the selected chip.
+        var tag_prefix = cur_type_prefix + '_' + opt_name;
+        cur_type_html = cur_type_html + nvic_chan_list_table_row(tag_prefix);
       }
       else if (cur_opt.type == 'input_number') {
         // A numeric input field.
@@ -714,6 +728,31 @@ var gen_type_listener_func = function(cur_type) {
           opt_tags[opt_name].innerHTML = select_tag_html;
         }
       }
+      else if (cur_opt.type == 'nvic_select') {
+        opt_tags[opt_name] = document.getElementById(tag_prefix + '_interrupts_tag');
+        opt_tags[opt_name + '_row'] = document.getElementById(tag_prefix + '_interrupts_row_tag');
+        // Figure out what chip type is being used.
+        // TODO: Move to its own method?
+        var chip_type = null;
+        for (var fsm_ind in fsm_nodes) {
+          var c_node = fsm_nodes[fsm_ind];
+          if (c_node && c_node.node_type == 'Boot') {
+            chip_type = c_node.options.chip_type;
+            break;
+          }
+        }
+        var interrupts = {};
+        if (chip_type == 'STM32F030F4' || chip_type == 'STM32F031F6') {
+          interrupts = interrupt_opts.STM32F03xFx;
+          var select_tag_html = '';
+          for (var int_val in interrupts) {
+            select_tag_html += `
+              <option value="` + int_val + `" class="` + tag_prefix + `_interrupts_option">` + interrupts[int_val] + `</option>
+            `;
+          }
+          opt_tags[opt_name].innerHTML = select_tag_html;
+        }
+      }
       else if (cur_opt.type == 'defined_label_select') {
         opt_tags[opt_name] = document.getElementById(tag_prefix + '_label_list_tag');
         opt_tags[opt_name + '_row'] = document.getElementById(tag_prefix + '_label_list_row_tag');
@@ -764,6 +803,7 @@ var gen_type_listener_func = function(cur_type) {
       // and any other options or node-specific stuff.
       if (cur_opt.type == 'select' ||
           cur_opt.type == 'rcc_select' ||
+          cur_opt.type == 'nvic_select' ||
           cur_opt.type == 'input_number' ||
           cur_opt.type == 'input_text' ||
           cur_opt.type == 'defined_var_select' ||
