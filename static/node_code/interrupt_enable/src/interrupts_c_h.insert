@@ -1,0 +1,14 @@
+INTERRUPTS_C_H_EXTI0_1_START:
+// EXTI handler for interrupt lines 0-1.
+void EXTI0_1_IRQ_handler(void);
+INTERRUPTS_C_H_EXTI0_1_DONE:
+
+INTERRUPTS_C_H_EXTI2_3_START:
+// EXTI handler for interrupt lines 2-3.
+void EXTI2_3_IRQ_handler(void);
+INTERRUPTS_C_H_EXTI2_3_DONE:
+
+INTERRUPTS_C_H_EXTI4_15_START:
+// EXTI handler for interrupt lines 4-15.
+void EXTI4_15_IRQ_handler(void);
+INTERRUPTS_C_H_EXTI4_15_DONE:
