@@ -27,14 +27,16 @@ check_selected_menu_tool = function() {
 // Common 'connectors' table options.
 var apply_node_io_table_listeners = function(node_type) {
   // The 'boot' node is a special type which has no inputs.
-  if (node_type == 'Boot') {
+  // So is the 'enter hardware interrupt' node.
+  if (node_type == 'Boot' || node_type == 'Interrupt') {
     document.getElementById('node_io_options_top_mid_input').hidden = true;
     document.getElementById('node_io_options_mid_left_input').hidden = true;
     document.getElementById('node_io_options_mid_right_input').hidden = true;
     document.getElementById('node_io_options_bot_mid_input').hidden = true;
   }
-  // The 'jump' node is a special type which has no outputs.
-  if (node_type == 'Jump') {
+  // The 'Jump' node is a special type which has no outputs.
+  // So is the 'Exit Hardware Interrupt' node.
+  if (node_type == 'Jump' || node_type == 'Interrupt_End') {
     document.getElementById('node_io_options_top_mid_output').hidden = true;
     document.getElementById('node_io_options_mid_left_output').hidden = true;
     document.getElementById('node_io_options_mid_right_output').hidden = true;

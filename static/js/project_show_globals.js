@@ -204,6 +204,26 @@ const tool_node_types = [
   },
 },
 {
+  base_name: 'Interrupt',
+  menu_name: 'Hardware Interrupt (Start)',
+  node_color: 'green',
+  options: {
+    // TODO
+  },
+  default_options: {
+  },
+},
+{
+  base_name: 'Interrupt_End',
+  menu_name: 'Hardware Interrupt (Finish)',
+  node_color: 'pink',
+  options: {
+    // TODO
+  },
+  default_options: {
+  },
+},
+{
   base_name: 'GPIO_Init',
   menu_name: 'Setup GPIO Pin',
   node_color: 'green',
