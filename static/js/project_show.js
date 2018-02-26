@@ -1180,7 +1180,8 @@ var precompile_project = function() {
   // With the addition of segmented hardware interrupts, however, this is
   // beginning to feel complicated. I'd like to look into user-defined
   // nodes which use separate 'grids' and pages/editors. TODO.
-  var boot_node = null;
+  var source_nodes = [];
+  source_nodes['Boot'] = null;
   // TODO: Maybe update/use existing 'defined_vars' variable?
   var global_vars = [];
   var pre_pre_process_error = "";
@@ -1242,16 +1243,16 @@ var precompile_project = function() {
       }
       else if (cur_node.node_type == 'Boot') {
         // 'Boot' node. There should only be one of these.
-        if (boot_node) {
+        if (source_nodes[cur_node.node_type]) {
           pre_pre_process_error += "Error: More than one 'Boot' node defined. There can only be one 'Boot' node, where the program starts.\n";
         }
         else {
-          boot_node = grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y];
+          source_nodes[cur_node.node_type] = grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y];
         }
       }
     }
   }
-  if (!boot_node) {
+  if (!source_nodes['Boot']) {
     pre_pre_process_error += "Error: No 'Boot' node - the program has no starting point.\n";
   }
 
@@ -1264,11 +1265,13 @@ var precompile_project = function() {
   // complete cleanly on its own.
   if (!pre_pre_process_error) {
     // Now, enter the main node processing loop.
-    var cur_proc_node = boot_node;
+    // TODO: One entry per source node?
+    var cur_proc_node = source_nodes['Boot'];
     var visited_nodes = [];
-    visited_nodes["("+boot_node.grid_coord_x+","+boot_node.grid_coord_y+")"] = true;
+    visited_nodes['Boot'] = [];
+    visited_nodes['Boot']["("+cur_proc_node.grid_coord_x+","+cur_proc_node.grid_coord_y+")"] = true;
     var done_processing = false;
-    var remaining_branches = [boot_node];
+    var remaining_branches = [cur_proc_node];
     // In-scope method for finding the next node in a chain;
     // it assumes that it will not operate on branching nodes.
     // Currently used for cleanly removing 'no-op' nodes.
@@ -1484,12 +1487,12 @@ var precompile_project = function() {
               branch_f: next_node_f.pn_index
             };
             // 'Enqueue' both branch nodes.
-            if (!visited_nodes["("+next_node_t.grid_coord_x+","+next_node_t.grid_coord_y+")"]) {
-              visited_nodes["("+next_node_t.grid_coord_x+","+next_node_t.grid_coord_y+")"] = true;
+            if (!visited_nodes['Boot']["("+next_node_t.grid_coord_x+","+next_node_t.grid_coord_y+")"]) {
+              visited_nodes['Boot']["("+next_node_t.grid_coord_x+","+next_node_t.grid_coord_y+")"] = true;
               remaining_branches.push(next_node_t);
             }
-            if (!visited_nodes["("+next_node_f.grid_coord_x+","+next_node_f.grid_coord_y+")"]) {
-              visited_nodes["("+next_node_f.grid_coord_x+","+next_node_f.grid_coord_y+")"] = true;
+            if (!visited_nodes['Boot']["("+next_node_f.grid_coord_x+","+next_node_f.grid_coord_y+")"]) {
+              visited_nodes['Boot']["("+next_node_f.grid_coord_x+","+next_node_f.grid_coord_y+")"] = true;
               remaining_branches.push(next_node_f);
             }
             return true;
@@ -1528,8 +1531,8 @@ var precompile_project = function() {
             program_nodes[proc_node.pn_index].output = {
               single: next_node.pn_index
             };
-            if (!visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"]) {
-              visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"] = true;
+            if (!visited_nodes['Boot']["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"]) {
+              visited_nodes['Boot']["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"] = true;
               remaining_branches.push(next_node);
             }
             return true;
