@@ -48,6 +48,8 @@ var imgs_to_load = {
   Delay:             '/static/fsm_assets/delay_node.png',
   Label:             '/static/fsm_assets/label_node.png',
   Jump:              '/static/fsm_assets/jump_node.png',
+  Interrupt:         '/static/fsm_assets/interrupt_node.png',
+  Interrupt_End:     '/static/fsm_assets/interrupt_end_node.png',
   GPIO_Init:         '/static/fsm_assets/init_gpio_node.png',
   GPIO_Output:       '/static/fsm_assets/set_output_pin_node.png',
   GPIO_Input:        '/static/fsm_assets/read_input_pin_node.png',
