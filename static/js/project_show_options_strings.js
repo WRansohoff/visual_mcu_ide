@@ -537,61 +537,67 @@ var gen_tag_onchange = function(cur_node, opt_tags, opt_name, opts) {
         // Get the type of variable selected (if any), and
         // add an appropriate type of input tag.
         var chosen_var = defined_vars[opt_tags[opt_name].value];
-        var prefix = cur_node.node_type + '_options_' + cur_opt.determines_var;
-        if (chosen_var.type == 'int') {
-          cell_tag.innerHTML = std_opts_input_number_tag(prefix);
-          opt_tags[cur_opt.determines_var] = document.getElementById(prefix + '_tag');
-          if (cur_node.options[opt_name] == opt_tags[opt_name].value) {
-            opt_tags[cur_opt.determines_var].value = cur_node.options[cur_opt.determines_var];
+        if (chosen_var) {
+          var prefix = cur_node.node_type + '_options_' + cur_opt.determines_var;
+          if (chosen_var.type == 'int') {
+            cell_tag.innerHTML = std_opts_input_number_tag(prefix);
+            opt_tags[cur_opt.determines_var] = document.getElementById(prefix + '_tag');
+            if (cur_node.options[opt_name] == opt_tags[opt_name].value) {
+              opt_tags[cur_opt.determines_var].value = cur_node.options[cur_opt.determines_var];
+            }
+            else {
+              opt_tags[cur_opt.determines_var].value = '0';
+            }
+            opt_tags[cur_opt.determines_var].onchange = gen_tag_onchange(cur_node, opt_tags, cur_opt.determines_var, opts);
+            opt_tags[cur_opt.determines_var].onchange();
+          }
+          else if (chosen_var.type == 'float') {
+            cell_tag.innerHTML = std_opts_input_float_tag(prefix);
+            opt_tags[cur_opt.determines_var] = document.getElementById(prefix + '_tag');
+            if (cur_node.options[opt_name] == opt_tags[opt_name].value) {
+              opt_tags[cur_opt.determines_var].value = cur_node.options[cur_opt.determines_var];
+            }
+            else {
+              opt_tags[cur_opt.determines_var].value = '0';
+            }
+            opt_tags[cur_opt.determines_var].onchange = gen_tag_onchange(cur_node, opt_tags, cur_opt.determines_var, opts);
+            opt_tags[cur_opt.determines_var].onchange();
+          }
+          else if (chosen_var.type == 'bool') {
+            var bool_opt_html = std_opts_select_tag(prefix) +
+              std_opts_option_tag(prefix, 'true', 'True') +
+              std_opts_option_tag(prefix, 'false', 'False') +
+            '</select>';
+            cell_tag.innerHTML = bool_opt_html;
+            opt_tags[cur_opt.determines_var] = document.getElementById(prefix + '_tag');
+            if (cur_node.options[opt_name] == opt_tags[opt_name].value) {
+              opt_tags[cur_opt.determines_var].value = cur_node.options[cur_opt.determines_var];
+            }
+            else {
+              opt_tags[cur_opt.determines_var].value = 'true';
+            }
+            opt_tags[cur_opt.determines_var].onchange = gen_tag_onchange(cur_node, opt_tags, cur_opt.determines_var, opts);
+            opt_tags[cur_opt.determines_var].onchange();
+          }
+          else if (chosen_var.type == 'char') {
+            cell_tag.innerHTML = std_opts_input_letter_tag(prefix);
+            opt_tags[cur_opt.determines_var] = document.getElementById(prefix + '_tag');
+            if (cur_node.options[opt_name] == opt_tags[opt_name].value) {
+              opt_tags[cur_opt.determines_var].value = cur_node.options[cur_opt.determines_var];
+            }
+            else {
+              opt_tags[cur_opt.determines_var].value = 'c';
+            }
+            opt_tags[cur_opt.determines_var].onchange = gen_tag_onchange(cur_node, opt_tags, cur_opt.determines_var, opts);
+            opt_tags[cur_opt.determines_var].onchange();
           }
           else {
-            opt_tags[cur_opt.determines_var].value = '0';
+            // Meh.
+            cell_tag.innerHTML = '';
           }
-          opt_tags[cur_opt.determines_var].onchange = gen_tag_onchange(cur_node, opt_tags, cur_opt.determines_var, opts);
-          opt_tags[cur_opt.determines_var].onchange();
-        }
-        else if (chosen_var.type == 'float') {
-          cell_tag.innerHTML = std_opts_input_float_tag(prefix);
-          opt_tags[cur_opt.determines_var] = document.getElementById(prefix + '_tag');
-          if (cur_node.options[opt_name] == opt_tags[opt_name].value) {
-            opt_tags[cur_opt.determines_var].value = cur_node.options[cur_opt.determines_var];
-          }
-          else {
-            opt_tags[cur_opt.determines_var].value = '0';
-          }
-          opt_tags[cur_opt.determines_var].onchange = gen_tag_onchange(cur_node, opt_tags, cur_opt.determines_var, opts);
-          opt_tags[cur_opt.determines_var].onchange();
-        }
-        else if (chosen_var.type == 'bool') {
-          var bool_opt_html = std_opts_select_tag(prefix) +
-            std_opts_option_tag(prefix, 'true', 'True') +
-            std_opts_option_tag(prefix, 'false', 'False') +
-          '</select>';
-          cell_tag.innerHTML = bool_opt_html;
-          opt_tags[cur_opt.determines_var] = document.getElementById(prefix + '_tag');
-          if (cur_node.options[opt_name] == opt_tags[opt_name].value) {
-            opt_tags[cur_opt.determines_var].value = cur_node.options[cur_opt.determines_var];
-          }
-          else {
-            opt_tags[cur_opt.determines_var].value = 'true';
-          }
-          opt_tags[cur_opt.determines_var].onchange = gen_tag_onchange(cur_node, opt_tags, cur_opt.determines_var, opts);
-          opt_tags[cur_opt.determines_var].onchange();
-        }
-        else if (chosen_var.type == 'char') {
-          cell_tag.innerHTML = std_opts_input_letter_tag(prefix);
-          opt_tags[cur_opt.determines_var] = document.getElementById(prefix + '_tag');
-          if (cur_node.options[opt_name] == opt_tags[opt_name].value) {
-            opt_tags[cur_opt.determines_var].value = cur_node.options[cur_opt.determines_var];
-          }
-          else {
-            opt_tags[cur_opt.determines_var].value = 'c';
-          }
-          opt_tags[cur_opt.determines_var].onchange = gen_tag_onchange(cur_node, opt_tags, cur_opt.determines_var, opts);
-          opt_tags[cur_opt.determines_var].onchange();
         }
         else {
-          // Meh.
+          // No variable.
           cell_tag.innerHTML = '';
         }
       }

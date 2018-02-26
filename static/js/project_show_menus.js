@@ -471,7 +471,14 @@ var default_options_for_type = function(type) {
     var cur_type = tool_node_types[tn_ind];
     if (cur_type) {
       if (type == cur_type.base_name) {
-        return JSON.parse(JSON.stringify(cur_type.default_options));
+        var d_opts = {};
+        for (var opt_ind in cur_type.options) {
+          var opt_obj = cur_type.options[opt_ind];
+          if (opt_obj.default) {
+            d_opts[opt_ind] = opt_obj.default;
+          }
+        }
+        return d_opts;
       }
     }
   }

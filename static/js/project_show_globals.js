@@ -1083,6 +1083,17 @@ const tool_node_types = [
     rect_style: {
       type: 'select',
       label: 'Fill Type:',
+      hides: [
+        {
+          opt: 'outline',
+          hide_on: [
+            'Fill',
+          ],
+          display_on: [
+            'Outline',
+          ],
+        },
+      ],
       options: [
         { name: 'Fill', value: 'Fill', },
         { name: 'Outline', value: 'Outline', },

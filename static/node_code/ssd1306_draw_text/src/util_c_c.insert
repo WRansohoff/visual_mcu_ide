@@ -437,6 +437,14 @@ void oled_draw_letter_c(int x, int y, char c, unsigned char color, char size) {
         w0 = OLED_CH_fws0;
         w1 = OLED_CH_exc1fws1 & 0x0000FFFF;
     }
+    else if (c == '-') {
+        w0 = OLED_CH_hyp0;
+        w1 = OLED_CH_hyp1pls1 >> 16;
+    }
+    else if (c == '+') {
+        w0 = OLED_CH_pls0;
+        w1 = OLED_CH_hyp1pls1 & 0x0000FFFF;
+    }
     oled_draw_letter(x, y, w0, w1, color, size);
 }
 
@@ -445,6 +453,10 @@ void oled_draw_letter_i(int x, int y, int ic, unsigned char color, char size) {
     int cur_x = x;
     int first_found = 0;
     int proc_val = ic;
+    if (proc_val < 0) {
+        proc_val = proc_val * -1;
+        oled_draw_letter_c(cur_x, y, '-', color, size);
+    }
     for (magnitude = 1000000000; magnitude > 0; magnitude = magnitude / 10) {
         int m_val = proc_val / magnitude;
         proc_val -= (m_val * magnitude);
