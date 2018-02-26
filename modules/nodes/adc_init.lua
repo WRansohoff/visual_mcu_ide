@@ -7,11 +7,10 @@ function node_reqs.ensure_support_methods(node, proj_state)
   -- Import the 'misc' and 'adc' standard peripheral libraries,
   -- and make sure that there is a global 'ADC_InitTypeDef'
   -- variable available to the main method.
-  local stdp_s_path = 'static/node_code/adc_init/src/std_periph/'
-  if not varm_util.import_std_periph_lib('misc', stdp_s_path, proj_state.base_dir) then
+  if not varm_util.import_std_periph_lib('misc', proj_state.base_dir) then
     return nil
   end
-  if not varm_util.import_std_periph_lib('adc', stdp_s_path, proj_state.base_dir) then
+  if not varm_util.import_std_periph_lib('adc', proj_state.base_dir) then
     return nil
   end
   -- Ensure that a global 'ADC_InitTypeDef' struct is defined.

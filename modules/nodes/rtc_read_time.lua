@@ -6,10 +6,9 @@ local node_reqs = {}
 function node_reqs.ensure_support_methods(node, proj_state)
   -- Import the 'misc', 'rtc', and 'pwr' standard periph libs,
   -- and make sure that a global 'RTC_TimeTypeDef' exists.
-  local stdp_s_path = 'static/node_code/rtc_read_time/src/std_periph/'
-  if not varm_util.import_std_periph_lib('misc', stdp_s_path, proj_state.base_dir) or not
-         varm_util.import_std_periph_lib('rtc', stdp_s_path, proj_state.base_dir) or not
-         varm_util.import_std_periph_lib('pwr', stdp_s_path, proj_state.base_dir) then
+  if not varm_util.import_std_periph_lib('misc', proj_state.base_dir) or not
+         varm_util.import_std_periph_lib('rtc', proj_state.base_dir) or not
+         varm_util.import_std_periph_lib('pwr', proj_state.base_dir) then
     return nil
   end
   -- Ensure that a global 'RTC_TimeTypeDef' struct is defined.

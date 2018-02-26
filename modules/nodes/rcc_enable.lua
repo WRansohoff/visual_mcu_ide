@@ -9,13 +9,12 @@ function node_reqs.ensure_support_methods(node, proj_state)
   -- For now, just use the standard peripherals library's method.
   -- Copy the appropriate files, and uncomment their include statements.
   -- Also add the source files to the Makefile.
-  local stdp_s_path = 'static/node_code/rcc_enable/src/std_periph/'
   -- stm32f0xx_misc.[ch]
-  if not varm_util.import_std_periph_lib('misc', stdp_s_path, proj_state.base_dir) then
+  if not varm_util.import_std_periph_lib('misc', proj_state.base_dir) then
     return nil
   end
   -- stm32f0xx_rcc.[ch]
-  if not varm_util.import_std_periph_lib('rcc', stdp_s_path, proj_state.base_dir) then
+  if not varm_util.import_std_periph_lib('rcc', proj_state.base_dir) then
     return nil
   end
 

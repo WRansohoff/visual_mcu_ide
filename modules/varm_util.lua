@@ -264,14 +264,10 @@ end
 -- Import a standard peripheral library file.
 -- The 'which_lib' value defines which library to pull in. Examples:
 -- 'rcc', 'gpio', 'misc', 'rtc', 'adc', 'i2c', 'tim', and so on.
--- The 'from_dir' path should contain both the .c and .h files
--- for the library that is being imported.
 -- Currently, only STM32F0 chips are supported, but later that can be an opt.
 -- Returns true if the library has already been imported, or if it did
 -- not previously exist but was successfully imported.
-function varm_util.import_std_periph_lib(which_lib, from_dir, proj_base_dir)
-  --local from_c = from_dir .. 'stm32f0xx_' .. which_lib .. '.c'
-  --local from_h = from_dir .. 'stm32f0xx_' .. which_lib .. '.h'
+function varm_util.import_std_periph_lib(which_lib, proj_base_dir)
   local from_c = 'static/node_code/stm32f0_std_periph_libs/stm32f0xx_' .. which_lib .. '.c'
   local from_h = 'static/node_code/stm32f0_std_periph_libs/stm32f0xx_' .. which_lib .. '.h'
   local to_c = proj_base_dir .. 'src/std_periph/stm32f0xx_' .. which_lib .. '.c'

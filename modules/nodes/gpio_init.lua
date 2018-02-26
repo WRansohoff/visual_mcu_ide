@@ -6,11 +6,10 @@ local node_reqs = {}
 function node_reqs.ensure_support_methods(node, proj_state)
   -- I have an assembly method for STM32F0 GPIO setup, but for the sake
   -- of simplicity, just use the standard peripheral library. TODO
-  local stdp_s_path = 'static/node_code/gpio_init/src/std_periph/'
-  if not varm_util.import_std_periph_lib('misc', stdp_s_path, proj_state.base_dir) then
+  if not varm_util.import_std_periph_lib('misc', proj_state.base_dir) then
     return nil
   end
-  if not varm_util.import_std_periph_lib('gpio', stdp_s_path, proj_state.base_dir) then
+  if not varm_util.import_std_periph_lib('gpio', proj_state.base_dir) then
     return nil
   end
   -- Ensure that a global 'GPIO_InitTypeDef' struct is defined.

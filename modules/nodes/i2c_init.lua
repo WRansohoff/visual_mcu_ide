@@ -8,11 +8,10 @@ function node_reqs.ensure_support_methods(node, proj_state)
   -- I2Cx peripheral to a minimal 'master' mode config with a given speed.
   -- It also uses the GPIO std periph library to set the pin Alt. Func.
   -- (Standard Peripherals Library imports)
-  local stdp_s_path = 'static/node_code/gpio_init/src/std_periph/'
-  if not varm_util.import_std_periph_lib('misc', stdp_s_path, proj_state.base_dir) then
+  if not varm_util.import_std_periph_lib('misc', proj_state.base_dir) then
     return nil
   end
-  if not varm_util.import_std_periph_lib('gpio', stdp_s_path, proj_state.base_dir) then
+  if not varm_util.import_std_periph_lib('gpio', proj_state.base_dir) then
     return nil
   end
   -- (Assembly I2C init method.)
