@@ -79,9 +79,7 @@ function node_reqs.append_node(node, node_graph, proj_state)
     return nil
   end
   node_text = node_text .. '  // (End "SSD1306 Draw Rect" node)\n\n'
-  if not varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
-                                    "/ MAIN_ENTRY:",
-                                    node_text) then
+  if not varm_util.code_node_lode(node, node_text, proj_state) then
     return nil
   end
   return true

@@ -111,6 +111,20 @@ function varm_util.copy_file(src_path, dest_path, mode_suffix)
   return true
 end
 
+-- Load a node's code into the appropriate location.
+function varm_util.code_node_lode(node, node_text, proj_state)
+  -- If the target is 'main', append the ndoe to the end of the
+  -- main program.
+  if node.code_destination == 'main' then
+    return varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                      "/ MAIN_ENTRY:",
+                                      node_text)
+  else
+    -- TODO: Support hardware interrupt methods.
+    return nil
+  end
+end
+
 -- Insert text into a file at a given point.
 -- Technically, the easiest way to do this is to create a new file,
 -- copy the existing one into it, add the new text at the right place,

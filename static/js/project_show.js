@@ -1225,6 +1225,9 @@ var precompile_project = function() {
           node_type: cur_node.node_type,
           grid_coord_x: cur_node.grid_coord_x,
           grid_coord_y: cur_node.grid_coord_y,
+          // TODO: Support placing nodes into hardware interrupts,
+          // and ensure that those interrupts stay partitioned.
+          code_destination: 'main',
           options: cur_node.options,
         });
       }
