@@ -27,5 +27,6 @@ FSMNodeDefs['SSD1306_Draw_Text'] = require("modules/nodes/ssd1306_draw_text")
 FSMNodeDefs['SSD1306_Refresh'] = require("modules/nodes/ssd1306_refresh")
 FSMNodeDefs['Check_Truthy'] = require("modules/nodes/check_truthy")
 FSMNodeDefs['Check_Equals'] = require("modules/nodes/check_equals")
+FSMNodeDefs['Interrupt_Enable'] = require("modules/nodes/interrupt_enable")
 
 return FSMNodeDefs

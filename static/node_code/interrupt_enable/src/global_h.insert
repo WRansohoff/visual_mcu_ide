@@ -1,0 +1,6 @@
+SYS_GLOBAL_INTERRUPT_INIT_STRUCTS_START:
+// Define global 'Init' structs for code autogenerators
+// to use with hardware interrupts on the chip.
+EXTI_InitTypeDef global_exti_init_struct;
+NVIC_InitTypeDef global_nvic_init_struct;
+SYS_GLOBAL_INTERRUPT_INIT_STRUCTS_DONE:
