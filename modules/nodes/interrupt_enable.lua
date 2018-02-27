@@ -39,27 +39,6 @@ function node_reqs.ensure_support_methods(node, proj_state)
       break
     end
   end
-  if exti_irq_c_tag and exti_irq_h_tag and false then
-    if not varm_util.copy_block_into_file(
-        'static/node_code/interrupt_enable/src/interrupts_c_h.insert',
-        proj_state.base_dir .. 'src/interrupts_c.h',
-        exti_irq_h_tag .. 'START:',
-        exti_irq_h_tag .. 'DONE:',
-        '/ EXTI_INTERRUPTS_C_DECLARES:') then
-      return nil
-    end
-    if not varm_util.copy_block_into_file(
-        'static/node_code/interrupt_enable/src/interrupts_c_c.insert',
-        proj_state.base_dir .. 'src/interrupts_c.c',
-        exti_irq_c_tag .. 'START:',
-        exti_irq_c_tag .. 'DONE:',
-        '/ EXTI_INTERRUPTS_C_DEFINES:') then
-      return nil
-    end
-  else
-    --return nil
-    return true
-  end
   return true
 end
 
