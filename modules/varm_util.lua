@@ -127,7 +127,9 @@ function varm_util.code_node_lode(node, node_text, proj_state)
                                       node_text)
   else
     -- TODO: Support hardware interrupt methods.
-    return nil
+    -- (Return true to allow compilation, but it still doesn't work)
+    --return true
+    return false
   end
 end
 

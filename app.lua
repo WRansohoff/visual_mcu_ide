@@ -210,6 +210,8 @@ app:post("/precompile_project_file/:project_id", function(self)
   -- Save the provided JSON string to a file.
   local up_file = self.params.file
   local boot_index = -1
+  local entry_nodes = {}
+  local entry_nodes_lookup = {}
   local ret_status = 200
   local status_msg = 'success'
   if not up_file then
@@ -228,13 +230,27 @@ app:post("/precompile_project_file/:project_id", function(self)
       if val.node_type == 'Boot' then
         if boot_index == -1 then
           boot_index = val.node_ind
+          entry_nodes_lookup['Boot'] = boot_index
         else
           ret_status = 500
           status_msg = 'More than one Boot node passed in.'
         end
+      elseif val.node_type == 'Interrupt' then
+        if not entry_nodes_lookup[val.code_destination] then
+          entry_nodes_lookup[val.code_destination] = val.node_ind
+        else
+          ret_status = 500
+          status_msg = 'More than one entry node for hardware interrupt: ' .. val.code_destination
+        end
       end
     end
   end
+  -- Fill out the 'entry_nodes' table.
+  for i, val in pairs(entry_nodes_lookup) do
+    table.insert(entry_nodes, val)
+  end
+  -- Done; copy 'nodes' struct and verify the existance of a
+  -- 'Boot' node to start the program at.
   local nodes = up_nodes
   if boot_index == -1 then
     ret_status = 500
@@ -282,8 +298,10 @@ app:post("/precompile_project_file/:project_id", function(self)
       status_msg = 'Could not find node ' .. cur_ind
     end
     proj_state = FSMNodes.init_project_state(cur_node, nodes, global_decs, proj_id)
-    local indices_to_process = {}
-    table.insert(indices_to_process, cur_ind)
+    -- TODO: Remove
+    --local indices_to_process = {}
+    --table.insert(indices_to_process, cur_ind)
+    local indices_to_process = entry_nodes
     while preprocessing do
       cur_ind = table.remove(indices_to_process)
       if (not cur_ind) and cur_ind ~= 0 then
@@ -314,11 +332,17 @@ app:post("/precompile_project_file/:project_id", function(self)
               visited_nodes[cur_ind] = true
               table.insert(indices_to_process, cur_node.output.branch_t)
               table.insert(indices_to_process, cur_node.output.branch_f)
+            elseif cur_node.node_type == 'Interrupt_End' then
+              -- (Special type of node which has no outputs.)
+              visited_nodes[cur_ind] = true
             else
               preprocessing = false
               ret_status = 500
               status_msg = 'Invalid output options passed in node ' .. cur_ind
             end
+          elseif cur_node.node_type == 'Interrupt_End' then
+            -- (Special type of node which has no outputs.)
+            visited_nodes[cur_ind] = true
           else
             preprocessing = false
             ret_status = 500
