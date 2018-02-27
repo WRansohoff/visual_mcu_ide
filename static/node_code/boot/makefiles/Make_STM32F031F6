@@ -81,6 +81,7 @@ AS_SRC += $(BOOT_FILE)
 
 C_SRC  += ./src/main.c
 C_SRC  += ./src/util_c.c
+C_SRC  += ./src/interrupts_c.c
 ## STD_PERIPH_SRCS
 
 # (other header file directories, if any)

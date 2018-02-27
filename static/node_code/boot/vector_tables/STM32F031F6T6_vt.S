@@ -2,13 +2,14 @@
 #define _VVC_VECT_TBL
 
 .syntax unified
-.cpu cortex-m0plus
+.cpu cortex-m0
 .fpu softvfp
 .thumb
 
 // Global values.
 .global reset_handler
 .global vector_table
+.global default_interrupt_handler
 
 /*
  * Define the core vector table which will live at 0x00000000.
@@ -60,8 +61,8 @@ vector_table:
     .word ADC1_IRQ_handler
     .word TIM1_break_IRQ_handler
     .word TIM1_CC_IRQ_handler
-    // 32-47
     .word TIM2_IRQ_handler
+    // 32-47
     .word TIM3_IRQ_handler
     .word 0
     .word 0
@@ -77,8 +78,8 @@ vector_table:
     .word 0
     .word 0
     .word 0
-    // 48-49
     .word 0
+    // 48
     // (Location to boot from for RAM startup)
     #define boot_ram_base  0xF108F85F
     .word boot_ram_base

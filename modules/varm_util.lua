@@ -126,10 +126,16 @@ function varm_util.code_node_lode(node, node_text, proj_state)
                                       "/ MAIN_ENTRY:",
                                       node_text)
   else
-    -- TODO: Support hardware interrupt methods.
-    -- (Return true to allow compilation, but it still doesn't work)
-    --return true
-    return false
+    -- This node should be inserted into a
+    -- hardware interrupt method.
+    if string.find(node.code_destination, 'EXTI') then
+      local entry_point = '/ ' .. node.code_destination .. '_ENTRY:'
+      return varm_util.insert_into_file(proj_state.base_dir .. 'src/interrupts_c.c',
+                                        entry_point,
+                                        node_text)
+    else
+      return nil
+    end
   end
 end
 

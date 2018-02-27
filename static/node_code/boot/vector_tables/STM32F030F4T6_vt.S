@@ -2,13 +2,14 @@
 #define _VVC_VECT_TBL
 
 .syntax unified
-.cpu cortex-m0plus
+.cpu cortex-m0
 .fpu softvfp
 .thumb
 
 // Global values.
 .global reset_handler
 .global vector_table
+.global default_interrupt_handler
 
 /*
  * Define the core vector table which will live at 0x00000000.

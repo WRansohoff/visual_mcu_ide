@@ -10,7 +10,13 @@ end
 
 -- ('Exit Hardware Interrupt' Node)
 function node_reqs.append_node(node, node_graph, proj_state)
-  return true
+  -- Place a label, so that other nodes can jump here.
+  local node_text = '  // ("Exit Hardware Interrupt" node)\n'
+  node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  node_text = node_text .. '  ;\n'
+  local node_text = node_text .. '  // (Fall through to return.)\n'
+  node_text = node_text .. '  // (End "Exit Hardware Interrupt" node)\n\n'
+  return varm_util.code_node_lode(node, node_text, proj_state)
 end
 
 return node_reqs

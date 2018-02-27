@@ -19,8 +19,47 @@ function node_reqs.ensure_support_methods(node, proj_state)
       '/ SYS_GLOBAL_VAR_DEFINES:') then
     return nil
   end
-  -- TODO: Ensure that 'interrupts_c.[c/h]' files exist, and
-  -- that they contain an appropriate interrupt handler function.
+  -- Ensure that the 'interrupts_c.[c/h]' files exist, and
+  -- that they contain the appropriate interrupt handler function.
+  -- TODO: Support interrupt lines other than EXTI[0-15].
+  local exti_irq_h_tag = nil
+  local exti_irq_c_tag = nil
+  for e_pin = 0,15 do
+    if (node.options.interrupt_chan == 'EXTI' .. tostring(e_pin)) then
+      if e_pin < 2 then
+        exti_irq_h_tag = 'INTERRUPTS_C_H_EXTI0_1_'
+        exti_irq_c_tag = 'INTERRUPTS_C_C_EXTI0_1_'
+      elseif e_pin < 4 then
+        exti_irq_h_tag = 'INTERRUPTS_C_H_EXTI2_3_'
+        exti_irq_c_tag = 'INTERRUPTS_C_C_EXTI2_3_'
+      else
+        exti_irq_h_tag = 'INTERRUPTS_C_H_EXTI4_15_'
+        exti_irq_c_tag = 'INTERRUPTS_C_C_EXTI4_15_'
+      end
+      break
+    end
+  end
+  if exti_irq_c_tag and exti_irq_h_tag and false then
+    if not varm_util.copy_block_into_file(
+        'static/node_code/interrupt_enable/src/interrupts_c_h.insert',
+        proj_state.base_dir .. 'src/interrupts_c.h',
+        exti_irq_h_tag .. 'START:',
+        exti_irq_h_tag .. 'DONE:',
+        '/ EXTI_INTERRUPTS_C_DECLARES:') then
+      return nil
+    end
+    if not varm_util.copy_block_into_file(
+        'static/node_code/interrupt_enable/src/interrupts_c_c.insert',
+        proj_state.base_dir .. 'src/interrupts_c.c',
+        exti_irq_c_tag .. 'START:',
+        exti_irq_c_tag .. 'DONE:',
+        '/ EXTI_INTERRUPTS_C_DEFINES:') then
+      return nil
+    end
+  else
+    --return nil
+    return true
+  end
   return true
 end
 

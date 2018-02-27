@@ -38,7 +38,7 @@ function node_reqs.append_node(node, node_graph, proj_state)
     end
   end
   -- Add GPIO output code.
-  if node.options.gpio_val and node.options.gpio_val == 'variable' and node.options.gpio_var_name and node.options.gpio_var_name ~= '(None)' then
+  if node.options.gpio_val and node.options.gpio_val == 'Var' and node.options.gpio_var_name and node.options.gpio_var_name ~= '(None)' then
     node_text = node_text .. '  if (' .. node.options.gpio_var_name ..
                 ') {\n    ' .. gpio_bank .. '->ODR |= GPIO_ODR_' ..
                 gpio_pin_num .. ';\n  }\n  else {\n    ' .. gpio_bank ..

@@ -2,7 +2,7 @@
 #define _VVC_BOOT_SEQ
 
 .syntax unified
-.cpu cortex-m0plus
+.cpu cortex-m0
 .fpu softvfp
 .thumb
 

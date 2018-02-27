@@ -163,6 +163,8 @@ function FSMNodes.gen_bare_source_files(boot_node, cur_proj_state)
   -- - src/global.h
   -- - src/util_c.h
   -- - src/util_c.c
+  -- - src/interrupts_c.h
+  -- - src/interrupts_c.c
   -- - src/stm32f0xx.h
   -- - src/stm32f0xx_conf.h
   -- - src/std_periph
@@ -178,6 +180,7 @@ function FSMNodes.gen_bare_source_files(boot_node, cur_proj_state)
   local files_to_copy = { 'src/core.S', 'src/util.S', 'src/global.h',
                           'src/main.h', 'src/main.c', 'src/stm32f0xx.h',
                           'src/util_c.h', 'src/util_c.c',
+                          'src/interrupts_c.h', 'src/interrupts_c.c',
                           'src/stm32f0xx_conf.h',
                           'src/arm_include/arm_common_tables.h',
                           'src/arm_include/arm_const_structs.h',
@@ -208,9 +211,9 @@ function FSMNodes.gen_bare_source_files(boot_node, cur_proj_state)
       local var_c_val = tostring(val.var_val)
       if var_c_type == 'bool' then
         var_c_type = 'unsigned char'
-        if var_c_val == 'false' then
+        if var_c_val == 'false' or var_c_val == '0' then
           var_c_val = '0';
-        elseif var_c_val == 'true' then
+        elseif var_c_val == 'true' or var_c_val == '1' then
           var_c_val = '1';
         else
           -- uh...error? TODO

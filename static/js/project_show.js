@@ -1225,8 +1225,9 @@ var precompile_project = function() {
         if (cur_node.node_type == 'Boot') {
           start_dest = 'main';
         }
-        else if (cur_node.node_type == 'Interrupt') {
-          start_dest = 'hwint_' + cur_node.options.interrupt_chan;
+        else if (cur_node.node_type == 'Interrupt' &&
+                 cur_node.options.interrupt_chan) {
+          start_dest = cur_node.options.interrupt_chan;
         }
         program_nodes.push({
           node_ind: prog_node_ind,

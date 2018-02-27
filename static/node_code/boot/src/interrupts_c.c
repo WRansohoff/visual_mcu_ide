@@ -1,4 +1,6 @@
-INTERRUPTS_C_C_EXTI0_1_START:
+#include "interrupts_c.h"
+
+// C-language hardware interrupt method definitions.
 /*
  * Each EXTI line between 0-15 can map to a GPIO pin.
  * The EXTI line number is the same as the pin number, and
@@ -22,9 +24,7 @@ if (EXTI_GetITStatus(EXTI_Line1) != RESET) {
 }
 return;
 }
-INTERRUPTS_C_C_EXTI0_1_DONE:
 
-INTERRUPTS_C_C_EXTI2_3_START:
 /*
  * EXTI2_3: Handle interrupt lines 2 and 3.
  */
@@ -39,9 +39,7 @@ if (EXTI_GetITStatus(EXTI_Line3) != RESET) {
 }
 return;
 }
-INTERRUPTS_C_C_EXTI2_3_DONE:
 
-INTERRUPTS_C_C_EXTI4_15_START:
 /*
  * EXTI4_15: Handle interrupt lines between [4:15], inclusive.
  * TODO: To keep things fast, should this only add line checks
@@ -98,4 +96,5 @@ if (EXTI_GetITStatus(EXTI_Line15) != RESET) {
 }
 return;
 }
-INTERRUPTS_C_C_EXTI4_15_DONE:
+
+// EXTI_INTERRUPTS_C_DEFINES:

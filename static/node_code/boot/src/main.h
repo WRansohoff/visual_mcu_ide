@@ -7,5 +7,6 @@
 
 #include "global.h"
 #include "util_c.h"
+#include "interrupts_c.h"
 
 #endif
