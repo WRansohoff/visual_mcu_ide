@@ -1221,14 +1221,19 @@ var precompile_project = function() {
       if (cur_node.node_type != 'Nop_Node' &&
           cur_node.node_type != 'Label' &&
           cur_node.node_type != 'Jump') {
+        var start_dest = 'none';
+        if (cur_node.node_type == 'Boot') {
+          start_dest = 'main';
+        }
+        else if (cur_node.node_type == 'Interrupt') {
+          start_dest = 'hwint_' + cur_node.options.interrupt_chan;
+        }
         program_nodes.push({
           node_ind: prog_node_ind,
           node_type: cur_node.node_type,
           grid_coord_x: cur_node.grid_coord_x,
           grid_coord_y: cur_node.grid_coord_y,
-          // TODO: Support placing nodes into hardware interrupts,
-          // and ensure that those interrupts stay partitioned.
-          code_destination: 'main',
+          code_destination: start_dest,
           options: cur_node.options,
         });
       }
@@ -1241,13 +1246,26 @@ var precompile_project = function() {
         });
         // Global variable definition. TODO.
       }
-      else if (cur_node.node_type == 'Boot') {
+      else if (cur_node.node_type == 'Boot' ||
+               cur_node.node_type == 'Interrupt') {
         // 'Boot' node. There should only be one of these.
-        if (source_nodes[cur_node.node_type]) {
-          pre_pre_process_error += "Error: More than one 'Boot' node defined. There can only be one 'Boot' node, where the program starts.\n";
+        // This behavior is also shared by 'Enter Interrupt'
+        // nodes.
+        var node_ind = cur_node.node_type;
+        if (node_ind == 'Interrupt') {
+          node_ind = node_ind + '_' + cur_node.options.interrupt_chan;
+        }
+        if (source_nodes[node_ind]) {
+          pre_pre_process_error += "Error: More than one '" + node_ind + "' node defined. There can only be one '" + node_ind + "' node,";
+          if (node_ind == 'Boot') {
+            pre_pre_process_error += " where the program starts.\n";
+          }
+          else {
+            pre_pre_process_error += " where the hardware interrupt starts.\n";
+          }
         }
         else {
-          source_nodes[cur_node.node_type] = grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y];
+          source_nodes[node_ind] = grid_nodes_xy[cur_node.grid_coord_x][cur_node.grid_coord_y];
         }
       }
     }
@@ -1268,10 +1286,19 @@ var precompile_project = function() {
     // TODO: One entry per source node?
     var cur_proc_node = source_nodes['Boot'];
     var visited_nodes = [];
-    visited_nodes['Boot'] = [];
-    visited_nodes['Boot']["("+cur_proc_node.grid_coord_x+","+cur_proc_node.grid_coord_y+")"] = true;
+    visited_nodes["("+cur_proc_node.grid_coord_x+","+cur_proc_node.grid_coord_y+")"] = true;
     var done_processing = false;
     var remaining_branches = [cur_proc_node];
+    for (var source_ind in source_nodes) {
+      if (source_ind != 'Boot') {
+        var s_node = source_nodes[source_ind];
+        var s_dest = program_nodes[s_node.pn_index].code_destination;
+        if (s_dest && s_dest != 'none') {
+          visited_nodes["("+s_node.grid_coord_x+","+s_node.grid_coord_y+")"] = true;
+          remaining_branches.push(s_node);
+        }
+      }
+    }
     // In-scope method for finding the next node in a chain;
     // it assumes that it will not operate on branching nodes.
     // Currently used for cleanly removing 'no-op' nodes.
@@ -1294,8 +1321,15 @@ var precompile_project = function() {
           grid_x += 1;
         }
         else {
-          pre_pre_process_error += "Error: Node at (" + grid_x + ", " + grid_y + ") has no 'output' connection.\n";
+          // Special case: 'End Interrupt' nodes terminate
+          // a hardware interrupt flow, and don't have outputs.
+          if (cur_input_node.node_type == 'Interrupt_End') {
+            return true;
+          }
+          else {
+            pre_pre_process_error += "Error: Node at (" + grid_x + ", " + grid_y + ") has no 'output' connection.\n";
           return false;
+          }
         }
         var next_node = find_input_node(grid_x, grid_y);
         if (!next_node) {
@@ -1476,23 +1510,49 @@ var precompile_project = function() {
           }
           var next_node_f = find_input_node(cur_grid_node_x, cur_grid_node_y);
 
-          // Check that both 'if/else' branches exist.
+          // Check that both 'if/else' branches exist and
+          // that they do not violate scope.
           if (!next_node_t || !next_node_f) {
             pre_pre_process_error += "Error: Branching node at (" + cur_grid_node_x + ", " + cur_grid_node_y + ") does not point to valid 'input' arrows with both of its outputs.\n";
             return false;
           }
           else {
+            // Verify matching scopes. (TODO: Method for this?)
+            var cur_scope = program_nodes[proc_node.pn_index].code_destination;
+            var next_scope_t = program_nodes[next_node_t.pn_index].code_destination;
+            var next_scope_f = program_nodes[next_node_f.pn_index].code_destination;
+            if (next_scope_t == 'none') {
+              program_nodes[next_node_t.pn_index].code_destination = cur_scope;
+              next_scope_t = cur_scope;
+            }
+            if (next_scope_f == 'none') {
+              program_nodes[next_node_f.pn_index].code_destination = cur_scope;
+              next_scope_f = cur_scope;
+            }
+            // TODO: Remove when hw interrupts work reliably.
+            //alert("scope:\n" + cur_scope + " -> " + next_scope_t + "\n" + cur_scope + " -> " + next_scope_f);
+            if (next_scope_t != cur_scope) {
+              // Scope-jumping violation.
+              pre_pre_process_error += "Error: Grid coordinate(" + cur_grid_node_x + ", " + cur_grid_node_y + ") points to a node outside of its scope on its 'True' branch. Hardware interrupts must not 'flow into' other hardware interrupts or the main 'Boot' node's program flow, and vice-versa.\n";
+              return false;
+            }
+            if (next_scope_f != cur_scope) {
+              // Scope-jumping violation.
+              pre_pre_process_error += "Error: Grid coordinate(" + cur_grid_node_x + ", " + cur_grid_node_y + ") points to a node outside of its scope on its 'False' branch. Hardware interrupts must not 'flow into' other hardware interrupts or the main 'Boot' node's program flow, and vice-versa.\n";
+              return false;
+            }
+            // Mark the node's outputs.
             program_nodes[proc_node.pn_index].output = {
               branch_t: next_node_t.pn_index,
               branch_f: next_node_f.pn_index
             };
             // 'Enqueue' both branch nodes.
-            if (!visited_nodes['Boot']["("+next_node_t.grid_coord_x+","+next_node_t.grid_coord_y+")"]) {
-              visited_nodes['Boot']["("+next_node_t.grid_coord_x+","+next_node_t.grid_coord_y+")"] = true;
+            if (!visited_nodes["("+next_node_t.grid_coord_x+","+next_node_t.grid_coord_y+")"]) {
+              visited_nodes["("+next_node_t.grid_coord_x+","+next_node_t.grid_coord_y+")"] = true;
               remaining_branches.push(next_node_t);
             }
-            if (!visited_nodes['Boot']["("+next_node_f.grid_coord_x+","+next_node_f.grid_coord_y+")"]) {
-              visited_nodes['Boot']["("+next_node_f.grid_coord_x+","+next_node_f.grid_coord_y+")"] = true;
+            if (!visited_nodes["("+next_node_f.grid_coord_x+","+next_node_f.grid_coord_y+")"]) {
+              visited_nodes["("+next_node_f.grid_coord_x+","+next_node_f.grid_coord_y+")"] = true;
               remaining_branches.push(next_node_f);
             }
             return true;
@@ -1519,8 +1579,15 @@ var precompile_project = function() {
             cur_grid_node_x += 1;
           }
           else {
-            pre_pre_process_error += "Error: Node at (" + cur_grid_node_x + ", " + cur_grid_node_y + ") has no 'output' connection.\n";
-            return false;
+            // Special case: 'End Interrupt' nodes terminate
+            // a hardware interrupt flow, and don't have outputs.
+            if (proc_node.node_type == 'Interrupt_End') {
+              return true;
+            }
+            else {
+              pre_pre_process_error += "Error: Node at (" + cur_grid_node_x + ", " + cur_grid_node_y + ") has no 'output' connection.\n";
+              return false;
+            }
           }
           var next_node = find_input_node(cur_grid_node_x, cur_grid_node_y);
           if (!next_node) {
@@ -1528,13 +1595,33 @@ var precompile_project = function() {
             return false;
           }
           else {
+            // If the next node's 'code_destination' is 'none',
+            // set it to this node's value. Otherwise,
+            // ensure that it matches this node's value.
+            // If there is a mismatch, it indicates an invalid
+            // jump between scopes; mark that as an error.
+            var cur_scope = program_nodes[proc_node.pn_index].code_destination;
+            var next_scope = program_nodes[next_node.pn_index].code_destination;
+            if (next_scope == 'none') {
+              program_nodes[next_node.pn_index].code_destination = cur_scope;
+              next_scope = cur_scope;
+            }
+            // TODO: Remove when hw interrupts work reliably.
+            //alert("scope:\n" + cur_scope + " -> " + next_scope);
+            if (next_scope != cur_scope) {
+              // Scope-jumping violation.
+              pre_pre_process_error += "Error: Grid coordinate(" + cur_grid_node_x + ", " + cur_grid_node_y + ") points to a node outside of its scope. Hardware interrupts must not 'flow into' other hardware interrupts or the main 'Boot' node's program flow, and vice-versa.\n";
+              return false;
+            }
+            if (!visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"]) {
+              visited_nodes["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"] = true;
+              remaining_branches.push(next_node);
+            }
+            // Now we know which node is 'next'.
+            // So, mark the node's output.
             program_nodes[proc_node.pn_index].output = {
               single: next_node.pn_index
             };
-            if (!visited_nodes['Boot']["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"]) {
-              visited_nodes['Boot']["("+next_node.grid_coord_x+","+next_node.grid_coord_y+")"] = true;
-              remaining_branches.push(next_node);
-            }
             return true;
           }
         }
@@ -1545,6 +1632,7 @@ var precompile_project = function() {
       }
     };
 
+    // Perform the actual preprocessing.
     while (!done_processing) {
       var next_proc_node = remaining_branches.pop();
       if (next_proc_node) {

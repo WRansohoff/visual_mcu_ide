@@ -119,6 +119,12 @@ function varm_util.code_node_lode(node, node_text, proj_state)
     return varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
                                       "/ MAIN_ENTRY:",
                                       node_text)
+  elseif node.code_destination == 'none' then
+    -- TODO: Once interrupt support is done, this should
+    -- be a no-op instead of defaulting to 'main'.
+    return varm_util.insert_into_file(proj_state.base_dir .. 'src/main.c',
+                                      "/ MAIN_ENTRY:",
+                                      node_text)
   else
     -- TODO: Support hardware interrupt methods.
     return nil
