@@ -456,6 +456,12 @@ void oled_draw_letter_i(int x, int y, int ic, unsigned char color, char size) {
     if (proc_val < 0) {
         proc_val = proc_val * -1;
         oled_draw_letter_c(cur_x, y, '-', color, size);
+        if (size == 'S') {
+            cur_x += 6;
+        }
+        else if (size == 'L') {
+            cur_x += 12;
+        }
     }
     for (magnitude = 1000000000; magnitude > 0; magnitude = magnitude / 10) {
         int m_val = proc_val / magnitude;
