@@ -1005,15 +1005,83 @@ const tool_node_types = [
       ],
       default: '1',
     },
+    rect_x_type: {
+      type: 'select',
+      label: 'X-Coordinate Type:',
+      options: [
+        { name: 'Constant Number', value: 'val', },
+        { name: 'Variable', value: 'var', },
+      ],
+      default: 'val',
+      hides: [
+        {
+          opt: 'rect_x',
+          hide_on: [
+            'var',
+          ],
+          display_on: [
+            'val',
+          ],
+        },
+        {
+          opt: 'rect_x_var',
+          hide_on: [
+            'val',
+          ],
+          display_on: [
+            'var',
+          ],
+        },
+      ],
+    },
     rect_x: {
       type: 'input_number',
       label: 'X-Coordinate:',
       default: 0
     },
+    rect_x_var: {
+      type: 'defined_var_select',
+      label: 'X-Coordinate Variable:',
+      default: '(None)',
+    },
+    rect_y_type: {
+      type: 'select',
+      label: 'Y-Coordinate Type:',
+      options: [
+        { name: 'Constant Number', value: 'val', },
+        { name: 'Variable', value: 'var', },
+      ],
+      default: 'val',
+      hides: [
+        {
+          opt: 'rect_y',
+          hide_on: [
+            'var',
+          ],
+          display_on: [
+            'val',
+          ],
+        },
+        {
+          opt: 'rect_y_var',
+          hide_on: [
+            'val',
+          ],
+          display_on: [
+            'var',
+          ],
+        },
+      ],
+    },
     rect_y: {
       type: 'input_number',
       label: 'Y-Coordinate:',
       default: 0
+    },
+    rect_y_var: {
+      type: 'defined_var_select',
+      label: 'Y-Coordinate Variable:',
+      default: '(None)',
     },
     rect_w: {
       type: 'input_number',

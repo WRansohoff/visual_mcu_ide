@@ -53,6 +53,18 @@ function node_reqs.append_node(node, node_graph, proj_state)
     end
     local rect_x = tostring(node.options.rect_x)
     local rect_y = tostring(node.options.rect_y)
+    if node.options.rect_x_type == 'var' then
+      rect_x = tostring(node.options.rect_x_var)
+      if rect_x == '(None)' then
+        return nil
+      end
+    end
+    if node.options.rect_y_type == 'var' then
+      rect_y = tostring(node.options.rect_y_var)
+      if rect_y == '(None)' then
+        return nil
+      end
+    end
     local rect_w = tostring(node.options.rect_w)
     local rect_h = tostring(node.options.rect_h)
     -- Default to 'On'.

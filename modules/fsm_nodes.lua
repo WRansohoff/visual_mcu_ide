@@ -43,9 +43,15 @@ function FSMNodes.init_project_state(boot_node, node_graph, global_decs, proj_id
       p_state.src_base = FSMNodes.gen_bare_source_files(boot_node, p_state)
       -- Generate a Makefile and LICENSE/README.md files.
       p_state.build_files_generated = FSMNodes.gen_build_files(boot_node, p_state)
-     else
-       return p_state
-     end
+      -- TODO: Delete, after making EXTI stuff only import when needed.
+      if not varm_util.import_std_periph_lib('exti', p_state.base_dir) or not
+          varm_util.import_std_periph_lib('syscfg', p_state.base_dir) then
+        return nil
+      end
+
+    else
+      return p_state
+    end
   else
     return p_state
   end
