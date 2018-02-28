@@ -1087,15 +1087,83 @@ const tool_node_types = [
       label: 'Y-Coordinate Variable:',
       default: '(None)',
     },
+    rect_w_type: {
+      type: 'select',
+      label: 'Width Value Type:',
+      options: [
+        { name: 'Constant Number', value: 'val', },
+        { name: 'Variable', value: 'var', },
+      ],
+      default: 'val',
+      hides: [
+        {
+          opt: 'rect_w',
+          hide_on: [
+            'var',
+          ],
+          display_on: [
+            'val',
+          ],
+        },
+        {
+          opt: 'rect_w_var',
+          hide_on: [
+            'val',
+          ],
+          display_on: [
+            'var',
+          ],
+        },
+      ],
+    },
     rect_w: {
       type: 'input_number',
-      label: 'Rect Width',
-      default: 0
+      label: 'Rect Width:',
+      default: 0,
+    },
+    rect_w_var: {
+      type: 'defined_var_select',
+      label: 'Width Variable:',
+      default: '(None)',
+    },
+    rect_h_type: {
+      type: 'select',
+      label: 'Height Value Type:',
+      options: [
+        { name: 'Constant Number', value: 'val', },
+        { name: 'Variable', value: 'var', },
+      ],
+      default: 'val',
+      hides: [
+        {
+          opt: 'rect_h',
+          hide_on: [
+            'var',
+          ],
+          display_on: [
+            'val',
+          ],
+        },
+        {
+          opt: 'rect_h_var',
+          hide_on: [
+            'val',
+          ],
+          display_on: [
+            'var',
+          ],
+        },
+      ],
     },
     rect_h: {
       type: 'input_number',
-      label: 'Rect Height',
+      label: 'Rect Height:',
       default: 0
+    },
+    rect_h_var: {
+      type: 'defined_var_select',
+      label: 'Height Variable:',
+      default: '(None)',
     },
     rect_color: {
       type: 'select',

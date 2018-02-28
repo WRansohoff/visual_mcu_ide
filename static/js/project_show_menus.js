@@ -313,7 +313,7 @@ var apply_branching_node_io_table_listeners = function(node_type) {
         }
         if (cur_node.connections.up == 'output_T') {
           cur_node.connections.up = 'none';
-          up_select_tag.value = 'None';
+          top_select_tag.value = 'None';
         }
         if (cur_node.connections.right == 'output_T') {
           cur_node.connections.right = 'none';
@@ -331,7 +331,7 @@ var apply_branching_node_io_table_listeners = function(node_type) {
         }
         if (cur_node.connections.up == 'output_F') {
           cur_node.connections.up = 'none';
-          up_select_tag.value = 'None';
+          top_select_tag.value = 'None';
         }
         if (cur_node.connections.right == 'output_F') {
           cur_node.connections.right = 'none';
@@ -366,7 +366,7 @@ var apply_branching_node_io_table_listeners = function(node_type) {
         }
         if (cur_node.connections.up == 'output_T') {
           cur_node.connections.up = 'none';
-          up_select_tag.value = 'None';
+          top_select_tag.value = 'None';
         }
       }
     }
@@ -384,7 +384,7 @@ var apply_branching_node_io_table_listeners = function(node_type) {
         }
         if (cur_node.connections.up == 'output_F') {
           cur_node.connections.up = 'none';
-          up_select_tag.value = 'None';
+          top_select_tag.value = 'None';
         }
       }
     }
@@ -415,7 +415,7 @@ var apply_branching_node_io_table_listeners = function(node_type) {
         }
         if (cur_node.connections.up == 'output_T') {
           cur_node.connections.up = 'none';
-          up_select_tag.value = 'None';
+          top_select_tag.value = 'None';
         }
       }
     }
@@ -433,7 +433,7 @@ var apply_branching_node_io_table_listeners = function(node_type) {
         }
         if (cur_node.connections.up == 'output_F') {
           cur_node.connections.up = 'none';
-          up_select_tag.value = 'None';
+          top_select_tag.value = 'None';
         }
       }
     }

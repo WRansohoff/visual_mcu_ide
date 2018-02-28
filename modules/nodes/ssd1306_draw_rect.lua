@@ -67,6 +67,18 @@ function node_reqs.append_node(node, node_graph, proj_state)
     end
     local rect_w = tostring(node.options.rect_w)
     local rect_h = tostring(node.options.rect_h)
+    if node.options.rect_w_type == 'var' then
+      rect_w = tostring(node.options.rect_w_var)
+      if rect_w == '(None)' then
+        return nil
+      end
+    end
+    if node.options.rect_h_type == 'var' then
+      rect_h = tostring(node.options.rect_h_var)
+      if rect_h == '(None)' then
+        return nil
+      end
+    end
     -- Default to 'On'.
     local rect_col = '1'
     if node.options.rect_color == 'Off' then
@@ -78,8 +90,8 @@ function node_reqs.append_node(node, node_graph, proj_state)
     if rect_style == 'Outline' and node.options.outline then
       outline_w = tostring(node.options.outline)
     end
-    node_text = node_text .. '  oled_draw_rect(' .. rect_x .. ', ' ..
-                rect_y .. ', ' .. rect_w .. ', ' .. rect_h .. ', ' ..
+    node_text = node_text .. '  oled_draw_rect((int)' .. rect_x .. ', (int)' ..
+                rect_y .. ', (int)' .. rect_w .. ', (int)' .. rect_h .. ', ' ..
                 outline_w .. ', ' .. rect_col .. ');\n'
   else
     return nil

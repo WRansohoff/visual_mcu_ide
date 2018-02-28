@@ -13,19 +13,14 @@ function node_reqs.append_node(node, node_graph, proj_state)
   local node_text = '  // ("Set Variable" node)\n'
   node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
   -- (The actual variable setting.)
-  local var_c_type = node.options.var_type
   local var_c_val = tostring(node.options.var_val)
-  if var_c_type == 'bool' then
-    var_c_type = 'unsigned char'
-    if var_c_val == 'false' then
-      var_c_val = '0';
-    elseif var_c_val == 'true' then
-      var_c_val = '1';
-    else
-      -- uh...error? TODO
-      var_c_val = '0';
-    end
-  elseif var_c_type == 'char' then
+  if var_c_val == 'false' then
+    var_c_val = '0';
+  elseif var_c_val == 'true' then
+    var_c_val = '1';
+  elseif not tonumber(var_c_val) then
+    -- If it doesn't translate to a number, assume it's a char.
+    -- (Since we don't support strings yet.)
     var_c_val = "'" .. var_c_val .. "'"
   end
   node_text = node_text .. '  ' .. node.options.var_name .. ' = ' .. var_c_val .. ';\n'
