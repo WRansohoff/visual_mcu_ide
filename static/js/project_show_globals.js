@@ -82,6 +82,10 @@ var imgs_to_load = {
   // Branching nodes:
   Check_Truthy:      '/static/fsm_assets/check_truthy_node.png',
   Check_Equals:      '/static/fsm_assets/check_equals_node.png',
+  Check_GT:          '/static/fsm_assets/check_greater_node.png',
+  Check_GT_EQ:       '/static/fsm_assets/check_greater_equals_node.png',
+  Check_LT:          '/static/fsm_assets/check_lesser_node.png',
+  Check_LT_EQ:       '/static/fsm_assets/check_lesser_equals_node.png',
   // Sooo I mixed up 'LtoR' and 'RtoL' in the png filenames. But long-term,
   // these should be svg files anyways so just...ugh, TODO
   left_arrow_blue:   '/static/fsm_assets/conn_LtoR_blue.png',
@@ -1238,9 +1242,79 @@ const tool_node_types = [
     },
   },
 },
+// TODO: Consolidate 'check <logic>' nodes into one node with
+// multiple 'check_type' options ('==', '>', '>=', etc.)
 {
   base_name: 'Check_Equals',
   menu_name: 'Are Variables Equal?',
+  node_color: 'canary',
+  options: {
+    var_a_name: {
+      type: 'defined_var_select',
+      label: 'Variable A:',
+      default: '(None)',
+    },
+    var_b_name: {
+      type: 'defined_var_select',
+      label: 'Variable B:',
+      default: '(None)',
+    },
+  },
+},
+{
+  base_name: 'Check_GT',
+  menu_name: 'Is A Greater than B?',
+  node_color: 'canary',
+  options: {
+    var_a_name: {
+      type: 'defined_var_select',
+      label: 'Variable A:',
+      default: '(None)',
+    },
+    var_b_name: {
+      type: 'defined_var_select',
+      label: 'Variable B:',
+      default: '(None)',
+    },
+  },
+},
+{
+  base_name: 'Check_GT_EQ',
+  menu_name: 'Is A Greater or Equal to B?',
+  node_color: 'canary',
+  options: {
+    var_a_name: {
+      type: 'defined_var_select',
+      label: 'Variable A:',
+      default: '(None)',
+    },
+    var_b_name: {
+      type: 'defined_var_select',
+      label: 'Variable B:',
+      default: '(None)',
+    },
+  },
+},
+{
+  base_name: 'Check_LT',
+  menu_name: 'Is A Less than B?',
+  node_color: 'canary',
+  options: {
+    var_a_name: {
+      type: 'defined_var_select',
+      label: 'Variable A:',
+      default: '(None)',
+    },
+    var_b_name: {
+      type: 'defined_var_select',
+      label: 'Variable B:',
+      default: '(None)',
+    },
+  },
+},
+{
+  base_name: 'Check_LT_EQ',
+  menu_name: 'Is A Lesser or Equal to B?',
   node_color: 'canary',
   options: {
     var_a_name: {

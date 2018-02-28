@@ -170,6 +170,10 @@ app:match("/project/:project_id", function(self)
   branch_nodes_list = { }
   branch_nodes_list["Is Variable Truth-y?"] = "Node"
   branch_nodes_list["Are Variables Equal?"] = "Node"
+  branch_nodes_list["Is A Greater than B?"] = "Node"
+  branch_nodes_list["Is A Greater or Equal to B?"] = "Node"
+  branch_nodes_list["Is A Less than B?"] = "Node"
+  branch_nodes_list["Is A Lesser or Equal to B?"] = "Node"
   tool_list["If-Else Branching Nodes"] = branch_nodes_list
 
   -- Check for a previously-saved file.
