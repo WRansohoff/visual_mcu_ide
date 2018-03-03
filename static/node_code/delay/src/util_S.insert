@@ -1,8 +1,11 @@
-UTIL_S_DELAY_CYCLES_DEC_START:
+UTIL_S_DELAYS_DEC_START:
 .global delay_cycles
-UTIL_S_DELAY_CYCLES_DEC_DONE:
+.global delay_us
+.global delay_ms
+.global delay_s
+UTIL_S_DELAYS_DEC_DONE:
 
-UTIL_S_DELAY_CYCLES_DEF_START:
+UTIL_S_DELAYS_DEF_START:
 /*
  * Delay a given number of MCU cycles.
  * Expects:
@@ -32,4 +35,57 @@ delay_cycles:
   POP  { r0, pc }
 .size delay_cycles, .-delay_cycles
 
-UTIL_S_DELAY_CYCLES_DEF_DONE:
+/*
+ * Delay a given number of microseconds.
+ * TODO: Allow for PLL clock speeds other than 48MHz.
+ * Expects:
+ *  r0 contains the number of microseconds to wait.
+ */
+.type delay_us,%function
+.section .text.delay_us,"ax",%progbits
+delay_us:
+  PUSH { r0, r1, lr }
+  // @48MHz PLL, 1 microsecond should = 48 cycles.
+  MOVS r1, #48
+  MULS r0, r0, r1
+  BL   delay_cycles
+  POP  { r0, r1, pc }
+.size delay_us, .-delay_us
+
+
+/*
+ * Delay a given number of milliseconds.
+ * TODO: Allow for PLL clock speeds other than 48MHz.
+ * Expects:
+ *  r0 contains the number of milliseconds to wait.
+ */
+.type delay_ms,%function
+.section .text.delay_ms,"ax",%progbits
+delay_ms:
+  PUSH { r0, r1, lr }
+  // @48MHz PLL, 1 millisecond should = 48,000 cycles.
+  LDR  r1, =0x0000BB80
+  MULS r0, r0, r1
+  BL   delay_cycles
+  POP  { r0, r1, pc }
+.size delay_ms, .-delay_ms
+
+
+/*
+ * Delay a given number of seconds.
+ * TODO: Allow for PLL clock speeds other than 48MHz.
+ * Expects:
+ *  r0 contains the number of seconds to wait.
+ */
+.type delay_s,%function
+.section .text.delay_s,"ax",%progbits
+delay_s:
+  PUSH { r0, r1, lr }
+  // @48MHz PLL, 1 second should = 48,000,000 cycles.
+  LDR  r1, =0x02DC6C00
+  MULS r0, r0, r1
+  BL   delay_cycles
+  POP  { r0, r1, pc }
+.size delay_s, .-delay_s
+
+UTIL_S_DELAYS_DEF_DONE:

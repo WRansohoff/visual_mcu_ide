@@ -12,24 +12,24 @@ function node_reqs.ensure_support_methods(node, proj_state)
   local global_h_insert_path = 'static/node_code/delay/src/global_h.insert'
   if not varm_util.copy_block_into_file(util_s_insert_path,
                                         proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_DELAY_CYCLES_DEC_START:',
-                                        'UTIL_S_DELAY_CYCLES_DEC_DONE:',
+                                        'UTIL_S_DELAYS_DEC_START:',
+                                        'UTIL_S_DELAYS_DEC_DONE:',
                                         '/ ASM_GLOBAL_UTIL_DECLARES:') then
     return nil
   end
   -- 'util.S' defines.
   if not varm_util.copy_block_into_file(util_s_insert_path,
                                         proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_DELAY_CYCLES_DEF_START:',
-                                        'UTIL_S_DELAY_CYCLES_DEF_DONE:',
+                                        'UTIL_S_DELAYS_DEF_START:',
+                                        'UTIL_S_DELAYS_DEF_DONE:',
                                         '/ ASM_GLOBAL_UTIL_DEFINES:') then
     return nil
   end
   -- 'global.h' declare.
   if not varm_util.copy_block_into_file(global_h_insert_path,
                                         proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_DELAY_CYCLES_START:',
-                                        'GLOBAL_EXTERN_DELAY_CYCLES_DONE:',
+                                        'GLOBAL_EXTERN_DELAYS_START:',
+                                        'GLOBAL_EXTERN_DELAYS_DONE:',
                                         '/ ASM_METHOD_DEFINES:') then
     return nil
   end
