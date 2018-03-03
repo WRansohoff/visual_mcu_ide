@@ -166,6 +166,10 @@ app:match("/project/:project_id", function(self)
   external_devices_ssd1306_list["Draw Text"] = "Node"
   external_devices_ssd1306_list["Refresh Display"] = "Node"
   external_devices_list["SSD1306 OLED Screen"] = external_devices_ssd1306_list
+  external_devices_ws2812_list = { }
+  external_devices_ws2812_list["Write NeoPixel"] = "Node"
+  external_devices_ws2812_list["Latch NeoPixels"] = "Node"
+  external_devices_list["WS2812B NeoPixel LED"] = external_devices_ws2812_list
   tool_list["External Devices"] = external_devices_list
   branch_nodes_list = { }
   branch_nodes_list["Is Variable Truth-y?"] = "Node"
