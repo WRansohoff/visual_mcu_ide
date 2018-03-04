@@ -92,7 +92,7 @@ ws2812b_write_color:
     B    ws2812b_bit_done
     ws2812b_write_color_bit_0:
     BL   ws2812b_write_0
-    B    ws2812b_bit_done
+    //B    ws2812b_bit_done
     ws2812b_bit_done:
       LSRS r3, r3, #1
       BEQ ws2812b_write_color_done

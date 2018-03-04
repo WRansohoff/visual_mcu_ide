@@ -67,7 +67,25 @@ function node_reqs.append_node(node, node_graph, proj_state)
   -- Latch the given pin.
   if node.options and node.options.gpio_bank and
      node.options.gpio_pin then
-    node_text = node_text .. '  ws2812b_latch(' .. node.options.gpio_bank .. '->ODR, (1<<' .. tostring(node.options.gpio_pin) .. '));\n'
+    -- Set the GPIO 'output' register address.
+    local gpiox_odr = '0x4800'
+    if node.options.gpio_bank == 'GPIOA' then
+      gpiox_odr = gpiox_odr .. '00'
+    elseif node.options.gpio_bank == 'GPIOB' then
+      gpiox_odr = gpiox_odr .. '04'
+    elseif node.options.gpio_bank == 'GPIOC' then
+      gpiox_odr = gpiox_odr .. '08'
+    elseif node.options.gpio_bank == 'GPIOD' then
+      gpiox_odr = gpiox_odr .. '0C'
+    elseif node.options.gpio_bank == 'GPIOE' then
+      gpiox_odr = gpiox_odr .. '10'
+    elseif node.options.gpio_bank == 'GPIOF' then
+      gpiox_odr = gpiox_odr .. '14'
+    else
+      return nil
+    end
+    gpiox_odr = gpiox_odr .. '14'
+    node_text = node_text .. '  ws2812b_latch(' .. gpiox_odr .. ',  ' .. tostring(2^node.options.gpio_pin) .. ');\n'
   else
     return nil
   end

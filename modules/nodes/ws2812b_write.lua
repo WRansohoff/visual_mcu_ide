@@ -68,8 +68,86 @@ function node_reqs.append_node(node, node_graph, proj_state)
   if node.options and node.options.gpio_bank and
      node.options.gpio_pin and node.options.color_type_r and
      node.options.color_type_g and node.options.color_type_b then
-    local write_color = '0x00'
-    node_text = node_text .. '  ws2812b_write_color(' .. node.options.gpio_bank .. '->ODR, (1<<' .. tostring(node.options.gpio_pin) .. '), ' .. write_color .. ');\n'
+    -- Set the GPIO 'output' register address.
+    local gpiox_odr = '0x4800'
+    if node.options.gpio_bank == 'GPIOA' then
+      gpiox_odr = gpiox_odr .. '00'
+    elseif node.options.gpio_bank == 'GPIOB' then
+      gpiox_odr = gpiox_odr .. '04'
+    elseif node.options.gpio_bank == 'GPIOC' then
+      gpiox_odr = gpiox_odr .. '08'
+    elseif node.options.gpio_bank == 'GPIOD' then
+      gpiox_odr = gpiox_odr .. '0C'
+    elseif node.options.gpio_bank == 'GPIOE' then
+      gpiox_odr = gpiox_odr .. '10'
+    elseif node.options.gpio_bank == 'GPIOF' then
+      gpiox_odr = gpiox_odr .. '14'
+    else
+      return nil
+    end
+    gpiox_odr = gpiox_odr .. '14'
+    -- Set the output color; 8 bits per color, in '0x00GGRRBB' order, MSB.
+    -- TODO: Warnings for color values that are out of range?
+    local g_color_logic = '0x00FF0000 & '
+    local r_color_logic = '0x0000FF00 & '
+    local b_color_logic = '0x000000FF & '
+    -- Green color byte.
+    if node.options.color_type_g == 'val' then
+      local g_color_val = '0x00'
+      local g_color_num = tonumber(node.options.color_val_g)
+      if g_color_num then
+        if g_color_num < 0 then
+          g_color_num = 0
+        elseif g_color_num > 255 then
+          g_color_num = 255
+        end
+        g_color_val = g_color_val .. string.format("%02X", g_color_num) .. '0000'
+        g_color_logic = g_color_logic .. g_color_val
+      else
+        return nil
+      end
+    elseif node.options.color_type_g == 'var' then
+    else
+      return nil
+    end
+    if node.options.color_type_r == 'val' then
+      local r_color_val = '0x0000'
+      local r_color_num = tonumber(node.options.color_val_r)
+      if r_color_num then
+        if r_color_num < 0 then
+          r_color_num = 0
+        elseif r_color_num > 255 then
+          r_color_num = 255
+        end
+        r_color_val = r_color_val .. string.format("%02X", r_color_num) .. '00'
+        r_color_logic = r_color_logic .. r_color_val
+      else
+        return nil
+      end
+    elseif node.options.color_type_r == 'var' then
+    else
+      return nil
+    end
+    if node.options.color_type_b == 'val' then
+      local b_color_val = '0x000000'
+      local b_color_num = tonumber(node.options.color_val_b)
+      if b_color_num then
+        if b_color_num < 0 then
+          b_color_num = 0
+        elseif b_color_num > 255 then
+          b_color_num = 255
+        end
+        b_color_val = b_color_val .. string.format("%02X", b_color_num)
+        b_color_logic = b_color_logic .. b_color_val
+      else
+        return nil
+      end
+    elseif node.options.color_type_b == 'var' then
+    else
+      return nil
+    end
+    local write_color = '((' .. g_color_logic .. ') | (' .. r_color_logic .. ') | (' .. b_color_logic .. '))'
+    node_text = node_text .. '  ws2812b_write_color(' .. gpiox_odr .. ', ' .. tostring(2^node.options.gpio_pin) .. ', ' .. write_color .. ');\n'
   else
     return nil
   end
