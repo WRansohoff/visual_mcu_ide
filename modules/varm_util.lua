@@ -336,17 +336,17 @@ end
 function varm_util.ensure_i2c_comms_included(node_code_path, proj_state)
   local util_s_insert_path = node_code_path .. 'src/util_S.insert'
   if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_COMMS_DEC_START:',
-                                        'UTIL_S_I2C_COMMS_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_I2C_COMMS_DEC_START:',
+             'UTIL_S_I2C_COMMS_DEC_DONE:',
+             '/ ASM_GLOBAL_UTIL_DECLARES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_COMMS_DEF_START:',
-                                        'UTIL_S_I2C_COMMS_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_I2C_COMMS_DEF_START:',
+             'UTIL_S_I2C_COMMS_DEF_DONE:',
+             '/ ASM_GLOBAL_UTIL_DEFINES:') then
     return nil
   end
   return true
@@ -356,17 +356,17 @@ end
 function varm_util.ensure_i2c_dc_comms_included(node_code_path, proj_state)
   local util_s_insert_path = node_code_path .. 'src/util_S.insert'
   if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_DC_COMMS_DEC_START:',
-                                        'UTIL_S_I2C_DC_COMMS_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_I2C_DC_COMMS_DEC_START:',
+             'UTIL_S_I2C_DC_COMMS_DEC_DONE:',
+             '/ ASM_GLOBAL_UTIL_DECLARES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_DC_COMMS_DEF_START:',
-                                        'UTIL_S_I2C_DC_COMMS_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_I2C_DC_COMMS_DEF_START:',
+             'UTIL_S_I2C_DC_COMMS_DEF_DONE:',
+             '/ ASM_GLOBAL_UTIL_DEFINES:') then
     return nil
   end
   return true
@@ -377,32 +377,32 @@ function varm_util.ensure_ssd1306_fb_included(node_code_path, proj_state)
   local util_s_insert_path = node_code_path .. 'src/util_S.insert'
   local global_h_insert_path = node_code_path .. 'src/global_h.insert'
   if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEC_START:',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_SSD1306_DRAW_FB_DEC_START:',
+             'UTIL_S_SSD1306_DRAW_FB_DEC_DONE:',
+             '/ ASM_GLOBAL_UTIL_DECLARES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEF_START:',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_SSD1306_DRAW_FB_DEF_START:',
+             'UTIL_S_SSD1306_DRAW_FB_DEF_DONE:',
+             '/ ASM_GLOBAL_UTIL_DEFINES:') then
     return nil
   end
   -- 'global.h' declare.
   if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_SSD1306_DRAW_FB_START:',
-                                        'GLOBAL_EXTERN_SSD1306_DRAW_FB_DONE:',
-                                        '/ ASM_METHOD_DEFINES:') then
+             proj_state.base_dir .. 'src/global.h',
+             'GLOBAL_EXTERN_SSD1306_DRAW_FB_START:',
+             'GLOBAL_EXTERN_SSD1306_DRAW_FB_DONE:',
+             '/ ASM_METHOD_DEFINES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_SSD1306_FB_VAR_START:',
-                                        'GLOBAL_EXTERN_SSD1306_FB_VAR_DONE:',
-                                        '/ SYS_GLOBAL_VAR_DEFINES:') then
+             proj_state.base_dir .. 'src/global.h',
+             'GLOBAL_EXTERN_SSD1306_FB_VAR_START:',
+             'GLOBAL_EXTERN_SSD1306_FB_VAR_DONE:',
+             '/ SYS_GLOBAL_VAR_DEFINES:') then
     return nil
   end
   return true
