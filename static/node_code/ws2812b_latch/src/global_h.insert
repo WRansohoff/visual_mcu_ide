@@ -1,0 +1,3 @@
+GLOBAL_EXTERN_WS2812B_LATCH_START:
+extern void ws2812b_latch(unsigned int gpio_odr, unsigned int gpio_pinmask);
+GLOBAL_EXTERN_WS2812B_LATCH_DONE:

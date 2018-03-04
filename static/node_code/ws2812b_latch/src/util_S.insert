@@ -1,0 +1,30 @@
+UTIL_S_WS2812B_LATCH_DEC_START:
+.global ws2812b_latch
+UTIL_S_WS2812B_LATCH_DEC_DONE:
+
+UTIL_S_WS2812B_LATCH_DEF_START:
+/*
+ * Latch a WS2812B control pin to set previously-
+ * written colors. This just means delaying for >= 50us.
+ * Expects:
+ *  r0 contains the GPIO ODR address.
+ *  r1 contains the GPIO pin mask.
+ */
+.type ws2812b_latch,%function
+.section .text.ws2812b_latch,"ax",%progbits
+ws2812b_latch:
+  PUSH { r0, r1, r2, r6, r7, lr }
+  MOVS r6, r0
+  MOVS r7, r1
+  // Pull the pin low.
+  LDR  r2, [r6]
+  MVNS r7, r7
+  ANDS r2, r2, r7
+  STR  r2, [r6]
+  // Delay 60 us.
+  MOVS r0, #60
+  BL   delay_us
+  POP  { r0, r1, r2, r6, r7, pc }
+.size ws2812b_latch, .-ws2812b_latch
+
+UTIL_S_WS2812B_LATCH_DEF_DONE:

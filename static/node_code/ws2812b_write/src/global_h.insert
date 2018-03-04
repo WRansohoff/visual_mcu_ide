@@ -1,0 +1,3 @@
+GLOBAL_EXTERN_WS2812B_WRITE_START:
+extern void ws2812b_write_color(unsigned int gpio_odr, unsigned int gpio_pinmask, unsigned int color_grb);
+GLOBAL_EXTERN_WS2812B_WRITE_DONE:

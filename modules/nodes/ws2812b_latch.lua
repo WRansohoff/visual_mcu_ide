@@ -7,6 +7,8 @@ function node_reqs.ensure_support_methods(node, proj_state)
   -- This node requires methods from the 'Delay' node.
   local delay_util_s_insert_path = 'static/node_code/delay/src/util_S.insert'
   local delay_global_h_insert_path = 'static/node_code/delay/src/global_h.insert'
+  local util_s_insert_path = 'static/node_code/ws2812b_latch/src/util_S.insert'
+  local global_h_insert_path = 'static/node_code/ws2812b_latch/src/global_h.insert'
   -- 'util.S' delay declares.
   if not varm_util.copy_block_into_file(delay_util_s_insert_path,
                                         proj_state.base_dir .. 'src/util.S',
@@ -31,6 +33,30 @@ function node_reqs.ensure_support_methods(node, proj_state)
                                         '/ ASM_METHOD_DEFINES:') then
     return nil
   end
+  -- 'util.S' WS2812B latching declares.
+  if not varm_util.copy_block_into_file(util_s_insert_path,
+                                        proj_state.base_dir .. 'src/util.S',
+                                        'UTIL_S_WS2812B_LATCH_DEC_START:',
+                                        'UTIL_S_WS2812B_LATCH_DEC_DONE:',
+                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
+    return nil
+  end
+  -- 'util.S' WS2812B latching defines.
+  if not varm_util.copy_block_into_file(util_s_insert_path,
+                                        proj_state.base_dir .. 'src/util.S',
+                                        'UTIL_S_WS2812B_LATCH_DEF_START:',
+                                        'UTIL_S_WS2812B_LATCH_DEF_DONE:',
+                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
+    return nil
+  end
+  -- 'global.h' WS2812B latching declares.
+  if not varm_util.copy_block_into_file(global_h_insert_path,
+                                        proj_state.base_dir .. 'src/global.h',
+                                        'GLOBAL_EXTERN_WS2812B_LATCH_START:',
+                                        'GLOBAL_EXTERN_WS2812B_LATCH_DONE:',
+                                        '/ ASM_METHOD_DEFINES:') then
+    return nil
+  end
   return true
 end
 
@@ -38,6 +64,13 @@ end
 function node_reqs.append_node(node, node_graph, proj_state)
   local node_text = '  // ("Latch WS2812B LEDs" node)\n'
   node_text = node_text .. '  NODE_' .. node.node_ind .. ':\n'
+  -- Latch the given pin.
+  if node.options and node.options.gpio_bank and
+     node.options.gpio_pin then
+    node_text = node_text .. '  ws2812b_latch(' .. node.options.gpio_bank .. '->ODR, (1<<' .. tostring(node.options.gpio_pin) .. '));\n'
+  else
+    return nil
+  end
   -- (Done)
   if node.output and node.output.single then
     node_text = node_text .. '  goto NODE_' .. node.output.single .. ';\n'
