@@ -17,18 +17,18 @@ function node_reqs.ensure_support_methods(node, proj_state)
   local util_c_c_insert_path = 'static/node_code/ssd1306_draw_horiz_line/src/util_c_c.insert'
   -- 'util_c.h' declares.
   if not varm_util.copy_block_into_file(util_c_h_insert_path,
-                                        proj_state.base_dir .. 'src/util_c.h',
-                                        'UTIL_C_H_SSD1306_DRAW_RECT_START:',
-                                        'UTIL_C_H_SSD1306_DRAW_RECT_DONE:',
-                                        '/ UTIL_C_DECLARATIONS:') then
+             proj_state.base_dir .. 'src/util_c.h',
+             'UTIL_C_H_SSD1306_DRAW_RECT_START:',
+             'UTIL_C_H_SSD1306_DRAW_RECT_DONE:',
+             '/ UTIL_C_DECLARATIONS:') then
     return nil
   end
   -- 'util_c.c' defines.
   if not varm_util.copy_block_into_file(util_c_c_insert_path,
-                                        proj_state.base_dir .. 'src/util_c.c',
-                                        'UTIL_C_C_SSD1306_DRAW_RECT_START:',
-                                        'UTIL_C_C_SSD1306_DRAW_RECT_DONE:',
-                                        '/ UTIL_C_DEFINITIONS:') then
+             proj_state.base_dir .. 'src/util_c.c',
+             'UTIL_C_C_SSD1306_DRAW_RECT_START:',
+             'UTIL_C_C_SSD1306_DRAW_RECT_DONE:',
+             '/ UTIL_C_DEFINITIONS:') then
     return nil
   end
   return true

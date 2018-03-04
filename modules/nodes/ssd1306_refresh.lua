@@ -9,52 +9,52 @@ function node_reqs.ensure_support_methods(node, proj_state)
   -- Just the 'display framebuffer' method declare/defines from 'util.S'.
   -- (Along with its supporting I2C communication methods.)
   if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_COMMS_DEC_START:',
-                                        'UTIL_S_I2C_COMMS_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') or
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_I2C_COMMS_DEC_START:',
+             'UTIL_S_I2C_COMMS_DEC_DONE:',
+             '/ ASM_GLOBAL_UTIL_DECLARES:') or
      not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_DC_COMMS_DEC_START:',
-                                        'UTIL_S_I2C_DC_COMMS_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') or
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_I2C_DC_COMMS_DEC_START:',
+             'UTIL_S_I2C_DC_COMMS_DEC_DONE:',
+             '/ ASM_GLOBAL_UTIL_DECLARES:') or
      not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEC_START:',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_SSD1306_DRAW_FB_DEC_START:',
+             'UTIL_S_SSD1306_DRAW_FB_DEC_DONE:',
+             '/ ASM_GLOBAL_UTIL_DECLARES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_COMMS_DEF_START:',
-                                        'UTIL_S_I2C_COMMS_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') or
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_I2C_COMMS_DEF_START:',
+             'UTIL_S_I2C_COMMS_DEF_DONE:',
+             '/ ASM_GLOBAL_UTIL_DEFINES:') or
      not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_DC_COMMS_DEF_START:',
-                                        'UTIL_S_I2C_DC_COMMS_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') or
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_I2C_DC_COMMS_DEF_START:',
+             'UTIL_S_I2C_DC_COMMS_DEF_DONE:',
+             '/ ASM_GLOBAL_UTIL_DEFINES:') or
      not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEF_START:',
-                                        'UTIL_S_SSD1306_DRAW_FB_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_SSD1306_DRAW_FB_DEF_START:',
+             'UTIL_S_SSD1306_DRAW_FB_DEF_DONE:',
+             '/ ASM_GLOBAL_UTIL_DEFINES:') then
     return nil
   end
   -- (Also the extern and framebuffer memory in 'global.h')
   if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_SSD1306_DRAW_FB_START:',
-                                        'GLOBAL_EXTERN_SSD1306_DRAW_FB_DONE:',
-                                        '/ ASM_METHOD_DEFINES:') then
+             proj_state.base_dir .. 'src/global.h',
+             'GLOBAL_EXTERN_SSD1306_DRAW_FB_START:',
+             'GLOBAL_EXTERN_SSD1306_DRAW_FB_DONE:',
+             '/ ASM_METHOD_DEFINES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_SSD1306_FB_VAR_START:',
-                                        'GLOBAL_EXTERN_SSD1306_FB_VAR_DONE:',
-                                        '/ SYS_GLOBAL_VAR_DEFINES:') then
+             proj_state.base_dir .. 'src/global.h',
+             'GLOBAL_EXTERN_SSD1306_FB_VAR_START:',
+             'GLOBAL_EXTERN_SSD1306_FB_VAR_DONE:',
+             '/ SYS_GLOBAL_VAR_DEFINES:') then
     return nil
   end
   return true

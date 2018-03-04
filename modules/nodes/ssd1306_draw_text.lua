@@ -18,61 +18,61 @@ function node_reqs.ensure_support_methods(node, proj_state)
   local global_h_insert_path = 'static/node_code/ssd1306_draw_text/src/global_h.insert'
   -- 'util_c.h' declares.
   if not varm_util.copy_block_into_file(util_c_h_insert_path,
-                                        proj_state.base_dir .. 'src/util_c.h',
-                                        'UTIL_C_H_SSD1306_DRAW_PX_START:',
-                                        'UTIL_C_H_SSD1306_DRAW_PX_DONE:',
-                                        '/ UTIL_C_DECLARATIONS:') then
+             proj_state.base_dir .. 'src/util_c.h',
+             'UTIL_C_H_SSD1306_DRAW_PX_START:',
+             'UTIL_C_H_SSD1306_DRAW_PX_DONE:',
+             '/ UTIL_C_DECLARATIONS:') then
     return nil
   end
   if not varm_util.copy_block_into_file(util_c_h_insert_path,
-                                        proj_state.base_dir .. 'src/util_c.h',
-                                        'UTIL_C_H_SSD1306_DRAW_RECT_START:',
-                                        'UTIL_C_H_SSD1306_DRAW_RECT_DONE:',
-                                        '/ UTIL_C_DECLARATIONS:') then
+             proj_state.base_dir .. 'src/util_c.h',
+             'UTIL_C_H_SSD1306_DRAW_RECT_START:',
+             'UTIL_C_H_SSD1306_DRAW_RECT_DONE:',
+             '/ UTIL_C_DECLARATIONS:') then
     return nil
   end
   if not varm_util.copy_block_into_file(util_c_h_insert_path,
-                                        proj_state.base_dir .. 'src/util_c.h',
-                                        'UTIL_C_H_SSD1306_DRAW_TEXT_START:',
-                                        'UTIL_C_H_SSD1306_DRAW_TEXT_DONE:',
-                                        '/ UTIL_C_DECLARATIONS:') then
+             proj_state.base_dir .. 'src/util_c.h',
+             'UTIL_C_H_SSD1306_DRAW_TEXT_START:',
+             'UTIL_C_H_SSD1306_DRAW_TEXT_DONE:',
+             '/ UTIL_C_DECLARATIONS:') then
     return nil
   end
   -- 'util_c.c' defines.
   if not varm_util.copy_block_into_file(util_c_c_insert_path,
-                                        proj_state.base_dir .. 'src/util_c.c',
-                                        'UTIL_C_C_SSD1306_DRAW_PX_START:',
-                                        'UTIL_C_C_SSD1306_DRAW_PX_DONE:',
-                                        '/ UTIL_C_DEFINITIONS:') then
+             proj_state.base_dir .. 'src/util_c.c',
+             'UTIL_C_C_SSD1306_DRAW_PX_START:',
+             'UTIL_C_C_SSD1306_DRAW_PX_DONE:',
+             '/ UTIL_C_DEFINITIONS:') then
     return nil
   end
   if not varm_util.copy_block_into_file(util_c_c_insert_path,
-                                        proj_state.base_dir .. 'src/util_c.c',
-                                        'UTIL_C_C_SSD1306_DRAW_RECT_START:',
-                                        'UTIL_C_C_SSD1306_DRAW_RECT_DONE:',
-                                        '/ UTIL_C_DEFINITIONS:') then
+             proj_state.base_dir .. 'src/util_c.c',
+             'UTIL_C_C_SSD1306_DRAW_RECT_START:',
+             'UTIL_C_C_SSD1306_DRAW_RECT_DONE:',
+             '/ UTIL_C_DEFINITIONS:') then
     return nil
   end
   if not varm_util.copy_block_into_file(util_c_c_insert_path,
-                                        proj_state.base_dir .. 'src/util_c.c',
-                                        'UTIL_C_C_SSD1306_DRAW_TEXT_START:',
-                                        'UTIL_C_C_SSD1306_DRAW_TEXT_DONE:',
-                                        '/ UTIL_C_DEFINITIONS:') then
+             proj_state.base_dir .. 'src/util_c.c',
+             'UTIL_C_C_SSD1306_DRAW_TEXT_START:',
+             'UTIL_C_C_SSD1306_DRAW_TEXT_DONE:',
+             '/ UTIL_C_DEFINITIONS:') then
     return nil
   end
   -- 'global.h' definitions.
   if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_DEFS_SSD1306_SMALL_TEXT_CHARS_START:',
-                                        'GLOBAL_DEFS_SSD1306_SMALL_TEXT_CHARS_DONE',
-                                        '/ SYS_GLOBAL_VAR_DEFINES:') then
+             proj_state.base_dir .. 'src/global.h',
+             'GLOBAL_DEFS_SSD1306_SMALL_TEXT_CHARS_START:',
+             'GLOBAL_DEFS_SSD1306_SMALL_TEXT_CHARS_DONE',
+             '/ SYS_GLOBAL_VAR_DEFINES:') then
     return nil
   end
   if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_DEFS_SSD1306_TEXT_LINE_BUF_START:',
-                                        'GLOBAL_DEFS_SSD1306_TEXT_LINE_BUF_DONE:',
-                                        '/ SYS_GLOBAL_VAR_DEFINES:') then
+             proj_state.base_dir .. 'src/global.h',
+             'GLOBAL_DEFS_SSD1306_TEXT_LINE_BUF_START:',
+             'GLOBAL_DEFS_SSD1306_TEXT_LINE_BUF_DONE:',
+             '/ SYS_GLOBAL_VAR_DEFINES:') then
     return nil
   end
   return true

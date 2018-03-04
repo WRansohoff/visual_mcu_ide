@@ -19,26 +19,26 @@ function node_reqs.ensure_support_methods(node, proj_state)
   local global_h_insert_path = 'static/node_code/i2c_init/src/global_h.insert'
   -- 'util.S' declares.
   if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_INIT_DEC_START:',
-                                        'UTIL_S_I2C_INIT_DEC_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DECLARES:') then
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_I2C_INIT_DEC_START:',
+             'UTIL_S_I2C_INIT_DEC_DONE:',
+             '/ ASM_GLOBAL_UTIL_DECLARES:') then
     return nil
   end
   -- 'util.S' defines.
   if not varm_util.copy_block_into_file(util_s_insert_path,
-                                        proj_state.base_dir .. 'src/util.S',
-                                        'UTIL_S_I2C_INIT_DEF_START:',
-                                        'UTIL_S_I2C_INIT_DEF_DONE:',
-                                        '/ ASM_GLOBAL_UTIL_DEFINES:') then
+             proj_state.base_dir .. 'src/util.S',
+             'UTIL_S_I2C_INIT_DEF_START:',
+             'UTIL_S_I2C_INIT_DEF_DONE:',
+             '/ ASM_GLOBAL_UTIL_DEFINES:') then
     return nil
   end
   -- 'global.h' declare.
   if not varm_util.copy_block_into_file(global_h_insert_path,
-                                        proj_state.base_dir .. 'src/global.h',
-                                        'GLOBAL_EXTERN_I2C_INIT_START:',
-                                        'GLOBAL_EXTERN_I2C_INIT_DONE:',
-                                        '/ ASM_METHOD_DEFINES:') then
+             proj_state.base_dir .. 'src/global.h',
+             'GLOBAL_EXTERN_I2C_INIT_START:',
+             'GLOBAL_EXTERN_I2C_INIT_DONE:',
+             '/ ASM_METHOD_DEFINES:') then
     return nil
   end
   return true
