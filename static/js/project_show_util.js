@@ -81,15 +81,17 @@ var update_var_names = function(old_name, new_name) {
   }
   // If the name can change, rename any other nodes that were using
   // the old variable name.
-  // Uh...yeah no, this does not work anymore. TODO: Fixit!
-  // (More nodes than just 'Set_Variable' use variable names now,
-  // often more than one variable per node.)
   for (var index in fsm_nodes) {
     var cur_node = fsm_nodes[index];
     if (cur_node) {
-      if (cur_node.node_type == 'Set_Variable') {
-        if (cur_node.options.var_name == old_name) {
-          cur_node.options.var_name = new_name;
+      var cur_node_type = get_node_type_def_by_name(cur_node.node_type);
+      if (cur_node_type) {
+        for (var opt_ind in cur_node_type.options) {
+          if (cur_node_type.options[opt_ind].type == 'defined_var_select') {
+            if (cur_node.options[opt_ind] == old_name) {
+              cur_node.options[opt_ind] = new_name;
+            }
+          }
         }
       }
     }

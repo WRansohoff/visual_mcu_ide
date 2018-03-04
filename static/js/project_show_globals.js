@@ -1589,6 +1589,20 @@ const tool_node_types = [
 */
 ];
 
+// TODO: Hash instead of using an array?
+get_node_type_def_by_name = function(type_name) {
+  for (var tn_ind in tool_node_types) {
+    var cur_type = tool_node_types[tn_ind];
+    if (cur_type) {
+      if (type_name == cur_type.base_name &&
+          loaded_textures[cur_type.base_name]) {
+        return cur_type;
+      }
+    }
+  }
+  return false;
+};
+
 // (Available RCC peripheral clocks.)
 const rcc_opts = {
   STM32F03xFx: {

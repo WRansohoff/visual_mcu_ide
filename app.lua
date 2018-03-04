@@ -70,7 +70,7 @@ app:post("/new_project", function(self)
   end
 
   -- Create a new project for the user with the given title, and pass
-  -- it on to the /projects page. TODO: Render a message or something?
+  -- it on to the /projects page.
   new_project = Project:create({
     user_id = self.session.current_user.id,
     title   = self.params.title
@@ -306,9 +306,6 @@ app:post("/precompile_project_file/:project_id", function(self)
       status_msg = 'Could not find node ' .. cur_ind
     end
     proj_state = FSMNodes.init_project_state(cur_node, nodes, global_decs, proj_id)
-    -- TODO: Remove
-    --local indices_to_process = {}
-    --table.insert(indices_to_process, cur_ind)
     local indices_to_process = entry_nodes
     while preprocessing do
       cur_ind = table.remove(indices_to_process)
