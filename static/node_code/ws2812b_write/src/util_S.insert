@@ -9,6 +9,8 @@ UTIL_S_WS2812B_WRITE_DEF_START:
  * Write a '0' to a WS2812B control pin. This means:
  * 'high' for 0.40 us, 'low' for 0.85us.
  * TODO: Support PLL clock values other than 48MHz.
+ * (Also, these timings are inferred from a 'scope;
+ *  come up with a more robust system.)
  * Expects:
  *  r0 contains the GPIO ODR address.
  *  r1 contains the GPIO pin mask.
@@ -23,17 +25,20 @@ ws2812b_write_0:
   LDR  r2, [r6]
   ORRS r2, r2, r7
   STR  r2, [r6]
-  // Delay 0.40 us.
-  // (19,200 cycles = 0x4B00.)
-  LDR  r0, =0x00004B00
-  BL   delay_cycles
+  // Delay ~0.35 us.
+  // (Just wait several cycles.)
+  MOVS r0, #6
+  ws2812b_write_0_bit_delay:
+    SUBS r0, #3
+    BNE  ws2812b_write_0_bit_delay
   // Pull the pin low.
   LDR  r2, [r6]
   MVNS r7, r7
   ANDS r2, r2, r7
   STR  r2, [r6]
-  // Delay 0.85 us.
-  LDR  r0, =0x00009F60
+  // Delay ~0.9 us.
+  // (Jumping between functions introduces some extra time...)
+  MOVS r0, #12
   BL   delay_cycles
   POP  { r0, r1, r2, r6, r7, pc }
 .size ws2812b_write_0, .-ws2812b_write_0
@@ -41,6 +46,9 @@ ws2812b_write_0:
 /*
  * Write a '1' to a WS2812B control pin. This means:
  * 'high' for 0.80 us, 'low' for 0.45us.
+ * TODO: Support PLL clock values other than 48MHz.
+ * (Also, these timings are inferred from a 'scope;
+ *  come up with a more robust system.)
  * Expects:
  *  r0 contains the GPIO ODR address.
  *  r1 contains the GPIO pin mask.
@@ -55,16 +63,19 @@ ws2812b_write_1:
   LDR  r2, [r6]
   ORRS r2, r2, r7
   STR  r2, [r6]
-  // Delay 0.45 us.
-  LDR  r0, =0x00005460
+  // Delay ~0.90 us.
+  MOVS r0, #12
   BL   delay_cycles
   // Pull the pin low.
   LDR  r2, [r6]
   MVNS r7, r7
   ANDS r2, r2, r7
   STR  r2, [r6]
-  // Delay 0.80 us.
-  LDR  r0, =0x00009600
+  // Delay ~0.35 us.
+  MOVS r0, #9
+  ws2812b_write_1_bit_delay:
+    SUBS r0, #3
+    BNE  ws2812b_write_1_bit_delay
   BL   delay_cycles
   POP  { r0, r1, r2, r6, r7, pc }
 .size ws2812b_write_1, .-ws2812b_write_1
