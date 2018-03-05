@@ -222,7 +222,7 @@ function FSMNodes.gen_bare_source_files(boot_node, cur_proj_state)
         elseif var_c_val == 'true' or var_c_val == '1' then
           var_c_val = '1';
         else
-          -- uh...error? TODO
+          -- Default to 'false'.
           var_c_val = '0';
         end
       elseif var_c_type == 'char' then
