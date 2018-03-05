@@ -494,14 +494,15 @@ var default_options_for_type = function(type) {
 var refresh_selected_menu_tool = function() {
   var menu_tool_selected = check_selected_menu_tool();
   // If there is a texture for the selection, find its grid coord.
-  // (So, x/y coordinates / 64. (or whatever dot distance if it changes)
+  // (So, x/y coordinates / zoomed grid distance.
   if (menu_tool_selected) {
-    var half_grid = 32;
-    if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
-    cur_tool_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
-    if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
-    else { half_grid = 32; }
-    cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+    var hg_base = zoom_base*cur_zoom;
+    var half_grid = hg_base/2;
+    if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -(hg_base/2); }
+    cur_tool_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/hg_base);
+    if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -(hg_base/2); }
+    else { half_grid = hg_base/2; }
+    cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
   }
 };
 

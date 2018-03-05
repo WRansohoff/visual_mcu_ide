@@ -335,6 +335,9 @@ init_fsm_layout_canvas = function() {
     if (dy > 10.0) { dy = 10.0; }
     else if (dy < -10.0) { dy = -10.0; }
     cur_zoom += dy;
+    var zoom_grid = zoom_base*cur_zoom;
+    cur_fsm_grid_x = parseInt(cur_fsm_x / zoom_grid);
+    cur_fsm_grid_y = parseInt(cur_fsm_y / zoom_grid);
     redraw_canvas();
     //console.log("Zoom: " + dy);
   };
@@ -362,10 +365,11 @@ redraw_canvas = function() {
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
   // Next, draw any nodes that are within the current view.
-  var grid_min_x = cur_fsm_grid_x - 1;
+  var grid_min_x = cur_fsm_grid_x - 2;
   var grid_min_y = cur_fsm_grid_y - 1;
-  var grid_max_x = cur_fsm_grid_x + parseInt(canvas.width/64) + 2;
-  var grid_max_y = cur_fsm_grid_y + parseInt(canvas.height/64) + 1;
+  var hg_base = zoom_base*cur_zoom;
+  var grid_max_x = cur_fsm_grid_x + parseInt(canvas.width/hg_base) + 2;
+  var grid_max_y = cur_fsm_grid_y + parseInt(canvas.height/hg_base) + 1;
   for (var node_ind = 0; node_ind < 256; ++node_ind) {
     if (fsm_nodes[node_ind] && fsm_nodes[node_ind].node_status != -1 &&
         (fsm_nodes[node_ind].grid_coord_x >= grid_min_x &&
@@ -550,12 +554,13 @@ redraw_canvas = function() {
   else if (selected_tool == 'move_grabbed') {
     if (move_grabbed_node_id >= 0 &&
         fsm_nodes[move_grabbed_node_id]) {
-      var half_grid = 32;
-      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
-      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
-      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
-      else { half_grid = 32; }
-      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+      var hg_base = zoom_base*cur_zoom;
+      var half_grid = hg_base/2;
+      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -(hg_base/2); }
+      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/hg_base);
+      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -(hg_base/2); }
+      else { half_grid = hg_base/2; }
+      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
       gl.useProgram(node_shader_prog);
       // Bind texture.
       gl.bindTexture(gl.TEXTURE_2D, fsm_nodes[move_grabbed_node_id].tex_sampler);
@@ -787,8 +792,9 @@ project_show_onload = function() {
         var diff_y = e.clientY - last_pan_mouse_y;
         cur_fsm_x += (diff_x * pan_scale_factor);
         cur_fsm_y -= (diff_y * pan_scale_factor);
-        cur_fsm_grid_x = parseInt(cur_fsm_x / 64);
-        cur_fsm_grid_y = parseInt(cur_fsm_y / 64);
+        var hg_base = zoom_base*cur_zoom;
+        cur_fsm_grid_x = parseInt(cur_fsm_x / hg_base);
+        cur_fsm_grid_y = parseInt(cur_fsm_y / hg_base);
 
         // Submit the 'moved' coordinates to the shaders and re-draw.
         redraw_canvas();
@@ -826,12 +832,13 @@ project_show_onload = function() {
   document.getElementById("fsm_canvas_div").onclick = function(e) {
     if (selected_tool == 'pointer') {
       // Get the grid coordinate closest to the current cursor.
-      var half_grid = 32;
-      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
-      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
-      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
-      else { half_grid = 32; }
-      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+      var hg_base = zoom_base*cur_zoom;
+      var half_grid = hg_base/2;
+      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -(hg_base/2); }
+      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/hg_base);
+      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -(hg_base/2); }
+      else { half_grid = hg_base/2; }
+      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
       // If there is a node underneath the cursor, select it.
       var node_selected = false;
       for (var node_ind = 0; node_ind < 256; ++node_ind) {
@@ -895,12 +902,13 @@ project_show_onload = function() {
       // If there is a texture for the selection, find its grid coord.
       // (So, x/y coordinates / 64. (or whatever dot distance if it changes)
       if (menu_tool_selected) {
-        var half_grid = 32;
-        if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
-        cur_tool_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
-        if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
-        else { half_grid = 32; }
-        cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+        var hg_base = zoom_base*cur_zoom;
+        var half_grid = hg_base/2;
+        if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -(hg_base/2); }
+        cur_tool_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/hg_base);
+        if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -(hg_base/2); }
+        else { half_grid = hg_base/2; }
+        cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
       }
       // Add the current tool node to the list, unless there is a
       // node in the proposed coordinates already.
@@ -947,12 +955,13 @@ project_show_onload = function() {
       redraw_canvas();
     }
     else if (selected_tool == 'delete') {
-      var half_grid = 32;
-      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
-      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
-      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
-      else { half_grid = 32; }
-      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+      var hg_base = zoom_base*cur_zoom;
+      var half_grid = hg_base/2;
+      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -(hg_base/2); }
+      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/hg_base);
+      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -(hg_base/2); }
+      else { half_grid = hg_base/2; }
+      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
       // If there is a node on the current grid coordinate, delete it.
       for (var node_ind = 0; node_ind < 256; ++node_ind) {
         if (fsm_nodes[node_ind]) {
@@ -976,12 +985,13 @@ project_show_onload = function() {
       redraw_canvas();
     }
     else if (selected_tool == 'move') {
-      var half_grid = 32;
-      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
-      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
-      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
-      else { half_grid = 32; }
-      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+      var hg_base = zoom_base*cur_zoom;
+      var half_grid = hg_base/2;
+      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -(hg_base/2); }
+      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/hg_base);
+      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -(hg_base/2); }
+      else { half_grid = hg_base/2; }
+      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
       // If there is a node on the currently-selected grid node, pick it up.
       var node_to_grab = -1;
       for (var node_ind = 0; node_ind < 256; ++node_ind) {
@@ -1003,12 +1013,13 @@ project_show_onload = function() {
       }
     }
     else if (selected_tool == 'move_grabbed') {
-      var half_grid = 32;
-      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -32; }
-      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/64);
-      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -32; }
-      else { half_grid = 32; }
-      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/64);
+      var hg_base = zoom_base*cur_zoom;
+      var half_grid = hg_base/2;
+      if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -(hg_base/2); }
+      var cur_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/hg_base);
+      if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -(hg_base/2); }
+      else { half_grid = hg_base/2; }
+      var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
       var node_dropped = true;
       if (move_grabbed_node_id >= 0) {
         // If there is a 'grabbed' node, and if the currently-selected
