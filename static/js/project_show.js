@@ -14,22 +14,22 @@ const grid_frag_sh = `#version 300 es
   uniform   float canvas_w;
   uniform   float canvas_h;
   uniform   vec2 cur_view_coords;
+  uniform float zoom_factor;
   // Output color.
   out       vec4 out_color;
   void main() {
-    // Draw a 'pegboard' view. For now, no DPI settings or anything.
-    // Just 64px per grid square.
-    const int grid_spacing = 64;
+    // Draw a 'pegboard' view.
+    int grid_spacing = int(64.0 * zoom_factor);
     int cur_x = int(cur_view_coords.x);
     int cur_y = int(cur_view_coords.y);
-    int x_mod = cur_x & 0x0000003F;
-    int y_mod = cur_y & 0x0000003F;
+    int x_mod = cur_x % grid_spacing;
+    int y_mod = cur_y % grid_spacing;
     int cur_px_x = int(gl_FragCoord.x);
-    int cur_px_x_mod = cur_px_x & 0x0000003F;
-    cur_px_x_mod = 64-cur_px_x_mod;
+    int cur_px_x_mod = cur_px_x % grid_spacing;
+    cur_px_x_mod = grid_spacing-cur_px_x_mod;
     int cur_px_y = int(gl_FragCoord.y);
-    int cur_px_y_mod = cur_px_y & 0x0000003F;
-    cur_px_y_mod = 64-cur_px_y_mod;
+    int cur_px_y_mod = cur_px_y % grid_spacing;
+    cur_px_y_mod = grid_spacing-cur_px_y_mod;
     int is_grid_px = 0;
     const int grid_dot_size = 2;
     // Draw a larger dot at (0, 0) to get the coordinate system straight.
@@ -43,8 +43,8 @@ const grid_frag_sh = `#version 300 es
     // is within (dot_offset)+[0:dot_size].
     for (int x_prog = 0; x_prog < grid_dot_size; ++x_prog) {
       for (int y_prog = 0; y_prog < grid_dot_size; ++y_prog) {
-        if ((x_mod+x_prog == cur_px_x_mod || x_mod+x_prog+64 == cur_px_x_mod)
-            && (y_mod+y_prog == cur_px_y_mod || y_mod+y_prog+64 == cur_px_y_mod)) {
+        if ((x_mod+x_prog == cur_px_x_mod || x_mod+x_prog+grid_spacing == cur_px_x_mod)
+            && (y_mod+y_prog == cur_px_y_mod || y_mod+y_prog+grid_spacing == cur_px_y_mod)) {
           is_grid_px = 1;
         }
       }
@@ -72,10 +72,13 @@ const node_frag_sh = `#version 300 es
   uniform   float canvas_h;
   uniform   vec2 cur_view_coords;
   uniform   FSM_Node cur_tool_node;
+  uniform   float zoom_factor;
   // Output color.
   out       vec4 out_color;
   void main() {
     // Gather grid/view information.
+    int grid_spacing = int(64.0 * zoom_factor);
+    int half_grid = grid_spacing/2;
     int cur_x = int(cur_view_coords.x);
     int cur_y = int(cur_view_coords.y);
     int cur_px_x = int(gl_FragCoord.x);
@@ -85,14 +88,14 @@ const node_frag_sh = `#version 300 es
       // Find the right grid coordinate's location relative to the window.
       // The center will be at global (x*64, y*64), so:
       // (global_x-cur_view_x) = local center.
-      int cur_tool_node_local_x = cur_tool_node.grid_coord_x * 64;
+      int cur_tool_node_local_x = cur_tool_node.grid_coord_x * grid_spacing;
       cur_tool_node_local_x -= int(cur_view_coords.x);
-      int cur_tool_node_local_y = cur_tool_node.grid_coord_y * 64;
+      int cur_tool_node_local_y = cur_tool_node.grid_coord_y * grid_spacing;
       cur_tool_node_local_y -= int(cur_view_coords.y);
-      int cur_tool_node_min_x = cur_tool_node_local_x - 32;
-      int cur_tool_node_max_x = cur_tool_node_local_x + 32;
-      int cur_tool_node_min_y = cur_tool_node_local_y - 32;
-      int cur_tool_node_max_y = cur_tool_node_local_y + 32;
+      int cur_tool_node_min_x = cur_tool_node_local_x - half_grid;
+      int cur_tool_node_max_x = cur_tool_node_local_x + half_grid;
+      int cur_tool_node_min_y = cur_tool_node_local_y - half_grid;
+      int cur_tool_node_max_y = cur_tool_node_local_y + half_grid;
       if (cur_px_x >= cur_tool_node_min_x &&
           cur_px_x <= cur_tool_node_max_x &&
           cur_px_y >= cur_tool_node_min_y &&
@@ -104,8 +107,8 @@ const node_frag_sh = `#version 300 es
         int stripes_check = int(cur_tool_s+cur_tool_t);
         const int stripes_w = 16;
         const int stripes_s = 4;
-        cur_tool_s /= 64.0;
-        cur_tool_t /= 64.0;
+        cur_tool_s /= float(grid_spacing);
+        cur_tool_t /= float(grid_spacing);
         cur_tool_t = 1.0 - cur_tool_t;
         vec2 cur_tool_st = vec2(cur_tool_s, cur_tool_t);
         if (cur_tool_node.node_status == 1) {
@@ -136,45 +139,50 @@ const conn_frag_sh = `#version 300 es
   uniform vec2 cur_view_coords;
   uniform int  node_grid_x;
   uniform int  node_grid_y;
+  uniform float zoom_factor;
   // [0:3] = [top, left, bottom, right].
   uniform int  conn_position;
   // Output color.
   out     vec4 out_color;
   void main() {
     // Gather grid/view information.
+    int grid_spacing = int(64.0 * zoom_factor);
+    int pacman_spacing = 3*(grid_spacing/4);
+    int w_tex_mult = int(float(conn_tex_w) * zoom_factor);
+    int h_tex_mult = int(float(conn_tex_h) * zoom_factor);
     int cur_x = int(cur_view_coords.x);
     int cur_y = int(cur_view_coords.y);
     int cur_px_x = int(gl_FragCoord.x);
     int cur_px_y = int(gl_FragCoord.y);
     // Find the right grid coordinate's location relative to the window.
-    int cur_node_conn_local_x = node_grid_x * 64;
+    int cur_node_conn_local_x = node_grid_x * grid_spacing;
     cur_node_conn_local_x -= int(cur_view_coords.x);
-    int cur_node_conn_local_y = node_grid_y * 64;
+    int cur_node_conn_local_y = node_grid_y * grid_spacing;
     cur_node_conn_local_y -= int(cur_view_coords.y);
-    int cur_node_conn_min_x = cur_node_conn_local_x - (conn_tex_w/2);
-    int cur_node_conn_max_x = cur_node_conn_local_x + (conn_tex_w/2);
-    int cur_node_conn_min_y = cur_node_conn_local_y - (conn_tex_h/2);
-    int cur_node_conn_max_y = cur_node_conn_local_y + (conn_tex_h/2);
+    int cur_node_conn_min_x = cur_node_conn_local_x - (w_tex_mult/2);
+    int cur_node_conn_max_x = cur_node_conn_local_x + (w_tex_mult/2);
+    int cur_node_conn_min_y = cur_node_conn_local_y - (h_tex_mult/2);
+    int cur_node_conn_max_y = cur_node_conn_local_y + (h_tex_mult/2);
     // TODO: Constants.
     if (conn_position == 0) {
       // 'up'
-      cur_node_conn_min_y += 48;
-      cur_node_conn_max_y += 48;
+      cur_node_conn_min_y += pacman_spacing;
+      cur_node_conn_max_y += pacman_spacing;
     }
     else if (conn_position == 1) {
       // 'left'
-      cur_node_conn_min_x -= 48;
-      cur_node_conn_max_x -= 48;
+      cur_node_conn_min_x -= pacman_spacing;
+      cur_node_conn_max_x -= pacman_spacing;
     }
     else if (conn_position == 2) {
       // 'down'
-      cur_node_conn_min_y -= 48;
-      cur_node_conn_max_y -= 48;
+      cur_node_conn_min_y -= pacman_spacing;
+      cur_node_conn_max_y -= pacman_spacing;
     }
     else if (conn_position == 3) {
       // 'right'
-      cur_node_conn_min_x += 48;
-      cur_node_conn_max_x += 48;
+      cur_node_conn_min_x += pacman_spacing;
+      cur_node_conn_max_x += pacman_spacing;
     }
     if (cur_px_x >= cur_node_conn_min_x &&
         cur_px_x <= cur_node_conn_max_x &&
@@ -182,8 +190,8 @@ const conn_frag_sh = `#version 300 es
         cur_px_y <= cur_node_conn_max_y) {
       float cur_conn_s = float(cur_px_x - cur_node_conn_min_x);
       float cur_conn_t = float(cur_px_y - cur_node_conn_min_y);
-      cur_conn_s /= float(conn_tex_w);
-      cur_conn_t /= float(conn_tex_h);
+      cur_conn_s /= float(w_tex_mult);
+      cur_conn_t /= float(h_tex_mult);
       cur_conn_t = 1.0 - cur_conn_t;
       vec2 cur_conn_st = vec2(cur_conn_s, cur_conn_t);
       // Pofolk transparency: discard ~(1,1,1) or ~alpha==0 colors.
@@ -312,6 +320,25 @@ init_fsm_layout_canvas = function() {
     fsm_nodes[node_ind] = null;
   }
 
+  // Setup 'on scroll' listener to zoom in/out.
+  canvas.onmousewheel = function(e) {
+    var dy = null;
+    if (e.wheelDelta) {
+      dy = e.wheelDelta;
+    }
+    else {
+      dy = -1 * e.deltaY;
+    }
+
+    // Attenuate the raw delta value a bit.
+    dy /= 1000;
+    if (dy > 10.0) { dy = 10.0; }
+    else if (dy < -10.0) { dy = -10.0; }
+    cur_zoom += dy;
+    redraw_canvas();
+    //console.log("Zoom: " + dy);
+  };
+
   // Draw.
   redraw_canvas();
 };
@@ -328,6 +355,7 @@ redraw_canvas = function() {
   gl.uniform1f(gl.getUniformLocation(grid_shader_prog, 'canvas_w'), canvas.width);
   gl.uniform1f(gl.getUniformLocation(grid_shader_prog, 'canvas_h'), canvas.height);
   gl.uniform2fv(gl.getUniformLocation(grid_shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
+  gl.uniform1f(gl.getUniformLocation(grid_shader_prog, 'zoom_factor'), cur_zoom);
 
   // Draw.
   gl.viewport(0, 0, canvas.width, canvas.height);
@@ -352,6 +380,7 @@ redraw_canvas = function() {
       gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_h'), canvas.height);
       gl.uniform2fv(gl.getUniformLocation(node_shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.tex_sampler'), fsm_nodes[node_ind].tex_sampler);
+      gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'zoom_factor'), cur_zoom);
       // TODO: Handle 'node_status' properly...
       if (move_grabbed_node_id == node_ind) {
         gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_status'), 1);
@@ -376,6 +405,7 @@ redraw_canvas = function() {
         gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_position'), 0);
         gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_tex_w'), 8);
         gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'conn_tex_h'), 32);
+        gl.uniform1f(gl.getUniformLocation(conn_shader_prog, 'zoom_factor'), cur_zoom);
         if (fsm_nodes[node_ind].connections.up == 'input') {
           gl.bindTexture(gl.TEXTURE_2D, loaded_textures['down_arrow_' + fsm_nodes[node_ind].node_color]);
           gl.uniform1i(gl.getUniformLocation(conn_shader_prog, 'tex_sampler'), loaded_textures['down_arrow_' + fsm_nodes[node_ind].node_color]);

@@ -7,6 +7,7 @@ var selected_node_id = -1;
 var last_pan_mouse_x = -1;
 var last_pan_mouse_y = -1;
 var pan_scale_factor = 1.5;
+var cur_zoom = 1.0;
 var cur_fsm_x = 0;
 var cur_fsm_y = 0;
 var cur_fsm_grid_x = 0;
