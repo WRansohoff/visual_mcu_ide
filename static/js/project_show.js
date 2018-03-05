@@ -315,11 +315,6 @@ init_fsm_layout_canvas = function() {
   // Use the current shader program.
   gl.useProgram(grid_shader_prog);
 
-  // Pre-fill FSM node arrays with null values.
-  for (var node_ind = 0; node_ind < 256; ++node_ind) {
-    fsm_nodes[node_ind] = null;
-  }
-
   // Setup 'on scroll' listener to zoom in/out.
   canvas.onmousewheel = function(e) {
     var dy = null;
@@ -335,11 +330,13 @@ init_fsm_layout_canvas = function() {
     if (dy > 10.0) { dy = 10.0; }
     else if (dy < -10.0) { dy = -10.0; }
     cur_zoom += dy;
+    // Enforce a maximum 'zoomed-out' level.
+    if (cur_zoom < 0.2) { cur_zoom = 0.2; }
     var zoom_grid = zoom_base*cur_zoom;
     cur_fsm_grid_x = parseInt(cur_fsm_x / zoom_grid);
     cur_fsm_grid_y = parseInt(cur_fsm_y / zoom_grid);
     redraw_canvas();
-    //console.log("Zoom: " + dy);
+    //console.log("Zoom: " + cur_zoom);
   };
 
   // Draw.
@@ -370,7 +367,7 @@ redraw_canvas = function() {
   var hg_base = zoom_base*cur_zoom;
   var grid_max_x = cur_fsm_grid_x + parseInt(canvas.width/hg_base) + 2;
   var grid_max_y = cur_fsm_grid_y + parseInt(canvas.height/hg_base) + 1;
-  for (var node_ind = 0; node_ind < 256; ++node_ind) {
+  for (var node_ind in fsm_nodes) {
     if (fsm_nodes[node_ind] && fsm_nodes[node_ind].node_status != -1 &&
         (fsm_nodes[node_ind].grid_coord_x >= grid_min_x &&
          fsm_nodes[node_ind].grid_coord_x <= grid_max_x &&
@@ -841,7 +838,7 @@ project_show_onload = function() {
       var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
       // If there is a node underneath the cursor, select it.
       var node_selected = false;
-      for (var node_ind = 0; node_ind < 256; ++node_ind) {
+      for (var node_ind in fsm_nodes) {
         if (fsm_nodes[node_ind]) {
           if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
               fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y) {
@@ -914,7 +911,7 @@ project_show_onload = function() {
       // node in the proposed coordinates already.
       var already_populated = false;
       var index_to_use = -1;
-      for (var node_ind = 0; node_ind < 256; ++node_ind) {
+      for (var node_ind in fsm_nodes) {
         if (fsm_nodes[node_ind]) {
           if (fsm_nodes[node_ind].grid_coord_x == cur_tool_node_grid_x &&
               fsm_nodes[node_ind].grid_coord_y == cur_tool_node_grid_y) {
@@ -963,7 +960,7 @@ project_show_onload = function() {
       else { half_grid = hg_base/2; }
       var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
       // If there is a node on the current grid coordinate, delete it.
-      for (var node_ind = 0; node_ind < 256; ++node_ind) {
+      for (var node_ind in fsm_nodes) {
         if (fsm_nodes[node_ind]) {
           if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
               fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y) {
@@ -994,7 +991,7 @@ project_show_onload = function() {
       var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
       // If there is a node on the currently-selected grid node, pick it up.
       var node_to_grab = -1;
-      for (var node_ind = 0; node_ind < 256; ++node_ind) {
+      for (var node_ind in fsm_nodes) {
         if (fsm_nodes[node_ind]) {
           if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
               fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y) {
@@ -1025,7 +1022,7 @@ project_show_onload = function() {
         // If there is a 'grabbed' node, and if the currently-selected
         // grid node is empty, drop the grabbed node. Allow re-dropping
         // a node on the square that it previously occupied.
-        for (var node_ind = 0; node_ind < 256; ++node_ind) {
+        for (var node_ind in fsm_nodes) {
           if (fsm_nodes[node_ind]) {
             if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
                 fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y &&

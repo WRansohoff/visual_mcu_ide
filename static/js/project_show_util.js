@@ -38,7 +38,7 @@ refresh_defined_vars = function() {
   // Empty the storage array...
   defined_vars = [];
   // ...and fill it with the current values.
-  for (var node_ind = 0; node_ind < 256; ++node_ind) {
+  for (var node_ind in fsm_nodes) {
     if (fsm_nodes[node_ind]) {
       cur_node = fsm_nodes[node_ind];
       if (cur_node && cur_node.node_type == 'New_Variable') {
