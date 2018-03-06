@@ -329,12 +329,25 @@ init_fsm_layout_canvas = function() {
     dy /= 1000;
     if (dy > 10.0) { dy = 10.0; }
     else if (dy < -10.0) { dy = -10.0; }
+    var old_zoom_w = cur_zoom * canvas.width;
+    var old_zoom_h = cur_zoom * canvas.height;
     cur_zoom += dy;
     // Enforce a maximum 'zoomed-out' level.
     if (cur_zoom < 0.2) { cur_zoom = 0.2; }
-    var zoom_grid = zoom_base*cur_zoom;
-    cur_fsm_grid_x = parseInt(cur_fsm_x / zoom_grid);
-    cur_fsm_grid_y = parseInt(cur_fsm_y / zoom_grid);
+    var new_zoom_w = cur_zoom * canvas.width;
+    var new_zoom_h = cur_zoom * canvas.height;
+    // Zoom on a point determined by the mouse position...?
+    // So, get the difference in w/h caused by zoom levels,
+    // and then shift viewport x/y depending on the % across
+    // the canvas the mouse is.
+    // This works-ish, but is pretty rough. TODO
+    var mouse_x_ratio = cur_fsm_mouse_x / canvas.width;
+    var mouse_y_ratio = cur_fsm_mouse_y / canvas.height;
+    cur_fsm_x += (new_zoom_w - old_zoom_w) * mouse_x_ratio;
+    cur_fsm_y += (new_zoom_h - old_zoom_h) * mouse_y_ratio;
+    var hg_base = zoom_base * cur_zoom;
+    cur_fsm_grid_x = parseInt(cur_fsm_x / hg_base);
+    cur_fsm_grid_y = parseInt(cur_fsm_y / hg_base);
     redraw_canvas();
     //console.log("Zoom: " + cur_zoom);
   };
@@ -789,7 +802,7 @@ project_show_onload = function() {
         var diff_y = e.clientY - last_pan_mouse_y;
         cur_fsm_x += (diff_x * pan_scale_factor);
         cur_fsm_y -= (diff_y * pan_scale_factor);
-        var hg_base = zoom_base*cur_zoom;
+        var hg_base = zoom_base * cur_zoom;
         cur_fsm_grid_x = parseInt(cur_fsm_x / hg_base);
         cur_fsm_grid_y = parseInt(cur_fsm_y / hg_base);
 
