@@ -923,7 +923,6 @@ project_show_onload = function() {
       // Add the current tool node to the list, unless there is a
       // node in the proposed coordinates already.
       var already_populated = false;
-      var index_to_use = -1;
       for (var node_ind in fsm_nodes) {
         if (fsm_nodes[node_ind]) {
           if (fsm_nodes[node_ind].grid_coord_x == cur_tool_node_grid_x &&
@@ -937,28 +936,24 @@ project_show_onload = function() {
             already_populated = true;
           }
         }
-        else {
-          if (index_to_use == -1) {
-            index_to_use = node_ind;
-          }
-        }
       }
       if (!already_populated) {
         // Place a new node.
-        fsm_nodes[index_to_use] = [];
-        fsm_nodes[index_to_use].tex_sampler = cur_tool_node_tex;
-        fsm_nodes[index_to_use].node_type = cur_tool_node_type;
-        fsm_nodes[index_to_use].node_status = 0;
-        fsm_nodes[index_to_use].node_color = cur_tool_node_color;
-        fsm_nodes[index_to_use].connections = {
+        var p_node = [];
+        p_node.tex_sampler = cur_tool_node_tex;
+        p_node.node_type = cur_tool_node_type;
+        p_node.node_status = 0;
+        p_node.node_color = cur_tool_node_color;
+        p_node.connections = {
           left: 'none',
           right: 'none',
           up: 'none',
           down: 'none',
         };
-        fsm_nodes[index_to_use].options = default_options_for_type(cur_tool_node_type);
-        fsm_nodes[index_to_use].grid_coord_x = cur_tool_node_grid_x;
-        fsm_nodes[index_to_use].grid_coord_y = cur_tool_node_grid_y;
+        p_node.options = default_options_for_type(cur_tool_node_type);
+        p_node.grid_coord_x = cur_tool_node_grid_x;
+        p_node.grid_coord_y = cur_tool_node_grid_y;
+        fsm_nodes.push(p_node);
       }
 
       // Re-draw the canvas to show the placed node.
