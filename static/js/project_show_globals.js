@@ -408,8 +408,8 @@ const tool_node_types = [
         },
       ],
       options: [
-        { name: 'On', value: '0', },
-        { name: 'Off', value: '1', },
+        { name: 'On', value: '1', },
+        { name: 'Off', value: '0', },
         { name: 'Variable', value: 'Var', },
       ],
       default: '0',

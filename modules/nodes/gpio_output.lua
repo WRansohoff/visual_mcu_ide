@@ -45,7 +45,7 @@ function node_reqs.append_node(node, node_graph, proj_state)
                 gpio_pin_num .. ';\n  }\n  else {\n    ' .. gpio_bank ..
                 '->ODR &= ~GPIO_ODR_' .. gpio_pin_num .. ';\n  }\n'
   else
-    if gpio_pin_set and gpio_pin_set ~= 0 then
+    if gpio_pin_set and tonumber(gpio_pin_set) ~= 0 then
       -- Set the pin.
       node_text = node_text .. '  ' .. gpio_bank .. '->ODR |= GPIO_ODR_' .. gpio_pin_num .. ';\n'
     else
