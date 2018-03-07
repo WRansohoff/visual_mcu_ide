@@ -587,3 +587,34 @@ redraw_canvas = function() {
     }
   }
 };
+
+load_one_texture = function(tex_key, tex_path) {
+  var tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  var img = new Image();
+  const mip_level = 0;
+  const format = gl.RGBA;
+  const src_type = gl.UNSIGNED_BYTE;
+  // Dummy 1-pixel texture.
+  gl.texImage2D(gl.TEXTURE_2D, mip_level, format, 1, 1, 0, format, src_type, new Uint8Array([0, 0, 255, 255]));
+  img.onload = function() {
+    while (!img.complete) {}
+    while (img_lock) {}
+    img_lock = true;
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, mip_level, format, format, src_type, img);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    loaded_textures[tex_key] = tex;
+    img_lock = false;
+    imgs_loaded += 1;
+  };
+  img.src = tex_path;
+};
+
+preload_textures = function() {
+  for (var key in imgs_to_load) {
+    load_one_texture(key, imgs_to_load[key]);
+  }
+};
