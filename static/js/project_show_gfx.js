@@ -714,6 +714,10 @@ preload_node_textures = function() {
       img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
       img_gen.fill();
       // 'Node name' text.
+      img_gen.font = "32px monospace";
+      img_gen.textAlign = "center";
+      img_gen.fillStyle = "black";
+      img_gen.fillText(cur_type.base_name, tex_w/2, 32, arc_w);
 
       // Generate the texture.
       var new_tex = gl.createTexture();

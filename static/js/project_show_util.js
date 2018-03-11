@@ -92,6 +92,32 @@ var update_label_names = function(old_name, new_name) {
   return new_name;
 };
 
+get_node_ind_at_grid_coords = function(grid_x, grid_y) {
+  for (var node_ind in fsm_nodes) {
+    if (fsm_nodes[node_ind]) {
+      var pointer_over_node = true;
+      var n_type = get_node_type_def_by_name(fsm_nodes[node_ind].node_type);
+      var cgx = fsm_nodes[node_ind].grid_coord_x;
+      var cgy = fsm_nodes[node_ind].grid_coord_y;
+      if (n_type && n_type.new_gfx) {
+        if (grid_x < cgx || grid_x >= cgx+n_type.node_w) {
+          pointer_over_node = false;
+        }
+        if (grid_y < cgy || grid_y >= cgy+n_type.node_h) {
+          pointer_over_node = false;
+        }
+      }
+      else {
+        pointer_over_node = (fsm_nodes[node_ind].grid_coord_x == grid_x && fsm_nodes[node_ind].grid_coord_y == grid_y);
+      }
+      if (pointer_over_node) {
+        return node_ind;
+      }
+    }
+  }
+  return false;
+};
+
 // Convert a node array (like the global 'fsm_nodes' one) into a
 // JSON object which can be easily stringified.
 node_array_to_json = function(node_arr) {

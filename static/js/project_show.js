@@ -266,58 +266,52 @@ project_show_onload = function() {
       else { half_grid = hg_base/2; }
       var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
       // If there is a node underneath the cursor, select it.
-      var node_selected = false;
-      for (var node_ind in fsm_nodes) {
-        if (fsm_nodes[node_ind]) {
-          if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
-              fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y) {
-            node_selected = true;
-            selected_node_id = node_ind;
-            var sel_type = fsm_nodes[selected_node_id].node_type;
-            document.getElementById("hobb_options_header").innerHTML = ("Options: (" + sel_type + ", " + fsm_nodes[node_ind].pn_index + ")");
-            $("hobb_options_content").empty();
-            // In/Out connections table. The only case where this
-            // won't be added is a 'global' node that affects
-            // the entire program. Currently, that is only the
-            // 'Define new variable' node.
-            var selected_node_options_html = "";
-            // Most nodes have input/output connections to other nodes.
-            // But 'New Variable' nodes are globally scoped and not part
-            // of the program flow.
-            if (sel_type != 'New_Variable') {
-              // A 'branching' node has 1-many inputs and 1-2 outputs.
-              if (sel_type == 'Check_Truthy' ||
-                  sel_type == 'Check_Equals' ||
-                  sel_type == 'Check_GT' ||
-                  sel_type == 'Check_GT_EQ' ||
-                  sel_type == 'Check_LT' ||
-                  sel_type == 'Check_LT_EQ') {
-                selected_node_options_html += branching_node_io_options_html;
-              }
-              // A 'standard' node has 1-many inputs and 1 output.
-              else {
-                selected_node_options_html += node_io_options_html;
-              }
-            }
-            // Type-specific options:
-            for (var tn_ind in tool_node_types) {
-              var cur_type = tool_node_types[tn_ind];
-              if (cur_type) {
-                if (sel_type == cur_type.base_name) {
-                  selected_node_options_html += cur_type.options_gen_html;
-                  break;
-                }
-              }
-            }
-            document.getElementById("hobb_options_content").innerHTML = selected_node_options_html;
-            // Apply click listeners.
-            apply_selected_node_option_listeners(fsm_nodes[node_ind]);
-            break;
+      var selected_node_ind = get_node_ind_at_grid_coords(cur_node_grid_x, cur_node_grid_y);
+      if (selected_node_ind) {
+        // 'ID' vs 'ind'[ex] - the former is global.
+        selected_node_id = selected_node_ind;
+        var sel_type = fsm_nodes[selected_node_id].node_type;
+        document.getElementById("hobb_options_header").innerHTML = ("Options: (" + sel_type + ", " + fsm_nodes[selected_node_id].pn_index + ")");
+        $("hobb_options_content").empty();
+        // In/Out connections table. The only case where this
+        // won't be added is a 'global' node that affects
+        // the entire program. Currently, that is only the
+        // 'Define new variable' node.
+        var selected_node_options_html = "";
+        // Most nodes have input/output connections to other nodes.
+        // But 'New Variable' nodes are globally scoped and not part
+        // of the program flow.
+        if (sel_type != 'New_Variable') {
+          // A 'branching' node has 1-many inputs and 1-2 outputs.
+          if (sel_type == 'Check_Truthy' ||
+              sel_type == 'Check_Equals' ||
+              sel_type == 'Check_GT' ||
+              sel_type == 'Check_GT_EQ' ||
+              sel_type == 'Check_LT' ||
+              sel_type == 'Check_LT_EQ') {
+            selected_node_options_html += branching_node_io_options_html;
+          }
+          // A 'standard' node has 1-many inputs and 1 output.
+          else {
+            selected_node_options_html += node_io_options_html;
           }
         }
+        // Type-specific options:
+        for (var tn_ind in tool_node_types) {
+          var cur_type = tool_node_types[tn_ind];
+          if (cur_type) {
+            if (sel_type == cur_type.base_name) {
+              selected_node_options_html += cur_type.options_gen_html;
+              break;
+            }
+          }
+        }
+        document.getElementById("hobb_options_content").innerHTML = selected_node_options_html;
+        // Apply click listeners.
+        apply_selected_node_option_listeners(fsm_nodes[selected_node_ind]);
       }
-      // If not, Deselect.
-      if (!node_selected) {
+      else {
+        // If not, Deselect.
         selected_node_id = -1;
         document.getElementById("hobb_options_header").innerHTML = ("Options: (None)");
         $("#hobb_options_content").empty();
@@ -339,12 +333,25 @@ project_show_onload = function() {
       // Add the current tool node to the list, unless there is a
       // node in the proposed coordinates already.
       var already_populated = false;
+      var tool_type = get_node_type_def_by_name(cur_tool_node_type);
+      if (tool_type && tool_type.new_gfx) {
+        for (check_x = 0; check_x < tool_type.node_w; ++check_x) {
+          for (check_y = 0; check_y < tool_type.node_h; ++check_y) {
+            var existing_node_id = get_node_ind_at_grid_coords(cur_tool_node_grid_x+check_x, cur_tool_node_grid_y+check_y);
+            if (existing_node_id) {
+              already_populated = true;
+            }
+          }
+        }
+      }
+      else {
+        var existing_node_id = get_node_ind_at_grid_coords(cur_tool_node_grid_x, cur_tool_node_grid_y);
+        if (existing_node_id) {
+          already_populated = true;
+        }
+      }
       for (var node_ind in fsm_nodes) {
         if (fsm_nodes[node_ind]) {
-          if (fsm_nodes[node_ind].grid_coord_x == cur_tool_node_grid_x &&
-              fsm_nodes[node_ind].grid_coord_y == cur_tool_node_grid_y) {
-            already_populated = true;
-          }
           // Only allow one 'Boot' node. TODO: How to handle this?
           // For now, just don't place any more than one 'Boot' node.
           if (fsm_nodes[node_ind].node_type == 'Boot' &&
@@ -384,26 +391,22 @@ project_show_onload = function() {
       else { half_grid = hg_base/2; }
       var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
       // If there is a node on the current grid coordinate, delete it.
-      for (var node_ind in fsm_nodes) {
-        if (fsm_nodes[node_ind]) {
-          if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
-              fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y) {
-            // (Un-select the node if deleting the current selection.)
-            if (selected_node_id == node_ind) {
-              selected_node_id = -1;
-              document.getElementById("hobb_options_header").innerHTML = ("Options: (None)");
-              $("#hobb_options_content").empty();
-            }
-            fsm_nodes[node_ind] = null;
-            // Squash the array of nodes.
-            fsm_nodes = fsm_nodes.filter(array_filter_nulls);
-            refresh_defined_vars();
-          }
+      var selected_node_ind = get_node_ind_at_grid_coords(cur_node_grid_x, cur_node_grid_y);
+      if (selected_node_ind) {
+        // (Un-select the node if deleting the current selection.)
+        if (selected_node_id == selected_node_ind) {
+          selected_node_id = -1;
+          document.getElementById("hobb_options_header").innerHTML = ("Options: (None)");
+          $("#hobb_options_content").empty();
         }
-      }
+        fsm_nodes[selected_node_ind] = null;
+        // Squash the array of nodes.
+        fsm_nodes = fsm_nodes.filter(array_filter_nulls);
+        refresh_defined_vars();
 
-      // Re-draw the canvas.
-      redraw_canvas();
+        // Re-draw the canvas.
+        redraw_canvas();
+      }
     }
     else if (selected_tool == 'move') {
       var hg_base = zoom_base*cur_zoom;
@@ -414,17 +417,8 @@ project_show_onload = function() {
       else { half_grid = hg_base/2; }
       var cur_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
       // If there is a node on the currently-selected grid node, pick it up.
-      var node_to_grab = -1;
-      for (var node_ind in fsm_nodes) {
-        if (fsm_nodes[node_ind]) {
-          if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
-              fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y) {
-            node_to_grab = node_ind;
-            break;
-          }
-        }
-      }
-      if (node_to_grab != -1) {
+      var node_to_grab = get_node_ind_at_grid_coords(cur_node_grid_x, cur_node_grid_y);
+      if (node_to_grab) {
         move_grabbed_node_id = node_to_grab;
         selected_tool = 'move_grabbed';
         $("#fsm_canvas_div").removeClass("hobb_layout_move_tool");
@@ -446,13 +440,21 @@ project_show_onload = function() {
         // If there is a 'grabbed' node, and if the currently-selected
         // grid node is empty, drop the grabbed node. Allow re-dropping
         // a node on the square that it previously occupied.
-        for (var node_ind in fsm_nodes) {
-          if (fsm_nodes[node_ind]) {
-            if (fsm_nodes[node_ind].grid_coord_x == cur_node_grid_x &&
-                fsm_nodes[node_ind].grid_coord_y == cur_node_grid_y &&
-                node_ind != move_grabbed_node_id) {
-              node_dropped = false;
+        var grabbed_node_type = get_node_type_def_by_name(fsm_nodes[move_grabbed_node_id].node_type);
+        if (grabbed_node_type && grabbed_node_type.new_gfx) {
+          for (check_x = 0; check_x < grabbed_node_type.node_w; ++check_x) {
+            for (check_y = 0; check_y < grabbed_node_type.node_h; ++check_y) {
+              var existing_node_id = get_node_ind_at_grid_coords(cur_node_grid_x+check_x, cur_node_grid_y+check_y);
+              if (existing_node_id && existing_node_id != move_grabbed_node_id) {
+                node_dropped = false;
+              }
             }
+          }
+        }
+        else {
+          var existing_node_id = get_node_ind_at_grid_coords(cur_node_grid_x, cur_node_grid_y);
+          if (existing_node_id && existing_node_id != move_grabbed_node_id) {
+            node_dropped = false;
           }
         }
       }
