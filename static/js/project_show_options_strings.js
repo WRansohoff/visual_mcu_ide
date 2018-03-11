@@ -717,7 +717,9 @@ var gen_type_listener_func = function(cur_type) {
           }
         }
         var periph_clocks = {};
-        if (chip_type == 'STM32F030F4' || chip_type == 'STM32F031F6') {
+        if (chip_type == 'STM32F030F4' ||
+            chip_type == 'STM32F031F6' ||
+            chip_type == 'STM32F030K6') {
           periph_clocks = rcc_opts.STM32F03xFx;
           var select_tag_html = '';
           for (var periph_val in periph_clocks) {
@@ -742,7 +744,9 @@ var gen_type_listener_func = function(cur_type) {
           }
         }
         var interrupts = {};
-        if (chip_type == 'STM32F030F4' || chip_type == 'STM32F031F6') {
+        if (chip_type == 'STM32F030F4' ||
+            chip_type == 'STM32F031F6' ||
+            chip_type == 'STM32F030K6') {
           interrupts = interrupt_opts.STM32F03xFx;
           var select_tag_html = '';
           for (var int_val in interrupts) {

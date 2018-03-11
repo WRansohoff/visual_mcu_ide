@@ -130,6 +130,10 @@ const tool_node_types = [
       {
         name: 'STM32F031F6',
         value: 'STM32F031F6',
+      },
+      {
+        name: 'STM32F030K6',
+        value: 'STM32F030K6',
       }],
       default: 'STM32F030F4',
     },
