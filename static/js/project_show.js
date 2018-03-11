@@ -1,4 +1,7 @@
 project_show_onload = function() {
+  // Create the 'Texture generation' canvas tag.
+  img_gen = document.createElement("canvas").getContext("2d");
+
   init_fsm_layout_canvas();
   // Generate 'options' HTML and js listeners
   gen_options_html_for_types();
@@ -15,6 +18,10 @@ project_show_onload = function() {
   var interval_id = setInterval(function() {
     // TODO: Constant for number of images to load.
     if (imgs_loaded == num_imgs) {
+      // Preload 'new GFX' node textures, overwriting
+      // any loaded images now that they are loaded.
+      preload_node_textures();
+      // Load the initial program.
       fsm_nodes = node_array_from_json(loaded_fsm_nodes);
       refresh_defined_vars();
       redraw_canvas();

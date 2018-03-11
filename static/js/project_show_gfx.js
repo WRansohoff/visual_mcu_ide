@@ -65,6 +65,8 @@ const node_frag_sh = `#version 300 es
     int node_status;
     int grid_coord_x;
     int grid_coord_y;
+    int node_w;
+    int node_h;
   };
   // Inputs.
   uniform   float canvas_w;
@@ -82,37 +84,37 @@ const node_frag_sh = `#version 300 es
     int cur_y = int(cur_view_coords.y);
     int cur_px_x = int(gl_FragCoord.x);
     int cur_px_y = int(gl_FragCoord.y);
+
     // Draw the supplied node.
     if (cur_tool_node.node_status >= 0) {
-      // Find the right grid coordinate's location relative to the window.
-      // The center will be at global (x*64, y*64), so:
-      // (global_x-cur_view_x) = local center.
+      // Find the current node's lower-left grid coordinate,
+      // relative to the current viewport.
       int cur_tool_node_local_x = cur_tool_node.grid_coord_x * grid_spacing;
       cur_tool_node_local_x -= int(cur_view_coords.x);
       int cur_tool_node_local_y = cur_tool_node.grid_coord_y * grid_spacing;
       cur_tool_node_local_y -= int(cur_view_coords.y);
       int cur_tool_node_min_x = cur_tool_node_local_x - half_grid;
-      int cur_tool_node_max_x = cur_tool_node_local_x + half_grid;
+      int cur_tool_node_max_x = cur_tool_node_local_x + half_grid + ((cur_tool_node.node_w-1) * grid_spacing);
       int cur_tool_node_min_y = cur_tool_node_local_y - half_grid;
-      int cur_tool_node_max_y = cur_tool_node_local_y + half_grid;
+      int cur_tool_node_max_y = cur_tool_node_local_y + half_grid + ((cur_tool_node.node_h-1) * grid_spacing);
       if (cur_px_x >= cur_tool_node_min_x &&
           cur_px_x <= cur_tool_node_max_x &&
           cur_px_y >= cur_tool_node_min_y &&
           cur_px_y <= cur_tool_node_max_y) {
-        // Texture coordinates are [0:1]; treat (grid_coord-32) as the 
-        // '0' and (grid_coord+32) as the '1', for a 64-px grid.
+        // Texture coordinates are [0:1]; stretch to the pixel
+        // range given by (max-min) X/Y values.
         float cur_tool_s = float(cur_px_x - cur_tool_node_min_x);
         float cur_tool_t = float(cur_px_y - cur_tool_node_min_y);
         int stripes_check = int(cur_tool_s+cur_tool_t);
         const int stripes_w = 16;
         const int stripes_s = 4;
-        cur_tool_s /= float(grid_spacing);
-        cur_tool_t /= float(grid_spacing);
+        cur_tool_s /= float(grid_spacing * cur_tool_node.node_w);
+        cur_tool_t /= float(grid_spacing * cur_tool_node.node_h);
         cur_tool_t = 1.0 - cur_tool_t;
         vec2 cur_tool_st = vec2(cur_tool_s, cur_tool_t);
         if (cur_tool_node.node_status == 1) {
-          // Apply a 'striping' transparency effect to indicate that this
-          // node is in a temporary or transient state.
+          // Apply a 'striping' transparency effect to indicate
+          // that this node is in a temporary or transient state.
           if (stripes_check % stripes_w <= (stripes_w-stripes_s)/2 ||
               stripes_check % stripes_w >= stripes_w-(stripes_w-stripes_s)/2) {
             out_color = texture(cur_tool_node.tex_sampler, cur_tool_st);
@@ -244,7 +246,7 @@ init_fsm_layout_canvas = function() {
   // Load shaders.
   const vs = load_shader(gl, gl.VERTEX_SHADER, vert_sh);
   const grid_fs = load_shader(gl, gl.FRAGMENT_SHADER, grid_frag_sh);
-  const node_fs = load_shader(gl, gl.FRAGMENT_SHADER, node_frag_sh);
+  const node_detail_fs = load_shader(gl, gl.FRAGMENT_SHADER, node_frag_sh);
   const conn_fs = load_shader(gl, gl.FRAGMENT_SHADER, conn_frag_sh);
   grid_shader_prog = gl.createProgram();
   node_shader_prog = gl.createProgram();
@@ -253,7 +255,7 @@ init_fsm_layout_canvas = function() {
   gl.attachShader(grid_shader_prog, grid_fs);
   gl.linkProgram(grid_shader_prog);
   gl.attachShader(node_shader_prog, vs);
-  gl.attachShader(node_shader_prog, node_fs);
+  gl.attachShader(node_shader_prog, node_detail_fs);
   gl.linkProgram(node_shader_prog);
   gl.attachShader(conn_shader_prog, vs);
   gl.attachShader(conn_shader_prog, conn_fs);
@@ -263,11 +265,11 @@ init_fsm_layout_canvas = function() {
     return;
   }
   if (!gl.getProgramParameter(node_shader_prog, gl.LINK_STATUS)) {
-    alert("Couldn't initialize node shader program - log:\n" + gl.getProgramInfoLog(node_shader_prog));
+    alert("Couldn't initialize 'new GFX' node shader program - log:\n" + gl.getProgramInfoLog(node_shader_prog));
     return;
   }
-  if (!gl.getProgramParameter(node_shader_prog, gl.LINK_STATUS)) {
-    alert("Couldn't initialize node shader program - log:\n" + gl.getProgramInfoLog(node_shader_prog));
+  if (!gl.getProgramParameter(conn_shader_prog, gl.LINK_STATUS)) {
+    alert("Couldn't initialize connections shader program - log:\n" + gl.getProgramInfoLog(conn_shader_prog));
     return;
   }
 
@@ -374,6 +376,7 @@ redraw_canvas = function() {
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
   // Next, draw any nodes that are within the current view.
+  // TODO: Don't assume that nodes are 1x1 anymore.
   var grid_min_x = cur_fsm_grid_x - 2;
   var grid_min_y = cur_fsm_grid_y - 1;
   var hg_base = zoom_base*cur_zoom;
@@ -403,6 +406,15 @@ redraw_canvas = function() {
       }
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_x'), fsm_nodes[node_ind].grid_coord_x);
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_y'), fsm_nodes[node_ind].grid_coord_y);
+      var node_grid_w = 1;
+      var node_grid_h = 1;
+      var n_type = get_node_type_def_by_name(fsm_nodes[node_ind].node_type);
+      if (n_type && n_type.new_gfx) {
+        node_grid_w = n_type.node_w;
+        node_grid_h = n_type.node_h;
+      }
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_w'), node_grid_w);
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_h'), node_grid_h);
       // Draw.
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -556,6 +568,15 @@ redraw_canvas = function() {
     gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_status'), 1);
     gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_x'), cur_tool_node_grid_x);
     gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_y'), cur_tool_node_grid_y);
+    var node_grid_w = 1;
+    var node_grid_h = 1;
+    var n_type = get_node_type_def_by_name(cur_tool_node_type);
+    if (n_type && n_type.new_gfx) {
+      node_grid_w = n_type.node_w;
+      node_grid_h = n_type.node_h;
+    }
+    gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_w'), node_grid_w);
+    gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_h'), node_grid_h);
     // Draw.
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -581,6 +602,15 @@ redraw_canvas = function() {
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_status'), 1);
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_x'), cur_node_grid_x);
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_y'), cur_node_grid_y);
+      var node_grid_w = 1;
+      var node_grid_h = 1;
+      var n_type = get_node_type_def_by_name(fsm_nodes[move_grabbed_node_id].node_type);
+      if (n_type && n_type.new_gfx) {
+        node_grid_w = n_type.node_w;
+        node_grid_h = n_type.node_h;
+      }
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_w'), node_grid_w);
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_h'), node_grid_h);
       // Draw.
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -616,5 +646,86 @@ load_one_texture = function(tex_key, tex_path) {
 preload_textures = function() {
   for (var key in imgs_to_load) {
     load_one_texture(key, imgs_to_load[key]);
+  }
+};
+
+// Instead of loading .png images, generate Textures of the
+// appropriate sizes.
+preload_node_textures = function() {
+  for (var node_type in tool_node_types) {
+    var cur_type = tool_node_types[node_type];
+    if (cur_type && cur_type.new_gfx) {
+      // img_gen_canvas
+      var tex_w = zoom_base * cur_type.node_w;
+      var tex_h = zoom_base * cur_type.node_h;
+      var arc_w = tex_w - zoom_base;
+      var arc_h = tex_h - zoom_base;
+      img_gen.canvas.width = tex_w;
+      img_gen.canvas.height = tex_h;
+      // Generate a Texture 'background'.
+      // Outline
+      var arc_x = zoom_base/2;
+      var arc_y = zoom_base/2;
+      img_gen.strokeStyle = 'black';
+      img_gen.lineWidth = 4;
+      img_gen.beginPath();
+      img_gen.arc(arc_x, arc_y, zoom_base/2, Math.PI, 3*Math.PI/2, false);
+      arc_x = arc_x + arc_w;
+      img_gen.lineTo(arc_x, arc_y-zoom_base/2);
+      img_gen.arc(arc_x, arc_y, zoom_base/2, 3*Math.PI/2, 0, false);
+      arc_y = arc_y + arc_h;
+      img_gen.lineTo(arc_x+zoom_base/2, arc_y);
+      img_gen.arc(arc_x, arc_y, zoom_base/2, 0, Math.PI/2, false);
+      arc_x = zoom_base/2;
+      img_gen.lineTo(arc_x, arc_y+zoom_base/2);
+      img_gen.arc(arc_x, arc_y, zoom_base/2, Math.PI/2, Math.PI, false);
+      arc_y = zoom_base/2;
+      img_gen.lineTo(arc_x-zoom_base/2, arc_y);
+      img_gen.stroke();
+      // Fill
+      // (Inlay a bit to allow for the outline to show through.)
+      var inlay = 2;
+      img_gen.fillStyle = cur_type.node_rgb;
+      img_gen.fillRect(inlay,
+                       (zoom_base/2) + inlay,
+                       tex_w - (inlay*2),
+                       arc_h - (inlay*2));
+      img_gen.fillRect((zoom_base/2) + inlay,
+                       inlay,
+                       arc_w - (inlay*2),
+                       tex_h - (inlay*2));
+      img_gen.strokeStyle = cur_type.node_rgb;
+      // (Rounded corners.)
+      arc_x = zoom_base/2;
+      arc_y = zoom_base/2;
+      img_gen.beginPath();
+      img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
+      img_gen.fill();
+      arc_x = arc_x + arc_w;
+      img_gen.beginPath();
+      img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
+      img_gen.fill();
+      arc_y = arc_y + arc_h;
+      img_gen.beginPath();
+      img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
+      img_gen.fill();
+      arc_x = zoom_base/2;
+      img_gen.beginPath();
+      img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
+      img_gen.fill();
+      // 'Node name' text.
+
+      // Generate the texture.
+      var new_tex = gl.createTexture();
+      const mip_level = 0;
+      const format = gl.RGBA;
+      const src_type = gl.UNSIGNED_BYTE;
+      gl.bindTexture(gl.TEXTURE_2D, new_tex);
+      gl.texImage2D(gl.TEXTURE_2D, mip_level, format, format, src_type, img_gen.canvas);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      loaded_textures[cur_type.base_name] = new_tex;
+    }
   }
 };

@@ -20,6 +20,7 @@ var grid_shader_prog = null;
 var node_shader_prog = null;
 var img_lock = false;
 var imgs_loaded = 0;
+var img_gen = null;
 // Array for keeping track of FSM node structs to send to the shader.
 var fsm_nodes = [];
 // (Fields sent to the shaders)
@@ -119,6 +120,10 @@ const tool_node_types = [
   base_name: 'Boot',
   menu_name: 'Boot',
   node_color: 'green',
+  node_rgb: 'rgb(89,237,103)',
+  node_w: 2,
+  node_h: 2,
+  new_gfx: true,
   options: {
     chip_type: {
       type: 'select',
@@ -139,6 +144,7 @@ const tool_node_types = [
   base_name: 'Delay',
   menu_name: 'Delay',
   node_color: 'blue',
+  node_rgb: 'rgb(112,130,239)',
   options: {
     delay_units: {
       type: 'select',
@@ -172,6 +178,7 @@ const tool_node_types = [
   base_name: 'Label',
   menu_name: 'Label',
   node_color: 'pink',
+  node_rgb: 'rgb(255,87,233)',
   options: {
     label_name: {
       type: 'input_text_def',
@@ -1485,6 +1492,7 @@ const tool_node_types = [
   base_name: 'Check_Truthy',
   menu_name: 'Is Variable Truth-y?',
   node_color: 'canary',
+  node_rgb: 'rgb(223,234,105)',
   options: {
     var_name: {
       type: 'defined_var_select',
