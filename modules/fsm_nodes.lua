@@ -65,7 +65,8 @@ function FSMNodes.get_boot_chip_type(boot_node)
     local boot_chip = boot_node.options.chip_type
     -- (Accepted options.)
     if boot_chip == 'STM32F030F4' or
-       boot_chip == 'STM32F031F6' then
+       boot_chip == 'STM32F031F6' or
+       boot_chip == 'STM32F030K6' then
       chip_type = boot_chip
      end
   end
