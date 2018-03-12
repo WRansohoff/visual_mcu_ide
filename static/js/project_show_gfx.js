@@ -599,6 +599,7 @@ redraw_canvas = function() {
       gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_w'), canvas.width);
       gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_h'), canvas.height);
       gl.uniform2fv(gl.getUniformLocation(node_shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
+      gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'zoom_factor'), cur_zoom);
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.tex_sampler'), fsm_nodes[move_grabbed_node_id].tex_sampler);
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_status'), 1);
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_x'), cur_node_grid_x);
@@ -742,12 +743,21 @@ generate_node_texture = function(g_node) {
     // use the current node texture if it exists and is not
     // a pre-generated .png (true if we're in this loop).
     var new_tex = null;
-    if (g_node.tex_sampler) {
-      new_tex = g_node.tex_sampler;
+    if (g_node.options) {
+      if (g_node.tex_sampler) {
+        new_tex = g_node.tex_sampler;
+      }
+      else {
+        new_tex = gl.createTexture();
+        g_node.tex_sampler = new_tex;
+      }
     }
     else {
-      new_tex = gl.createTexture();
-      g_node.tex_sampler = new_tex;
+      // This is not a 'real' node, we just want an 'empty' tex.
+      if (loaner_tex < 0) {
+        loaner_tex = gl.createTexture();
+      }
+      new_tex = loaner_tex;
     }
     const mip_level = 0;
     const format = gl.RGBA;

@@ -36,6 +36,7 @@ var cur_tool_node_color = 'green';
 var cur_tool_node_type = '';
 var cur_tool_node_grid_x = 0;
 var cur_tool_node_grid_y = 0;
+var loaner_tex = -1;
 // Preloaded textures
 var loaded_textures = [];
 // Global FSM program variables.
