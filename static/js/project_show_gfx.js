@@ -564,6 +564,7 @@ redraw_canvas = function() {
     gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_w'), canvas.width);
     gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_h'), canvas.height);
     gl.uniform2fv(gl.getUniformLocation(node_shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
+    gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'zoom_factor'), cur_zoom);
     gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.tex_sampler'), cur_tool_node_tex);
     gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_status'), 1);
     gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.grid_coord_x'), cur_tool_node_grid_x);
@@ -729,7 +730,9 @@ generate_node_texture = function(g_node) {
         img_gen.fillText(cur_opt.label, tex_w/2, tx_y, tex_w-32);
         tx_y += 16;
         img_gen.font = "14px monospace";
-        img_gen.fillText(g_node.options[o_ind], tex_w/2, tx_y, tex_w-32);
+        if (g_node.options && g_node.options[o_ind]) {
+          img_gen.fillText(g_node.options[o_ind], tex_w/2, tx_y, tex_w-32);
+        }
         tx_y += 16;
       }
     }

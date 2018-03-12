@@ -315,18 +315,7 @@ project_show_onload = function() {
       }
     }
     else if (selected_tool == 'tool') {
-      var menu_tool_selected = check_selected_menu_tool();
-      // If there is a texture for the selection, find its grid coord.
-      // (So, x/y coordinates / 64. (or whatever dot distance if it changes)
-      if (menu_tool_selected) {
-        var hg_base = zoom_base*cur_zoom;
-        var half_grid = hg_base/2;
-        if (cur_fsm_x+cur_fsm_mouse_x < 0) { half_grid = -(hg_base/2); }
-        cur_tool_node_grid_x = parseInt((cur_fsm_x+cur_fsm_mouse_x+half_grid)/hg_base);
-        if (cur_fsm_y+cur_fsm_mouse_y < 0) { half_grid = -(hg_base/2); }
-        else { half_grid = hg_base/2; }
-        cur_tool_node_grid_y = parseInt((cur_fsm_y+cur_fsm_mouse_y+half_grid)/hg_base);
-      }
+      refresh_selected_menu_tool();
       // Add the current tool node to the list, unless there is a
       // node in the proposed coordinates already.
       var already_populated = false;

@@ -149,6 +149,9 @@ const tool_node_types = [
   menu_name: 'Delay',
   node_color: 'blue',
   node_rgb: 'rgb(112,130,239)',
+  node_w: 2,
+  node_h: 2,
+  new_gfx: true,
   options: {
     delay_units: {
       type: 'select',
