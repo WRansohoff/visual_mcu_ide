@@ -347,8 +347,10 @@ init_fsm_layout_canvas = function() {
     cur_fsm_x += (new_zoom_w - old_zoom_w) * mouse_x_ratio;
     cur_fsm_y += (new_zoom_h - old_zoom_h) * mouse_y_ratio;
     var hg_base = zoom_base * cur_zoom;
-    cur_fsm_grid_x = parseInt(cur_fsm_x / hg_base);
-    cur_fsm_grid_y = parseInt(cur_fsm_y / hg_base);
+    cur_fsm_zoom_x = cur_fsm_x / hg_base;
+    cur_fsm_zoom_y = cur_fsm_y / hg_base;
+    cur_fsm_grid_x = parseInt(cur_fsm_zoom_x);
+    cur_fsm_grid_y = parseInt(cur_fsm_zoom_y);
     redraw_canvas();
     //console.log("Zoom: " + cur_zoom);
   };

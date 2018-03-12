@@ -11,6 +11,8 @@ var zoom_base = 64.0;
 var cur_zoom = 1.0;
 var cur_fsm_x = 0;
 var cur_fsm_y = 0;
+var cur_fsm_zoom_x = 0;
+var cur_fsm_zoom_y = 0;
 var cur_fsm_grid_x = 0;
 var cur_fsm_grid_y = 0;
 var cur_fsm_mouse_x = 0;
@@ -122,9 +124,9 @@ const tool_node_types = [
   menu_name: 'Boot',
   node_color: 'green',
   node_rgb: 'rgb(89,237,103)',
+  new_gfx: true,
   node_w: 2,
   node_h: 1,
-  new_gfx: true,
   options: {
     chip_type: {
       type: 'select',
@@ -294,6 +296,10 @@ const tool_node_types = [
   base_name: 'GPIO_Init',
   menu_name: 'Setup GPIO Pin',
   node_color: 'green',
+  node_rgb: 'rgb(89,237,103)',
+  new_gfx: true,
+  node_w: 2,
+  node_h: 4,
   options: {
     gpio_bank: {
       type: 'select',

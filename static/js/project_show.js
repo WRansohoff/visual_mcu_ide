@@ -216,8 +216,10 @@ project_show_onload = function() {
         cur_fsm_x += (diff_x * pan_scale_factor);
         cur_fsm_y -= (diff_y * pan_scale_factor);
         var hg_base = zoom_base * cur_zoom;
-        cur_fsm_grid_x = parseInt(cur_fsm_x / hg_base);
-        cur_fsm_grid_y = parseInt(cur_fsm_y / hg_base);
+        cur_fsm_zoom_x = cur_fsm_x / hg_base;
+        cur_fsm_zoom_y = cur_fsm_y / hg_base;
+        cur_fsm_grid_x = parseInt(cur_fsm_zoom_x);
+        cur_fsm_grid_y = parseInt(cur_fsm_zoom_y);
 
         // Submit the 'moved' coordinates to the shaders and re-draw.
         redraw_canvas();
