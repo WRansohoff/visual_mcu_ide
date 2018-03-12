@@ -122,7 +122,7 @@ const tool_node_types = [
   node_color: 'green',
   node_rgb: 'rgb(89,237,103)',
   node_w: 2,
-  node_h: 2,
+  node_h: 1,
   new_gfx: true,
   options: {
     chip_type: {

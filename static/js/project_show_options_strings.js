@@ -619,6 +619,10 @@ var gen_tag_onchange = function(cur_node, opt_tags, opt_name, opts) {
 
     // (Actually change the value.)
     cur_node.options[opt_name] = opt_tags[opt_name].value;
+
+    // Regenerate the node's texture and redraw.
+    cur_node.tex_sampler = generate_node_texture(cur_node);
+    redraw_canvas();
   };
 };
 
@@ -640,6 +644,10 @@ var gen_name_def_tag_onchange = function(cur_node, tag, opt_name, cur_opt) {
       console.log("Warning: unsure of what is being defined with " + opt_name + ".\n");
       cur_node.options[opt_name] = tag.value;
     }
+
+    // Regenerate the node's texture.
+    cur_node.tex_sampler = generate_node_texture(cur_node);
+    redraw_canvas();
   };
 };
 
@@ -684,6 +692,10 @@ var gen_hide_show_onchange = function(cur_node, opt_tags, opt_name, cur_opt) {
         // Bad state; do nothing?
       }
     }
+
+    // Regenerate the node's texture.
+    cur_node.tex_sampler = generate_node_texture(cur_node);
+    redraw_canvas();
   };
 };
 

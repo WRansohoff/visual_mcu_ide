@@ -660,6 +660,8 @@ generate_node_texture = function(g_node) {
     var arc_h = tex_h - zoom_base;
     img_gen.canvas.width = tex_w;
     img_gen.canvas.height = tex_h;
+    // Disable automatic anti-aliasing.
+    img_gen.imageSmoothingEnabled = false;
 
     // Generate a Texture 'background'.
     // Outline
@@ -713,19 +715,22 @@ generate_node_texture = function(g_node) {
     img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
     img_gen.fill();
     // 'Node name' text.
-    img_gen.font = "32px monospace";
+    img_gen.font = "20px monospace";
     img_gen.textAlign = "center";
     img_gen.fillStyle = "black";
-    img_gen.fillText(cur_type.base_name, tex_w/2, 28, arc_w);
+    img_gen.fillText(cur_type.base_name, tex_w/2, 18, arc_w);
     // Text for each option.
-    img_gen.font = "16px monospace";
     img_gen.textAlign = "center";
-    var tx_y = 48;
+    var tx_y = 36;
     for (var o_ind in cur_type.options) {
       var cur_opt = cur_type.options[o_ind];
       if (cur_opt) {
-        img_gen.fillText(cur_opt.label, tex_w/2, tx_y, tex_w-16);
-        tx_y += 32;
+        img_gen.font = "18px monospace";
+        img_gen.fillText(cur_opt.label, tex_w/2, tx_y, tex_w-32);
+        tx_y += 16;
+        img_gen.font = "14px monospace";
+        img_gen.fillText(g_node.options[o_ind], tex_w/2, tx_y, tex_w-32);
+        tx_y += 16;
       }
     }
 
