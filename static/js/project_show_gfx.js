@@ -720,19 +720,24 @@ generate_node_texture = function(g_node) {
     img_gen.font = "20px monospace";
     img_gen.textAlign = "center";
     img_gen.fillStyle = "black";
-    img_gen.fillText(cur_type.base_name, tex_w/2, 18, arc_w);
+    if (arc_w > 0) {
+      img_gen.fillText(cur_type.base_name, tex_w/2, 18, arc_w);
+    }
+    else {
+      img_gen.fillText(cur_type.base_name, tex_w/2, 24, tex_w-12);
+    }
     // Text for each option.
     img_gen.textAlign = "center";
-    var tx_y = 36;
+    var tx_y = 40;
     for (var o_ind in cur_type.options) {
       var cur_opt = cur_type.options[o_ind];
-      if (cur_opt) {
+      if (cur_opt && cur_opt.type != 'background') {
         img_gen.font = "18px monospace";
-        img_gen.fillText(cur_opt.label, tex_w/2, tx_y, tex_w-32);
+        img_gen.fillText(cur_opt.label, tex_w/2, tx_y, tex_w-16);
         tx_y += 16;
         img_gen.font = "14px monospace";
         if (g_node.options && g_node.options[o_ind]) {
-          img_gen.fillText(g_node.options[o_ind], tex_w/2, tx_y, tex_w-32);
+          img_gen.fillText(g_node.options[o_ind], tex_w/2, tx_y, tex_w-16);
         }
         tx_y += 16;
       }

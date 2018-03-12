@@ -187,12 +187,15 @@ const tool_node_types = [
   menu_name: 'Label',
   node_color: 'pink',
   node_rgb: 'rgb(255,87,233)',
+  new_gfx: true,
+  node_w: 1,
+  node_h: 1,
   options: {
     label_name: {
       type: 'input_text_def',
       def_type: 'labels',
       def_backup: 'label_display_name',
-      label: 'Label Name:',
+      label: 'Name:',
       default: '',
     },
     label_display_name: {
@@ -205,10 +208,14 @@ const tool_node_types = [
   base_name: 'Jump',
   menu_name: 'Jump',
   node_color: 'pink',
+  node_rgb: 'rgb(255,87,233)',
+  new_gfx: true,
+  node_w: 1,
+  node_h: 1,
   options: {
     label_name: {
       type: 'defined_label_select',
-      label: 'Label Name:',
+      label: 'Label:',
       default: '(None)',
     }
   },
