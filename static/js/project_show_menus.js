@@ -3,9 +3,12 @@ check_selected_menu_tool = function() {
   for (var tn_ind in tool_node_types) {
     var cur_type = tool_node_types[tn_ind];
     if (cur_type) {
-      if (selected_menu_tool == cur_type.menu_name &&
-          loaded_textures[cur_type.base_name]) {
-        cur_tool_node_tex = loaded_textures[cur_type.base_name];
+      if (selected_menu_tool == cur_type.menu_name) {
+        // (Generate a node texture which will lack options/etc)
+        var dummy_node = {
+          node_type: cur_type.base_name,
+        };
+        cur_tool_node_tex = generate_node_texture(dummy_node);
         cur_tool_node_type = cur_type.base_name;
         cur_tool_node_color = cur_type.node_color;
         menu_tool_selected = true;

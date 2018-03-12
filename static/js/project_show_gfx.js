@@ -395,7 +395,6 @@ redraw_canvas = function() {
       gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_w'), canvas.width);
       gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'canvas_h'), canvas.height);
       gl.uniform2fv(gl.getUniformLocation(node_shader_prog, 'cur_view_coords'), [cur_fsm_x, cur_fsm_y]);
-      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.tex_sampler'), fsm_nodes[node_ind].tex_sampler);
       gl.uniform1f(gl.getUniformLocation(node_shader_prog, 'zoom_factor'), cur_zoom);
       // TODO: Handle 'node_status' properly...
       if (move_grabbed_node_id == node_ind) {
@@ -413,6 +412,7 @@ redraw_canvas = function() {
         node_grid_w = n_type.node_w;
         node_grid_h = n_type.node_h;
       }
+      gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.tex_sampler'), fsm_nodes[node_ind].tex_sampler);
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_w'), node_grid_w);
       gl.uniform1i(gl.getUniformLocation(node_shader_prog, 'cur_tool_node.node_h'), node_grid_h);
       // Draw.
@@ -649,87 +649,109 @@ preload_textures = function() {
   }
 };
 
-// Instead of loading .png images, generate Textures of the
-// appropriate sizes.
-preload_node_textures = function() {
-  for (var node_type in tool_node_types) {
-    var cur_type = tool_node_types[node_type];
-    if (cur_type && cur_type.new_gfx) {
-      // img_gen_canvas
-      var tex_w = zoom_base * cur_type.node_w;
-      var tex_h = zoom_base * cur_type.node_h;
-      var arc_w = tex_w - zoom_base;
-      var arc_h = tex_h - zoom_base;
-      img_gen.canvas.width = tex_w;
-      img_gen.canvas.height = tex_h;
-      // Generate a Texture 'background'.
-      // Outline
-      var arc_x = zoom_base/2;
-      var arc_y = zoom_base/2;
-      img_gen.strokeStyle = 'black';
-      img_gen.lineWidth = 4;
-      img_gen.beginPath();
-      img_gen.arc(arc_x, arc_y, zoom_base/2, Math.PI, 3*Math.PI/2, false);
-      arc_x = arc_x + arc_w;
-      img_gen.lineTo(arc_x, arc_y-zoom_base/2);
-      img_gen.arc(arc_x, arc_y, zoom_base/2, 3*Math.PI/2, 0, false);
-      arc_y = arc_y + arc_h;
-      img_gen.lineTo(arc_x+zoom_base/2, arc_y);
-      img_gen.arc(arc_x, arc_y, zoom_base/2, 0, Math.PI/2, false);
-      arc_x = zoom_base/2;
-      img_gen.lineTo(arc_x, arc_y+zoom_base/2);
-      img_gen.arc(arc_x, arc_y, zoom_base/2, Math.PI/2, Math.PI, false);
-      arc_y = zoom_base/2;
-      img_gen.lineTo(arc_x-zoom_base/2, arc_y);
-      img_gen.stroke();
-      // Fill
-      // (Inlay a bit to allow for the outline to show through.)
-      var inlay = 2;
-      img_gen.fillStyle = cur_type.node_rgb;
-      img_gen.fillRect(inlay,
-                       (zoom_base/2) + inlay,
-                       tex_w - (inlay*2),
-                       arc_h - (inlay*2));
-      img_gen.fillRect((zoom_base/2) + inlay,
-                       inlay,
-                       arc_w - (inlay*2),
-                       tex_h - (inlay*2));
-      img_gen.strokeStyle = cur_type.node_rgb;
-      // (Rounded corners.)
-      arc_x = zoom_base/2;
-      arc_y = zoom_base/2;
-      img_gen.beginPath();
-      img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
-      img_gen.fill();
-      arc_x = arc_x + arc_w;
-      img_gen.beginPath();
-      img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
-      img_gen.fill();
-      arc_y = arc_y + arc_h;
-      img_gen.beginPath();
-      img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
-      img_gen.fill();
-      arc_x = zoom_base/2;
-      img_gen.beginPath();
-      img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
-      img_gen.fill();
-      // 'Node name' text.
-      img_gen.font = "32px monospace";
-      img_gen.textAlign = "center";
-      img_gen.fillStyle = "black";
-      img_gen.fillText(cur_type.base_name, tex_w/2, 32, arc_w);
+generate_node_texture = function(g_node) {
+  var cur_type = get_node_type_def_by_name(g_node.node_type);
+  if (cur_type && cur_type.new_gfx) {
+    // [Re]generate a texture for the given node.
+    // img_gen canvas setup.
+    var tex_w = zoom_base * cur_type.node_w;
+    var tex_h = zoom_base * cur_type.node_h;
+    var arc_w = tex_w - zoom_base;
+    var arc_h = tex_h - zoom_base;
+    img_gen.canvas.width = tex_w;
+    img_gen.canvas.height = tex_h;
 
-      // Generate the texture.
-      var new_tex = gl.createTexture();
-      const mip_level = 0;
-      const format = gl.RGBA;
-      const src_type = gl.UNSIGNED_BYTE;
-      gl.bindTexture(gl.TEXTURE_2D, new_tex);
-      gl.texImage2D(gl.TEXTURE_2D, mip_level, format, format, src_type, img_gen.canvas);
-      gl.generateMipmap(gl.TEXTURE_2D);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      loaded_textures[cur_type.base_name] = new_tex;
+    // Generate a Texture 'background'.
+    // Outline
+    var arc_x = zoom_base/2;
+    var arc_y = zoom_base/2;
+    img_gen.strokeStyle = 'black';
+    img_gen.lineWidth = 4;
+    img_gen.beginPath();
+    img_gen.arc(arc_x, arc_y, zoom_base/2, Math.PI, 3*Math.PI/2, false);
+    arc_x = arc_x + arc_w;
+    img_gen.lineTo(arc_x, arc_y-zoom_base/2);
+    img_gen.arc(arc_x, arc_y, zoom_base/2, 3*Math.PI/2, 0, false);
+    arc_y = arc_y + arc_h;
+    img_gen.lineTo(arc_x+zoom_base/2, arc_y);
+    img_gen.arc(arc_x, arc_y, zoom_base/2, 0, Math.PI/2, false);
+    arc_x = zoom_base/2;
+    img_gen.lineTo(arc_x, arc_y+zoom_base/2);
+    img_gen.arc(arc_x, arc_y, zoom_base/2, Math.PI/2, Math.PI, false);
+    arc_y = zoom_base/2;
+    img_gen.lineTo(arc_x-zoom_base/2, arc_y);
+    img_gen.stroke();
+    // Fill
+    // (Inlay a bit to allow for the outline to show through.)
+    var inlay = 2;
+    img_gen.fillStyle = cur_type.node_rgb;
+    img_gen.fillRect(inlay,
+                     (zoom_base/2) + inlay,
+                     tex_w - (inlay*2),
+                     arc_h - (inlay*2));
+    img_gen.fillRect((zoom_base/2) + inlay,
+                     inlay,
+                     arc_w - (inlay*2),
+                     tex_h - (inlay*2));
+    img_gen.strokeStyle = cur_type.node_rgb;
+    // (Rounded corner fills.)
+    arc_x = zoom_base/2;
+    arc_y = zoom_base/2;
+    img_gen.beginPath();
+    img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
+    img_gen.fill();
+    arc_x = arc_x + arc_w;
+    img_gen.beginPath();
+    img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
+    img_gen.fill();
+    arc_y = arc_y + arc_h;
+    img_gen.beginPath();
+    img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
+    img_gen.fill();
+    arc_x = zoom_base/2;
+    img_gen.beginPath();
+    img_gen.arc(arc_x, arc_y, (zoom_base/2)-inlay, 0, Math.PI*2, false);
+    img_gen.fill();
+    // 'Node name' text.
+    img_gen.font = "32px monospace";
+    img_gen.textAlign = "center";
+    img_gen.fillStyle = "black";
+    img_gen.fillText(cur_type.base_name, tex_w/2, 28, arc_w);
+    // Text for each option.
+    img_gen.font = "16px monospace";
+    img_gen.textAlign = "center";
+    var tx_y = 48;
+    for (var o_ind in cur_type.options) {
+      var cur_opt = cur_type.options[o_ind];
+      if (cur_opt) {
+        img_gen.fillText(cur_opt.label, tex_w/2, tx_y, tex_w-16);
+        tx_y += 32;
+      }
     }
+
+    // Generate the texture.
+    // To avoid creating lots of unnecessary textures,
+    // use the current node texture if it exists and is not
+    // a pre-generated .png (true if we're in this loop).
+    var new_tex = null;
+    if (g_node.tex_sampler) {
+      new_tex = g_node.tex_sampler;
+    }
+    else {
+      new_tex = gl.createTexture();
+      g_node.tex_sampler = new_tex;
+    }
+    const mip_level = 0;
+    const format = gl.RGBA;
+    const src_type = gl.UNSIGNED_BYTE;
+    gl.bindTexture(gl.TEXTURE_2D, new_tex);
+    gl.texImage2D(gl.TEXTURE_2D, mip_level, format, format, src_type, img_gen.canvas);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return new_tex;
+  }
+  else {
+    return loaded_textures[cur_type.base_name];
   }
 };

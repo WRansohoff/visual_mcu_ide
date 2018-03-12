@@ -18,9 +18,6 @@ project_show_onload = function() {
   var interval_id = setInterval(function() {
     // TODO: Constant for number of images to load.
     if (imgs_loaded == num_imgs) {
-      // Preload 'new GFX' node textures, overwriting
-      // any loaded images now that they are loaded.
-      preload_node_textures();
       // Load the initial program.
       fsm_nodes = node_array_from_json(loaded_fsm_nodes);
       refresh_defined_vars();
@@ -363,7 +360,6 @@ project_show_onload = function() {
       if (!already_populated) {
         // Place a new node.
         var p_node = [];
-        p_node.tex_sampler = cur_tool_node_tex;
         p_node.node_type = cur_tool_node_type;
         p_node.node_status = 0;
         p_node.node_color = cur_tool_node_color;
@@ -376,6 +372,8 @@ project_show_onload = function() {
         p_node.options = default_options_for_type(cur_tool_node_type);
         p_node.grid_coord_x = cur_tool_node_grid_x;
         p_node.grid_coord_y = cur_tool_node_grid_y;
+        //p_node.tex_sampler = cur_tool_node_tex;
+        p_node.tex_sampler = generate_node_texture(p_node);
         fsm_nodes.push(p_node);
       }
 

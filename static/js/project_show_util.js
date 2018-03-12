@@ -181,11 +181,24 @@ node_array_from_json = function(node_arr_json) {
       for (var tn_ind in tool_node_types) {
         var cur_type = tool_node_types[tn_ind];
         if (cur_type) {
-          if (cur_fsm_node.node_type == cur_type.base_name &&
-              loaded_textures[cur_type.base_name]) {
-            cur_fsm_node.tex_sampler = loaded_textures[cur_type.base_name];
-            cur_fsm_node.node_color = cur_type.node_color;
+          if (cur_fsm_node.node_type == cur_type.base_name) {
+            // Node type has been found; set node options.
             node_type_found = true;
+            if (cur_node.options) {
+              cur_fsm_node.options = cur_node.options;
+            }
+            else {
+              cur_fsm_node.options = {}
+            }
+            // Apply initial texture.
+            if (cur_type.new_gfx) {
+              cur_fsm_node.node_color = cur_type.node_color;
+              cur_fsm_node.tex_sampler = generate_node_texture(cur_fsm_node);
+            }
+            else if (loaded_textures[cur_type.base_name]) {
+              cur_fsm_node.tex_sampler = loaded_textures[cur_type.base_name];
+              cur_fsm_node.node_color = cur_type.node_color;
+            }
             break;
           }
         }
@@ -194,12 +207,6 @@ node_array_from_json = function(node_arr_json) {
         valid_node = false;
       }
       if (valid_node) {
-        if (cur_node.options) {
-          cur_fsm_node.options = cur_node.options;
-        }
-        else {
-          cur_fsm_node.options = {}
-        }
         nodes_map[cur_node_index] = cur_fsm_node;
         cur_node_index += 1;
       }

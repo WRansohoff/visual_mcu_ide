@@ -127,7 +127,7 @@ const tool_node_types = [
   options: {
     chip_type: {
       type: 'select',
-      label: 'Microcontroller Chip Type:',
+      label: 'MCU Core:',
       options: [{
         name: 'STM32F030F4',
         value: 'STM32F030F4',
@@ -1609,7 +1609,8 @@ get_node_type_def_by_name = function(type_name) {
     var cur_type = tool_node_types[tn_ind];
     if (cur_type) {
       if (type_name == cur_type.base_name &&
-          loaded_textures[cur_type.base_name]) {
+          (loaded_textures[cur_type.base_name] ||
+           cur_type.new_gfx)) {
         return cur_type;
       }
     }
