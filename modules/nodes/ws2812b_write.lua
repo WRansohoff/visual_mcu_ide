@@ -107,6 +107,7 @@ function node_reqs.append_node(node, node_graph, proj_state)
         return nil
       end
     elseif node.options.color_type_g == 'var' then
+      g_color_logic = g_color_logic .. '(' .. node.options.color_var_g .. ' << 16)'
     else
       return nil
     end
@@ -125,6 +126,7 @@ function node_reqs.append_node(node, node_graph, proj_state)
         return nil
       end
     elseif node.options.color_type_r == 'var' then
+      r_color_logic = r_color_logic .. '(' .. node.options.color_var_r .. ' << 8)'
     else
       return nil
     end
@@ -143,6 +145,7 @@ function node_reqs.append_node(node, node_graph, proj_state)
         return nil
       end
     elseif node.options.color_type_b == 'var' then
+      b_color_logic = b_color_logic .. node.options.color_var_b
     else
       return nil
     end
